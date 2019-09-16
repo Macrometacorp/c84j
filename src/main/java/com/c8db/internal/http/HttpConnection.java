@@ -21,6 +21,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -37,6 +38,7 @@ import org.apache.http.NameValuePair;
 import org.apache.http.auth.AuthenticationException;
 import org.apache.http.auth.Credentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
@@ -71,6 +73,8 @@ import org.slf4j.LoggerFactory;
 import com.arangodb.velocypack.VPackSlice;
 import com.c8db.C8DBException;
 import com.c8db.Protocol;
+import com.c8db.internal.C8Defaults;
+import com.c8db.internal.C8RequestParam;
 import com.c8db.internal.net.Connection;
 import com.c8db.internal.net.HostDescription;
 import com.c8db.internal.util.CURLLogger;
@@ -79,6 +83,7 @@ import com.c8db.internal.util.ResponseUtils;
 import com.c8db.util.C8Serialization;
 import com.c8db.util.C8Serializer.Options;
 import com.c8db.velocystream.Request;
+import com.c8db.velocystream.RequestType;
 import com.c8db.velocystream.Response;
 
 /**
@@ -94,6 +99,7 @@ public class HttpConnection implements Connection {
     public static class Builder {
         private String user;
         private String password;
+        private Boolean jwtAuthEnabled;
         private C8Serialization util;
         private Boolean useSsl;
         private String httpCookieSpec;
@@ -115,6 +121,11 @@ public class HttpConnection implements Connection {
 
         public Builder serializationUtil(final C8Serialization util) {
             this.util = util;
+            return this;
+        }
+
+        public Builder jwtAuthEnabled(final Boolean jwtAuth) {
+            this.jwtAuthEnabled = jwtAuth;
             return this;
         }
 
@@ -154,8 +165,8 @@ public class HttpConnection implements Connection {
         }
 
         public HttpConnection build() {
-            return new HttpConnection(host, timeout, user, password, useSsl, sslContext, util, contentType, ttl,
-                    httpCookieSpec);
+            return new HttpConnection(host, timeout, user, password, jwtAuthEnabled, useSsl, sslContext, util,
+                    contentType, ttl, httpCookieSpec);
         }
     }
 
@@ -163,18 +174,21 @@ public class HttpConnection implements Connection {
     private final CloseableHttpClient client;
     private final String user;
     private final String password;
+    private final Boolean jwtAuthEnabled;
     private final C8Serialization util;
     private final Boolean useSsl;
     private final Protocol contentType;
     private HostDescription host;
+    private volatile String jwt;
 
     private HttpConnection(final HostDescription host, final Integer timeout, final String user, final String password,
-            final Boolean useSsl, final SSLContext sslContext, final C8Serialization util,
+            final Boolean jwtAuthEnabled, final Boolean useSsl, final SSLContext sslContext, final C8Serialization util,
             final Protocol contentType, final Long ttl, final String httpCookieSpec) {
         super();
         this.host = host;
         this.user = user;
         this.password = password;
+        this.jwtAuthEnabled = jwtAuthEnabled;
         this.useSsl = useSsl;
         this.util = util;
         this.contentType = contentType;
@@ -243,19 +257,57 @@ public class HttpConnection implements Connection {
     public Response execute(final Request request) throws C8DBException, IOException, SocketException {
         final String url = buildUrl(buildBaseUrl(host), request);
         final HttpRequestBase httpRequest = buildHttpRequestBase(request, url);
-        httpRequest.setHeader("User-Agent", "Mozilla/5.0 (compatible; ArangoDB-JavaDriver/1.1; +http://mt.orz.at/)");
+        httpRequest.setHeader("User-Agent", "Mozilla/5.0 (compatible; C8DB-JavaDriver/1.1; +http://mt.orz.at/)");
         if (contentType == Protocol.HTTP_VPACK) {
             httpRequest.setHeader("Accept", "application/x-velocypack");
         }
         addHeader(request, httpRequest);
-        final Credentials credentials = addCredentials(httpRequest);
-        if (LOGGER.isDebugEnabled()) {
-            CURLLogger.log(url, request, credentials, util);
+        if (jwtAuthEnabled) {
+            if (jwt == null) {
+                addJWT();
+            }
+            httpRequest.addHeader("Authorization", "bearer " + jwt);
+        } else {
+            // basic auth instead
+            final Credentials credentials = addCredentials(httpRequest);
+            if (LOGGER.isDebugEnabled()) {
+                CURLLogger.log(url, request, credentials, util);
+            }
         }
-        Response response;
-        response = buildResponse(client.execute(httpRequest));
-        checkError(response);
+        Response response = null;
+        try {
+            response = buildResponse(client.execute(httpRequest));
+            checkError(response);
+        } catch (C8DBException ex) {
+            if (ex.getResponseCode().equals(401)) {
+                // jwt might has expired refresh it
+                addJWT();
+                httpRequest.removeHeaders("Authorization");
+                httpRequest.addHeader("Authorization", "bearer " + jwt);
+                response = buildResponse(client.execute(httpRequest));
+                checkError(response);
+            }
+        }
         return response;
+    }
+
+    private synchronized void addJWT() throws IOException, ClientProtocolException {
+        String authUrl = buildBaseUrl(host) + "/_open/auth";
+        Map<String, String> credentials = new HashMap<String, String>();
+        credentials.put("username", user);
+        credentials.put("password", password);
+        credentials.put("tenant", C8RequestParam.DEMO_TENANT);
+        final HttpRequestBase authHttpRequest = buildHttpRequestBase(
+                new Request(C8RequestParam.DEMO_TENANT, C8RequestParam.SYSTEM, RequestType.POST, authUrl)
+                        .setBody(util.serialize(credentials)),
+                authUrl);
+        authHttpRequest.setHeader("User-Agent", "Mozilla/5.0 (compatible; C8DB-JavaDriver/1.1; +http://mt.orz.at/)");
+        if (contentType == Protocol.HTTP_VPACK) {
+            authHttpRequest.setHeader("Accept", "application/x-velocypack");
+        }
+        Response authResponse = buildResponse(client.execute(authHttpRequest));
+        checkError(authResponse);
+        setJwt(authResponse.getBody().get("jwt").getAsString());
     }
 
     private HttpRequestBase buildHttpRequestBase(final Request request, final String url) {
@@ -385,6 +437,10 @@ public class HttpConnection implements Connection {
 
     protected void checkError(final Response response) throws C8DBException {
         ResponseUtils.checkError(util, response);
+    }
+
+    public void setJwt(String jwt) {
+        this.jwt = jwt;
     }
 
 }

@@ -93,8 +93,8 @@ public class C8DBTest {
         final Boolean resultCreate = c8DB.createGeoFabric(C8Defaults.DEFAULT_TENANT, dbName, "",
                 C8Defaults.DEFAULT_DC_LIST);
         assertThat(resultCreate, is(true));
-        System.out.println(c8DB.getGeoFabrics());
-        final Boolean resultDelete = c8DB.db(C8Defaults.DEFAULT_TENANT, dbName).drop();
+        C8Database testDb = c8DB.db(C8Defaults.DEFAULT_TENANT, dbName);
+        final Boolean resultDelete = testDb.drop();
         assertThat(resultDelete, is(true));
     }
 
@@ -117,14 +117,6 @@ public class C8DBTest {
     @Test
     public void getAccessibleDatabases() {
         final Collection<String> dbs = c8DB.getAccessibleGeoFabrics();
-        assertThat(dbs, is(notNullValue()));
-        assertThat(dbs.size(), greaterThan(0));
-        assertThat(dbs, hasItem("_system"));
-    }
-
-    @Test
-    public void getAccessibleDatabasesFor() {
-        final Collection<String> dbs = c8DB.getAccessibleGeoFabricsFor("root");
         assertThat(dbs, is(notNullValue()));
         assertThat(dbs.size(), greaterThan(0));
         assertThat(dbs, hasItem("_system"));
@@ -163,8 +155,7 @@ public class C8DBTest {
         try {
             c8DB.createGeoFabric(C8Defaults.DEFAULT_TENANT, dbName, "", C8Defaults.DEFAULT_DC_LIST);
             String spotDC = C8Defaults.DEFAULT_DC_LIST.split(",")[0];
-            Boolean asdf = c8DB.updateSpotRegionForGeoFabric(C8Defaults.DEFAULT_TENANT, dbName, spotDC);
-            System.out.println(asdf);
+            Boolean update = c8DB.updateSpotRegionForGeoFabric(C8Defaults.DEFAULT_TENANT, dbName, spotDC);
             final GeoFabricEntity dbInfo = c8DB.getGeoFabricInformation(C8Defaults.DEFAULT_TENANT, dbName);
             assertThat(dbInfo.getName(), is(dbName));
             assertThat(dbInfo.getOptions(), is(notNullValue()));
@@ -255,7 +246,7 @@ public class C8DBTest {
                 matchers.add(is(userEntity.getUser()));
             }
             // Add USER:
-            matchers.add(is(C8Defaults.DEFAULT_TENANT + "." + USER));
+            matchers.add(is(USER));
 
             for (final UserEntity user : users) {
                 assertThat(user.getUser(), anyOf(matchers));

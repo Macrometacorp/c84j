@@ -40,6 +40,7 @@ public final class C8Defaults {
     public static final Integer DEFAULT_TIMEOUT = 0;
     public static final String DEFAULT_USER = "root";
     public static final Boolean DEFAULT_USE_SSL = true;
+    public static final Boolean DEFAULT_JWT_AUTH = true;
     public static final int CHUNK_MIN_HEADER_SIZE = INTEGER_BYTES + INTEGER_BYTES + LONG_BYTES;
     public static final int CHUNK_MAX_HEADER_SIZE = CHUNK_MIN_HEADER_SIZE + LONG_BYTES;
     public static final int CHUNK_DEFAULT_CONTENT_SIZE = 30000;
