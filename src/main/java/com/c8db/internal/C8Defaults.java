@@ -31,10 +31,10 @@ public final class C8Defaults {
     public static final int INTEGER_BYTES = Integer.SIZE / Byte.SIZE;
     public static final int LONG_BYTES = Long.SIZE / Byte.SIZE;
 
-//	public static final String DEFAULT_HOST = "127.0.0.1";
+	public static final String DEFAULT_HOST = "127.0.0.1";
 //	public static final Integer DEFAULT_PORT = 8529;
-    public static final String DEFAULT_HOST = "tonchev.eng1.macrometa.io";
     public static final Integer DEFAULT_PORT = 443;
+    //TODO: update this
     public static final String DEFAULT_DC_LIST = "tonchev-europe-west4,tonchev-europe-west1";
     public static final String DEFAULT_TENANT = "demo";
     public static final Integer DEFAULT_TIMEOUT = 0;

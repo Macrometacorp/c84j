@@ -51,7 +51,7 @@ public abstract class BaseGraphTest {
             arangoDB.db(C8Defaults.DEFAULT_TENANT, TEST_DB).drop();
         } catch (final C8DBException e) {
         }
-        arangoDB.createGeoFabric(C8Defaults.DEFAULT_TENANT, TEST_DB, "", "tonchev-europe-west4");
+        arangoDB.createGeoFabric(C8Defaults.DEFAULT_TENANT, TEST_DB, "", C8Defaults.DEFAULT_DC_LIST);
         BaseGraphTest.db = arangoDB.db(C8Defaults.DEFAULT_TENANT, TEST_DB);
 
         final Collection<EdgeDefinition> edgeDefinitions = new ArrayList<EdgeDefinition>();

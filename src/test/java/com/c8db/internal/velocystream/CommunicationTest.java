@@ -129,8 +129,8 @@ public class CommunicationTest {
         arangoDB.getVersion();// authentication
 
         try {
-            arangoDB.createGeoFabric(C8Defaults.DEFAULT_TENANT, "db1", "", "tonchev-europe-west4");
-            arangoDB.createGeoFabric(C8Defaults.DEFAULT_TENANT, "db2", "", "tonchev-europe-west4");
+            arangoDB.createGeoFabric(C8Defaults.DEFAULT_TENANT, "db1", "", C8Defaults.DEFAULT_DC_LIST);
+            arangoDB.createGeoFabric(C8Defaults.DEFAULT_TENANT, "db2", "", C8Defaults.DEFAULT_DC_LIST);
             final C8Database db1 = arangoDB.db(C8Defaults.DEFAULT_TENANT, "db1");
             final C8Database db2 = arangoDB.db(C8Defaults.DEFAULT_TENANT, "db2");
 

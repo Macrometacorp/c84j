@@ -52,7 +52,7 @@ public class AQLActorsAndMoviesExample {
             arangoDB.db(C8Defaults.DEFAULT_TENANT, TEST_DB).drop();
         } catch (final C8DBException e) {
         }
-        arangoDB.createGeoFabric(C8Defaults.DEFAULT_TENANT, TEST_DB, "", "tonchev-europe-west4");
+        arangoDB.createGeoFabric(C8Defaults.DEFAULT_TENANT, TEST_DB, "", C8Defaults.DEFAULT_DC_LIST);
         db = arangoDB.db(C8Defaults.DEFAULT_TENANT, TEST_DB);
         createData();
     }

@@ -93,25 +93,25 @@ public class UserAuthTest {
         return params;
     }
 
-    private static C8DB arangoDB;
-    private static C8DB arangoDBRoot;
+    private static C8DB c8DB;
+    private static C8DB c8DBRoot;
     private final UserAuthParam param;
     private final String details;
 
     public UserAuthTest(final UserAuthParam param) {
         super();
         this.param = param;
-        if (arangoDB != null || arangoDBRoot != null) {
+        if (c8DB != null || c8DBRoot != null) {
             shutdown();
         }
-        arangoDBRoot = new C8DB.Builder().useProtocol(param.protocol).build();
-        arangoDBRoot.createUser(USER_NAME, "");
-        arangoDB = new C8DB.Builder().useProtocol(param.protocol).user(USER_NAME).build();
-        arangoDBRoot.createGeoFabric(C8Defaults.DEFAULT_TENANT, DB_NAME, "", "tonchev-europe-west4");
-        arangoDBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).createCollection(COLLECTION_NAME);
-        arangoDBRoot.db().grantAccess(USER_NAME, param.systemPermission);
-        arangoDBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).grantAccess(USER_NAME, param.dbPermission);
-        arangoDBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME).grantAccess(USER_NAME,
+        c8DBRoot = new C8DB.Builder().useProtocol(param.protocol).build();
+        c8DBRoot.createUser(USER_NAME, "");
+        c8DB = new C8DB.Builder().useProtocol(param.protocol).user(USER_NAME).build();
+        c8DBRoot.createGeoFabric(C8Defaults.DEFAULT_TENANT, DB_NAME, "", C8Defaults.DEFAULT_DC_LIST);
+        c8DBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).createCollection(COLLECTION_NAME);
+        c8DBRoot.db().grantAccess(USER_NAME, param.systemPermission);
+        c8DBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).grantAccess(USER_NAME, param.dbPermission);
+        c8DBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME).grantAccess(USER_NAME,
                 param.colPermission);
         details = new StringBuffer().append(param.protocol).append("_").append(param.systemPermission).append("_")
                 .append(param.dbPermission).append("_").append(param.colPermission).toString();
@@ -119,17 +119,17 @@ public class UserAuthTest {
 
     @AfterClass
     public static void shutdown() {
-        arangoDBRoot.deleteUser(USER_NAME);
+        c8DBRoot.deleteUser(USER_NAME);
         try {
-            arangoDBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).drop();
+            c8DBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).drop();
         } catch (final C8DBException e) {
         }
-        if (arangoDB != null) {
-            arangoDB.shutdown();
+        if (c8DB != null) {
+            c8DB.shutdown();
         }
-        arangoDBRoot.shutdown();
-        arangoDB = null;
-        arangoDBRoot = null;
+        c8DBRoot.shutdown();
+        c8DB = null;
+        c8DBRoot = null;
     }
 
     @Test
@@ -137,23 +137,23 @@ public class UserAuthTest {
         try {
             if (Permissions.RW.equals(param.systemPermission)) {
                 try {
-                    assertThat(details, arangoDB.createGeoFabric(C8Defaults.DEFAULT_TENANT, DB_NAME_NEW, "",
-                            "tonchev-europe-west4"), is(true));
+                    assertThat(details, c8DB.createGeoFabric(C8Defaults.DEFAULT_TENANT, DB_NAME_NEW, "",
+                            C8Defaults.DEFAULT_DC_LIST), is(true));
                 } catch (final C8DBException e) {
                     fail(details);
                 }
-                assertThat(details, arangoDBRoot.getGeoFabrics(), hasItem(DB_NAME_NEW));
+                assertThat(details, c8DBRoot.getGeoFabrics(), hasItem(DB_NAME_NEW));
             } else {
                 try {
-                    arangoDB.createGeoFabric(C8Defaults.DEFAULT_TENANT, DB_NAME_NEW, "", "tonchev-europe-west4");
+                    c8DB.createGeoFabric(C8Defaults.DEFAULT_TENANT, DB_NAME_NEW, "", C8Defaults.DEFAULT_DC_LIST);
                     fail(details);
                 } catch (final C8DBException e) {
                 }
-                assertThat(details, arangoDBRoot.getGeoFabrics(), not(hasItem(DB_NAME_NEW)));
+                assertThat(details, c8DBRoot.getGeoFabrics(), not(hasItem(DB_NAME_NEW)));
             }
         } finally {
             try {
-                arangoDBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME_NEW).drop();
+                c8DBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME_NEW).drop();
             } catch (final C8DBException e) {
             }
         }
@@ -162,25 +162,25 @@ public class UserAuthTest {
     @Test
     public void dropDatabase() {
         try {
-            arangoDBRoot.createGeoFabric(C8Defaults.DEFAULT_TENANT, DB_NAME_NEW, "", "tonchev-europe-west4");
+            c8DBRoot.createGeoFabric(C8Defaults.DEFAULT_TENANT, DB_NAME_NEW, "", C8Defaults.DEFAULT_DC_LIST);
             if (Permissions.RW.equals(param.systemPermission)) {
                 try {
-                    assertThat(details, arangoDB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).drop(), is(true));
+                    assertThat(details, c8DB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).drop(), is(true));
                 } catch (final C8DBException e) {
                     fail(details);
                 }
-                assertThat(details, arangoDBRoot.getGeoFabrics(), not(hasItem(DB_NAME)));
+                assertThat(details, c8DBRoot.getGeoFabrics(), not(hasItem(DB_NAME)));
             } else {
                 try {
-                    arangoDB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).drop();
+                    c8DB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).drop();
                     fail(details);
                 } catch (final C8DBException e) {
                 }
-                assertThat(details, arangoDBRoot.getGeoFabrics(), hasItem(DB_NAME));
+                assertThat(details, c8DBRoot.getGeoFabrics(), hasItem(DB_NAME));
             }
         } finally {
             try {
-                arangoDBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME_NEW).drop();
+                c8DBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME_NEW).drop();
             } catch (final C8DBException e) {
             }
         }
@@ -191,26 +191,26 @@ public class UserAuthTest {
         try {
             if (Permissions.RW.equals(param.systemPermission)) {
                 try {
-                    arangoDB.createUser(USER_NAME_NEW, "");
+                    c8DB.createUser(USER_NAME_NEW, "");
                 } catch (final C8DBException e) {
                     fail(details);
                 }
-                assertThat(details, arangoDBRoot.getUsers(), is(notNullValue()));
+                assertThat(details, c8DBRoot.getUsers(), is(notNullValue()));
             } else {
                 try {
-                    arangoDB.createUser(USER_NAME_NEW, "");
+                    c8DB.createUser(USER_NAME_NEW, "");
                     fail(details);
                 } catch (final C8DBException e) {
                 }
                 try {
-                    arangoDBRoot.getUser(USER_NAME_NEW);
+                    c8DBRoot.getUser(USER_NAME_NEW);
                     fail(details);
                 } catch (final C8DBException e) {
                 }
             }
         } finally {
             try {
-                arangoDBRoot.deleteUser(USER_NAME_NEW);
+                c8DBRoot.deleteUser(USER_NAME_NEW);
             } catch (final C8DBException e) {
             }
         }
@@ -219,29 +219,29 @@ public class UserAuthTest {
     @Test
     public void deleteUser() {
         try {
-            arangoDBRoot.createUser(USER_NAME_NEW, "");
+            c8DBRoot.createUser(USER_NAME_NEW, "");
             if (Permissions.RW.equals(param.systemPermission)) {
                 try {
-                    arangoDB.deleteUser(USER_NAME_NEW);
+                    c8DB.deleteUser(USER_NAME_NEW);
                 } catch (final C8DBException e) {
                     fail(details);
                 }
                 try {
-                    arangoDBRoot.getUser(USER_NAME_NEW);
+                    c8DBRoot.getUser(USER_NAME_NEW);
                     fail(details);
                 } catch (final C8DBException e) {
                 }
             } else {
                 try {
-                    arangoDB.deleteUser(USER_NAME_NEW);
+                    c8DB.deleteUser(USER_NAME_NEW);
                     fail(details);
                 } catch (final C8DBException e) {
                 }
-                assertThat(details, arangoDBRoot.getUsers(), is(notNullValue()));
+                assertThat(details, c8DBRoot.getUsers(), is(notNullValue()));
             }
         } finally {
             try {
-                arangoDBRoot.deleteUser(USER_NAME_NEW);
+                c8DBRoot.deleteUser(USER_NAME_NEW);
             } catch (final C8DBException e) {
             }
         }
@@ -250,25 +250,25 @@ public class UserAuthTest {
     @Test
     public void updateUser() {
         try {
-            arangoDBRoot.createUser(USER_NAME_NEW, "");
+            c8DBRoot.createUser(USER_NAME_NEW, "");
             if (Permissions.RW.equals(param.systemPermission)) {
                 try {
-                    arangoDB.updateUser(USER_NAME_NEW, new UserUpdateOptions().active(false));
+                    c8DB.updateUser(USER_NAME_NEW, new UserUpdateOptions().active(false));
                 } catch (final C8DBException e) {
                     fail(details);
                 }
-                assertThat(details, arangoDBRoot.getUser(USER_NAME_NEW).getActive(), is(false));
+                assertThat(details, c8DBRoot.getUser(USER_NAME_NEW).getActive(), is(false));
             } else {
                 try {
-                    arangoDB.updateUser(USER_NAME_NEW, new UserUpdateOptions().active(false));
+                    c8DB.updateUser(USER_NAME_NEW, new UserUpdateOptions().active(false));
                     fail(details);
                 } catch (final C8DBException e) {
                 }
-                assertThat(details, arangoDBRoot.getUser(USER_NAME_NEW).getActive(), is(true));
+                assertThat(details, c8DBRoot.getUser(USER_NAME_NEW).getActive(), is(true));
             }
         } finally {
             try {
-                arangoDBRoot.deleteUser(USER_NAME_NEW);
+                c8DBRoot.deleteUser(USER_NAME_NEW);
             } catch (final C8DBException e) {
             }
         }
@@ -277,23 +277,23 @@ public class UserAuthTest {
     @Test
     public void grantUserDBAccess() {
         try {
-            arangoDBRoot.createUser(USER_NAME_NEW, "");
+            c8DBRoot.createUser(USER_NAME_NEW, "");
             if (Permissions.RW.equals(param.systemPermission)) {
                 try {
-                    arangoDB.db().grantAccess(USER_NAME_NEW);
+                    c8DB.db().grantAccess(USER_NAME_NEW);
                 } catch (final C8DBException e) {
                     fail(details);
                 }
             } else {
                 try {
-                    arangoDB.db().grantAccess(USER_NAME_NEW);
+                    c8DB.db().grantAccess(USER_NAME_NEW);
                     fail(details);
                 } catch (final C8DBException e) {
                 }
             }
         } finally {
             try {
-                arangoDBRoot.deleteUser(USER_NAME_NEW);
+                c8DBRoot.deleteUser(USER_NAME_NEW);
             } catch (final C8DBException e) {
             }
         }
@@ -302,24 +302,24 @@ public class UserAuthTest {
     @Test
     public void resetUserDBAccess() {
         try {
-            arangoDBRoot.createUser(USER_NAME_NEW, "");
-            arangoDBRoot.db().grantAccess(USER_NAME_NEW);
+            c8DBRoot.createUser(USER_NAME_NEW, "");
+            c8DBRoot.db().grantAccess(USER_NAME_NEW);
             if (Permissions.RW.equals(param.systemPermission)) {
                 try {
-                    arangoDB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).resetAccess(USER_NAME_NEW);
+                    c8DB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).resetAccess(USER_NAME_NEW);
                 } catch (final C8DBException e) {
                     fail(details);
                 }
             } else {
                 try {
-                    arangoDB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).resetAccess(USER_NAME_NEW);
+                    c8DB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).resetAccess(USER_NAME_NEW);
                     fail(details);
                 } catch (final C8DBException e) {
                 }
             }
         } finally {
             try {
-                arangoDBRoot.deleteUser(USER_NAME_NEW);
+                c8DBRoot.deleteUser(USER_NAME_NEW);
             } catch (final C8DBException e) {
             }
         }
@@ -328,17 +328,17 @@ public class UserAuthTest {
     @Test
     public void grantUserCollcetionAccess() {
         try {
-            arangoDBRoot.createUser(USER_NAME_NEW, "");
+            c8DBRoot.createUser(USER_NAME_NEW, "");
             if (Permissions.RW.equals(param.systemPermission)) {
                 try {
-                    arangoDB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
+                    c8DB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
                             .grantAccess(USER_NAME_NEW, Permissions.RW);
                 } catch (final C8DBException e) {
                     fail(details);
                 }
             } else {
                 try {
-                    arangoDB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
+                    c8DB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
                             .grantAccess(USER_NAME_NEW, Permissions.RW);
                     fail(details);
                 } catch (final C8DBException e) {
@@ -346,7 +346,7 @@ public class UserAuthTest {
             }
         } finally {
             try {
-                arangoDBRoot.deleteUser(USER_NAME_NEW);
+                c8DBRoot.deleteUser(USER_NAME_NEW);
             } catch (final C8DBException e) {
             }
         }
@@ -355,18 +355,18 @@ public class UserAuthTest {
     @Test
     public void resetUserCollectionAccess() {
         try {
-            arangoDBRoot.createUser(USER_NAME_NEW, "");
-            arangoDBRoot.db().grantAccess(USER_NAME_NEW);
+            c8DBRoot.createUser(USER_NAME_NEW, "");
+            c8DBRoot.db().grantAccess(USER_NAME_NEW);
             if (Permissions.RW.equals(param.systemPermission)) {
                 try {
-                    arangoDB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
+                    c8DB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
                             .resetAccess(USER_NAME_NEW);
                 } catch (final C8DBException e) {
                     fail(details);
                 }
             } else {
                 try {
-                    arangoDB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
+                    c8DB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
                             .resetAccess(USER_NAME_NEW);
                     fail(details);
                 } catch (final C8DBException e) {
@@ -374,7 +374,7 @@ public class UserAuthTest {
             }
         } finally {
             try {
-                arangoDBRoot.deleteUser(USER_NAME_NEW);
+                c8DBRoot.deleteUser(USER_NAME_NEW);
             } catch (final C8DBException e) {
             }
         }
@@ -383,24 +383,24 @@ public class UserAuthTest {
     @Test
     public void updateUserDefaultDatabaseAccess() {
         try {
-            arangoDBRoot.createUser(USER_NAME_NEW, "");
-            arangoDBRoot.db().grantAccess(USER_NAME_NEW);
+            c8DBRoot.createUser(USER_NAME_NEW, "");
+            c8DBRoot.db().grantAccess(USER_NAME_NEW);
             if (Permissions.RW.equals(param.systemPermission)) {
                 try {
-                    arangoDB.grantDefaultDatabaseAccess(USER_NAME_NEW, Permissions.RW);
+                    c8DB.grantDefaultDatabaseAccess(USER_NAME_NEW, Permissions.RW);
                 } catch (final C8DBException e) {
                     fail(details);
                 }
             } else {
                 try {
-                    arangoDB.grantDefaultDatabaseAccess(USER_NAME_NEW, Permissions.RW);
+                    c8DB.grantDefaultDatabaseAccess(USER_NAME_NEW, Permissions.RW);
                     fail(details);
                 } catch (final C8DBException e) {
                 }
             }
         } finally {
             try {
-                arangoDBRoot.deleteUser(USER_NAME_NEW);
+                c8DBRoot.deleteUser(USER_NAME_NEW);
             } catch (final C8DBException e) {
             }
         }
@@ -409,24 +409,24 @@ public class UserAuthTest {
     @Test
     public void updateUserDefaultCollectionAccess() {
         try {
-            arangoDBRoot.createUser(USER_NAME_NEW, "");
-            arangoDBRoot.db().grantAccess(USER_NAME_NEW);
+            c8DBRoot.createUser(USER_NAME_NEW, "");
+            c8DBRoot.db().grantAccess(USER_NAME_NEW);
             if (Permissions.RW.equals(param.systemPermission)) {
                 try {
-                    arangoDB.grantDefaultCollectionAccess(USER_NAME_NEW, Permissions.RW);
+                    c8DB.grantDefaultCollectionAccess(USER_NAME_NEW, Permissions.RW);
                 } catch (final C8DBException e) {
                     fail(details);
                 }
             } else {
                 try {
-                    arangoDB.grantDefaultCollectionAccess(USER_NAME_NEW, Permissions.RW);
+                    c8DB.grantDefaultCollectionAccess(USER_NAME_NEW, Permissions.RW);
                     fail(details);
                 } catch (final C8DBException e) {
                 }
             }
         } finally {
             try {
-                arangoDBRoot.deleteUser(USER_NAME_NEW);
+                c8DBRoot.deleteUser(USER_NAME_NEW);
             } catch (final C8DBException e) {
             }
         }
@@ -437,28 +437,28 @@ public class UserAuthTest {
         try {
             if (Permissions.RW.equals(param.dbPermission)) {
                 try {
-                    arangoDB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).createCollection(COLLECTION_NAME_NEW);
+                    c8DB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).createCollection(COLLECTION_NAME_NEW);
                 } catch (final C8DBException e) {
                     fail(details);
                 }
                 assertThat(details,
-                        arangoDBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME_NEW).getInfo(),
+                        c8DBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME_NEW).getInfo(),
                         is(notNullValue()));
             } else {
                 try {
-                    arangoDB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).createCollection(COLLECTION_NAME_NEW);
+                    c8DB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).createCollection(COLLECTION_NAME_NEW);
                     fail(details);
                 } catch (final C8DBException e) {
                 }
                 try {
-                    arangoDBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME_NEW).getInfo();
+                    c8DBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME_NEW).getInfo();
                     fail(details);
                 } catch (final C8DBException e) {
                 }
             }
         } finally {
             try {
-                arangoDBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME_NEW).drop();
+                c8DBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME_NEW).drop();
             } catch (final C8DBException e) {
             }
         }
@@ -467,33 +467,33 @@ public class UserAuthTest {
     @Test
     public void dropCollection() {
         try {
-            arangoDBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).createCollection(COLLECTION_NAME_NEW);
-            arangoDBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME_NEW).grantAccess(USER_NAME,
+            c8DBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).createCollection(COLLECTION_NAME_NEW);
+            c8DBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME_NEW).grantAccess(USER_NAME,
                     param.colPermission);
             if (Permissions.RW.equals(param.dbPermission) && Permissions.RW.equals(param.colPermission)) {
                 try {
-                    arangoDB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME_NEW).drop();
+                    c8DB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME_NEW).drop();
                 } catch (final C8DBException e) {
                     fail(details);
                 }
                 try {
-                    arangoDBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME_NEW).getInfo();
+                    c8DBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME_NEW).getInfo();
                     fail(details);
                 } catch (final C8DBException e) {
                 }
             } else {
                 try {
-                    arangoDB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME_NEW).drop();
+                    c8DB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME_NEW).drop();
                     fail(details);
                 } catch (final C8DBException e) {
                 }
                 assertThat(details,
-                        arangoDBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME_NEW).getInfo(),
+                        c8DBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME_NEW).getInfo(),
                         is(notNullValue()));
             }
         } finally {
             try {
-                arangoDBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME_NEW).drop();
+                c8DBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME_NEW).drop();
             } catch (final C8DBException e) {
             }
         }
@@ -504,7 +504,7 @@ public class UserAuthTest {
         if ((Permissions.RW.equals(param.dbPermission) || Permissions.RO.equals(param.dbPermission))
                 && (Permissions.RW.equals(param.colPermission) || Permissions.RO.equals(param.colPermission))) {
             try {
-                final Collection<CollectionEntity> collections = arangoDB.db(C8Defaults.DEFAULT_TENANT, DB_NAME)
+                final Collection<CollectionEntity> collections = c8DB.db(C8Defaults.DEFAULT_TENANT, DB_NAME)
                         .getCollections();
                 boolean found = false;
                 for (final CollectionEntity collection : collections) {
@@ -518,7 +518,7 @@ public class UserAuthTest {
                 fail(details);
             }
         } else if (Permissions.RW.equals(param.dbPermission) || Permissions.RO.equals(param.dbPermission)) {
-            final Collection<CollectionEntity> collections = arangoDB.db(C8Defaults.DEFAULT_TENANT, DB_NAME)
+            final Collection<CollectionEntity> collections = c8DB.db(C8Defaults.DEFAULT_TENANT, DB_NAME)
                     .getCollections();
             boolean found = false;
             for (final CollectionEntity collection : collections) {
@@ -537,14 +537,14 @@ public class UserAuthTest {
                 && (Permissions.RW.equals(param.colPermission) || Permissions.RO.equals(param.colPermission))) {
             try {
                 assertThat(details,
-                        arangoDB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME).getInfo(),
+                        c8DB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME).getInfo(),
                         is(notNullValue()));
             } catch (final C8DBException e) {
                 fail(details);
             }
         } else {
             try {
-                arangoDB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME).getInfo();
+                c8DB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME).getInfo();
                 fail(details);
             } catch (final C8DBException e) {
             }
@@ -557,14 +557,14 @@ public class UserAuthTest {
                 && (Permissions.RW.equals(param.colPermission) || Permissions.RO.equals(param.colPermission))) {
             try {
                 assertThat(details,
-                        arangoDB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME).getProperties(),
+                        c8DB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME).getProperties(),
                         is(notNullValue()));
             } catch (final C8DBException e) {
                 fail(details);
             }
         } else {
             try {
-                arangoDB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME).getProperties();
+                c8DB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME).getProperties();
                 fail(details);
             } catch (final C8DBException e) {
             }
@@ -576,22 +576,22 @@ public class UserAuthTest {
         if (Permissions.RW.equals(param.dbPermission) && Permissions.RW.equals(param.colPermission)) {
             try {
                 assertThat(
-                        details, arangoDB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
+                        details, c8DB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
                                 .changeProperties(new CollectionPropertiesOptions().waitForSync(true)),
                         is(notNullValue()));
             } catch (final C8DBException e) {
                 fail(details);
             }
-            assertThat(details, arangoDBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
+            assertThat(details, c8DBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
                     .getProperties().getWaitForSync(), is(true));
         } else {
             try {
-                arangoDB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
+                c8DB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
                         .changeProperties(new CollectionPropertiesOptions().waitForSync(true));
                 fail(details);
             } catch (final C8DBException e) {
             }
-            assertThat(details, arangoDBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
+            assertThat(details, c8DBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
                     .getProperties().getWaitForSync(), is(false));
         }
     }
@@ -602,14 +602,14 @@ public class UserAuthTest {
                 && (Permissions.RW.equals(param.colPermission) || Permissions.RO.equals(param.colPermission))) {
             try {
                 assertThat(details,
-                        arangoDB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME).getIndexes(),
+                        c8DB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME).getIndexes(),
                         is(notNullValue()));
             } catch (final C8DBException e) {
                 fail(details);
             }
         } else {
             try {
-                arangoDB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME).getIndexes();
+                c8DB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME).getIndexes();
                 fail(details);
             } catch (final C8DBException e) {
             }
@@ -622,59 +622,59 @@ public class UserAuthTest {
         try {
             if (Permissions.RW.equals(param.dbPermission) && Permissions.RW.equals(param.colPermission)) {
                 try {
-                    final IndexEntity createHashIndex = arangoDB.db(C8Defaults.DEFAULT_TENANT, DB_NAME)
+                    final IndexEntity createHashIndex = c8DB.db(C8Defaults.DEFAULT_TENANT, DB_NAME)
                             .collection(COLLECTION_NAME).ensureHashIndex(Arrays.asList("a"), new HashIndexOptions());
                     assertThat(details, createHashIndex, is(notNullValue()));
                     id = createHashIndex.getId();
                 } catch (final C8DBException e) {
                     fail(details);
                 }
-                assertThat(details, arangoDBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
+                assertThat(details, c8DBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
                         .getIndexes().size(), is(2));
             } else {
                 try {
-                    final IndexEntity createHashIndex = arangoDB.db(C8Defaults.DEFAULT_TENANT, DB_NAME)
+                    final IndexEntity createHashIndex = c8DB.db(C8Defaults.DEFAULT_TENANT, DB_NAME)
                             .collection(COLLECTION_NAME).ensureHashIndex(Arrays.asList("a"), new HashIndexOptions());
                     id = createHashIndex.getId();
                     fail(details);
                 } catch (final C8DBException e) {
                 }
-                assertThat(details, arangoDBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
+                assertThat(details, c8DBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
                         .getIndexes().size(), is(1));
             }
         } finally {
             if (id != null) {
-                arangoDBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME).deleteIndex(id);
+                c8DBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME).deleteIndex(id);
             }
         }
     }
 
     @Test
     public void dropCollectionIndex() {
-        final String id = arangoDBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
+        final String id = c8DBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
                 .ensureHashIndex(Arrays.asList("a"), new HashIndexOptions()).getId();
         try {
             if (Permissions.RW.equals(param.dbPermission) && Permissions.RW.equals(param.colPermission)) {
                 try {
-                    arangoDB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME).deleteIndex(id);
+                    c8DB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME).deleteIndex(id);
                 } catch (final C8DBException e) {
                     fail(details);
                 }
-                assertThat(details, arangoDBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
+                assertThat(details, c8DBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
                         .getIndexes().size(), is(1));
             } else {
                 try {
-                    arangoDB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME).deleteIndex(id);
+                    c8DB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME).deleteIndex(id);
                     fail(details);
                 } catch (final C8DBException e) {
                 }
-                assertThat(details, arangoDBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
+                assertThat(details, c8DBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
                         .getIndexes().size(), is(2));
             }
         } finally {
             if (id != null) {
                 try {
-                    arangoDBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME).deleteIndex(id);
+                    c8DBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME).deleteIndex(id);
                 } catch (final C8DBException e) {
                 }
             }
@@ -684,29 +684,29 @@ public class UserAuthTest {
     @Test
     public void truncateCollection() {
         try {
-            arangoDBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
+            c8DBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
                     .insertDocument(new BaseDocument("123"));
             if ((Permissions.RW.equals(param.dbPermission) || Permissions.RO.equals(param.dbPermission))
                     && Permissions.RW.equals(param.colPermission)) {
                 try {
-                    arangoDB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME).truncate();
+                    c8DB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME).truncate();
                 } catch (final C8DBException e) {
                     fail(details);
                 }
-                assertThat(details, arangoDBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
+                assertThat(details, c8DBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
                         .documentExists("123"), is(false));
             } else {
                 try {
-                    arangoDB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME).truncate();
+                    c8DB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME).truncate();
                     fail(details);
                 } catch (final C8DBException e) {
                 }
-                assertThat(details, arangoDBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
+                assertThat(details, c8DBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
                         .documentExists("123"), is(true));
             }
         } finally {
             try {
-                arangoDBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME).truncate();
+                c8DBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME).truncate();
             } catch (final C8DBException e) {
             }
         }
@@ -715,19 +715,19 @@ public class UserAuthTest {
     @Test
     public void readDocumentByKey() {
         try {
-            arangoDBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
+            c8DBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
                     .insertDocument(new BaseDocument("123"));
             if ((Permissions.RW.equals(param.dbPermission) || Permissions.RO.equals(param.dbPermission))
                     && (Permissions.RW.equals(param.colPermission) || Permissions.RO.equals(param.colPermission))) {
-                assertThat(details, arangoDB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
+                assertThat(details, c8DB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
                         .getDocument("123", BaseDocument.class), is(notNullValue()));
             } else {
-                assertThat(details, arangoDB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
+                assertThat(details, c8DB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
                         .getDocument("123", BaseDocument.class), is(nullValue()));
             }
         } finally {
             try {
-                arangoDBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME).deleteDocument("123");
+                c8DBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME).deleteDocument("123");
             } catch (final C8DBException e) {
             }
         }
@@ -736,23 +736,23 @@ public class UserAuthTest {
     @Test
     public void readDocumentByAql() {
         try {
-            arangoDBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
+            c8DBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
                     .insertDocument(new BaseDocument("123"));
             if ((Permissions.RW.equals(param.dbPermission) || Permissions.RO.equals(param.dbPermission))
                     && (Permissions.RW.equals(param.colPermission) || Permissions.RO.equals(param.colPermission))) {
                 assertThat(details,
-                        arangoDB.db(C8Defaults.DEFAULT_TENANT, DB_NAME)
+                        c8DB.db(C8Defaults.DEFAULT_TENANT, DB_NAME)
                                 .query("FOR i IN @@col RETURN i", new MapBuilder().put("@col", COLLECTION_NAME).get(),
                                         new C8qlQueryOptions(), BaseDocument.class)
                                 .asListRemaining().size(),
                         is(1));
             } else {
-                assertThat(details, arangoDB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
+                assertThat(details, c8DB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
                         .getDocument("123", BaseDocument.class), is(nullValue()));
             }
         } finally {
             try {
-                arangoDBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME).deleteDocument("123");
+                c8DBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME).deleteDocument("123");
             } catch (final C8DBException e) {
             }
         }
@@ -764,26 +764,26 @@ public class UserAuthTest {
             if ((Permissions.RW.equals(param.dbPermission) || Permissions.RO.equals(param.dbPermission))
                     && Permissions.RW.equals(param.colPermission)) {
                 try {
-                    arangoDB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
+                    c8DB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
                             .insertDocument(new BaseDocument("123"));
                 } catch (final C8DBException e) {
                     fail(details);
                 }
-                assertThat(details, arangoDBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
+                assertThat(details, c8DBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
                         .documentExists("123"), is(true));
             } else {
                 try {
-                    arangoDB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
+                    c8DB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
                             .insertDocument(new BaseDocument("123"));
                     fail(details);
                 } catch (final C8DBException e) {
                 }
-                assertThat(details, arangoDBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
+                assertThat(details, c8DBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
                         .documentExists("123"), is(false));
             }
         } finally {
             try {
-                arangoDBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME).deleteDocument("123");
+                c8DBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME).deleteDocument("123");
             } catch (final C8DBException e) {
             }
         }
@@ -792,31 +792,31 @@ public class UserAuthTest {
     @Test
     public void updateDocumentByKey() {
         try {
-            arangoDBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
+            c8DBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
                     .insertDocument(new BaseDocument("123"));
             if ((Permissions.RW.equals(param.dbPermission) || Permissions.RO.equals(param.dbPermission))
                     && Permissions.RW.equals(param.colPermission)) {
                 try {
-                    arangoDB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME).updateDocument("123",
+                    c8DB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME).updateDocument("123",
                             new BaseDocument(new MapBuilder().put("test", "test").get()));
                 } catch (final C8DBException e) {
                     fail(details);
                 }
-                assertThat(details, arangoDBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
+                assertThat(details, c8DBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
                         .getDocument("123", BaseDocument.class).getAttribute("test").toString(), is("test"));
             } else {
                 try {
-                    arangoDB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME).updateDocument("123",
+                    c8DB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME).updateDocument("123",
                             new BaseDocument(new MapBuilder().put("test", "test").get()));
                     fail(details);
                 } catch (final C8DBException e) {
                 }
-                assertThat(details, arangoDBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
+                assertThat(details, c8DBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
                         .getDocument("123", BaseDocument.class).getAttribute("test"), is(nullValue()));
             }
         } finally {
             try {
-                arangoDBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME).deleteDocument("123");
+                c8DBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME).deleteDocument("123");
             } catch (final C8DBException e) {
             }
         }
@@ -825,12 +825,12 @@ public class UserAuthTest {
     @Test
     public void updateDocumentByAql() {
         try {
-            arangoDBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
+            c8DBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
                     .insertDocument(new BaseDocument("123"));
             if ((Permissions.RW.equals(param.dbPermission) || Permissions.RO.equals(param.dbPermission))
                     && Permissions.RW.equals(param.colPermission)) {
                 try {
-                    arangoDB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).query(
+                    c8DB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).query(
                             "FOR i IN @@col UPDATE i WITH @newDoc IN @@col",
                             new MapBuilder().put("@col", COLLECTION_NAME)
                                     .put("newDoc", new BaseDocument(new MapBuilder().put("test", "test").get())).get(),
@@ -838,11 +838,11 @@ public class UserAuthTest {
                 } catch (final C8DBException e) {
                     fail(details);
                 }
-                assertThat(details, arangoDBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
+                assertThat(details, c8DBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
                         .getDocument("123", BaseDocument.class).getAttribute("test").toString(), is("test"));
             } else {
                 try {
-                    arangoDB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).query(
+                    c8DB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).query(
                             "FOR i IN @@col UPDATE i WITH @newDoc IN @@col",
                             new MapBuilder().put("@col", COLLECTION_NAME)
                                     .put("newDoc", new BaseDocument(new MapBuilder().put("test", "test").get())).get(),
@@ -850,12 +850,12 @@ public class UserAuthTest {
                     fail(details);
                 } catch (final C8DBException e) {
                 }
-                assertThat(details, arangoDBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
+                assertThat(details, c8DBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
                         .getDocument("123", BaseDocument.class).getAttribute("test"), is(nullValue()));
             }
         } finally {
             try {
-                arangoDBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME).deleteDocument("123");
+                c8DBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME).deleteDocument("123");
             } catch (final C8DBException e) {
             }
         }
@@ -864,29 +864,29 @@ public class UserAuthTest {
     @Test
     public void deleteDocumentByKey() {
         try {
-            arangoDBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
+            c8DBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
                     .insertDocument(new BaseDocument("123"));
             if ((Permissions.RW.equals(param.dbPermission) || Permissions.RO.equals(param.dbPermission))
                     && Permissions.RW.equals(param.colPermission)) {
                 try {
-                    arangoDB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME).deleteDocument("123");
+                    c8DB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME).deleteDocument("123");
                 } catch (final C8DBException e) {
                     fail(details);
                 }
-                assertThat(details, arangoDBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
+                assertThat(details, c8DBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
                         .documentExists("123"), is(false));
             } else {
                 try {
-                    arangoDB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME).deleteDocument("123");
+                    c8DB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME).deleteDocument("123");
                     fail(details);
                 } catch (final C8DBException e) {
                 }
-                assertThat(details, arangoDBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
+                assertThat(details, c8DBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
                         .documentExists("123"), is(true));
             }
         } finally {
             try {
-                arangoDBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME).deleteDocument("123");
+                c8DBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME).deleteDocument("123");
             } catch (final C8DBException e) {
             }
         }
@@ -895,33 +895,33 @@ public class UserAuthTest {
     @Test
     public void deleteDocumentByAql() {
         try {
-            arangoDBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
+            c8DBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
                     .insertDocument(new BaseDocument("123"));
             if ((Permissions.RW.equals(param.dbPermission) || Permissions.RO.equals(param.dbPermission))
                     && Permissions.RW.equals(param.colPermission)) {
                 try {
-                    arangoDB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).query("REMOVE @key IN @@col",
+                    c8DB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).query("REMOVE @key IN @@col",
                             new MapBuilder().put("key", "123").put("@col", COLLECTION_NAME).get(),
                             new C8qlQueryOptions(), Void.class);
                 } catch (final C8DBException e) {
                     fail(details);
                 }
-                assertThat(details, arangoDBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
+                assertThat(details, c8DBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
                         .documentExists("123"), is(false));
             } else {
                 try {
-                    arangoDB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).query("REMOVE @key IN @@col",
+                    c8DB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).query("REMOVE @key IN @@col",
                             new MapBuilder().put("key", "123").put("@col", COLLECTION_NAME).get(),
                             new C8qlQueryOptions(), Void.class);
                     fail(details);
                 } catch (final C8DBException e) {
                 }
-                assertThat(details, arangoDBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
+                assertThat(details, c8DBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
                         .documentExists("123"), is(true));
             }
         } finally {
             try {
-                arangoDBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME).deleteDocument("123");
+                c8DBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME).deleteDocument("123");
             } catch (final C8DBException e) {
             }
         }
