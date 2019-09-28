@@ -31,13 +31,13 @@ public class HttpConnectionFactory implements ConnectionFactory {
 
     private final HttpConnection.Builder builder;
 
-    public HttpConnectionFactory(final Integer timeout, final String user, final String password, final Boolean jwtAuth,
-            final Boolean useSsl, final SSLContext sslContext, final C8Serialization util, final Protocol protocol,
-            final Long connectionTtl, String httpCookieSpec) {
+    public HttpConnectionFactory(final Integer timeout, final String user, final String password, final String email,
+            final Boolean jwtAuth, final Boolean useSsl, final SSLContext sslContext, final C8Serialization util,
+            final Protocol protocol, final Long connectionTtl, String httpCookieSpec) {
         super();
-        builder = new HttpConnection.Builder().timeout(timeout).user(user).password(password).jwtAuthEnabled(jwtAuth)
-                .useSsl(useSsl).sslContext(sslContext).serializationUtil(util).contentType(protocol).ttl(connectionTtl)
-                .httpCookieSpec(httpCookieSpec);
+        builder = new HttpConnection.Builder().timeout(timeout).user(user).password(password).email(email)
+                .jwtAuthEnabled(jwtAuth).useSsl(useSsl).sslContext(sslContext).serializationUtil(util)
+                .contentType(protocol).ttl(connectionTtl).httpCookieSpec(httpCookieSpec);
 
     }
 

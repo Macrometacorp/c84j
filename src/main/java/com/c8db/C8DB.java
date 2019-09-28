@@ -171,6 +171,11 @@ public interface C8DB extends C8SerializationAccessor {
             return this;
         }
 
+        public Builder email(final String email) {
+            setEmail(email);
+            return this;
+        }
+
         /**
          * If set to {@code true} SSL will be used when connecting to an ArangoDB
          * server.
@@ -609,7 +614,7 @@ public interface C8DB extends C8SerializationAccessor {
 
             final ConnectionFactory connectionFactory = (protocol == null || Protocol.VST == protocol)
                     ? new VstConnectionFactorySync(host, timeout, connectionTtl, useSsl, sslContext)
-                    : new HttpConnectionFactory(timeout, user, password, jwtAuth, useSsl, sslContext, custom, protocol,
+                    : new HttpConnectionFactory(timeout, user, password, email, jwtAuth, useSsl, sslContext, custom, protocol,
                             connectionTtl, httpCookieSpec);
 
             final Collection<Host> hostList = createHostList(max, connectionFactory);

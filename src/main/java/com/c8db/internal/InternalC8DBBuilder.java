@@ -64,6 +64,7 @@ public abstract class InternalC8DBBuilder {
     private static final String PROPERTY_KEY_TIMEOUT = "c8db.timeout";
     private static final String PROPERTY_KEY_USER = "c8db.user";
     private static final String PROPERTY_KEY_PASSWORD = "c8db.password";
+    private static final String PROPERTY_KEY_EMAIL = "c8db.email";
     private static final String PROPERTY_KEY_JWT_AUTH = "c8db.jwt";
     private static final String PROPERTY_KEY_USE_SSL = "c8db.usessl";
     private static final String PROPERTY_KEY_COOKIE_SPEC = "c8db.httpCookieSpec";
@@ -80,6 +81,7 @@ public abstract class InternalC8DBBuilder {
     protected Integer timeout;
     protected String user;
     protected String password;
+    protected String email;
     protected Boolean jwtAuth;
     protected Boolean useSsl;
     protected String httpCookieSpec;
@@ -135,6 +137,7 @@ public abstract class InternalC8DBBuilder {
         timeout = loadTimeout(properties, timeout);
         user = loadUser(properties, user);
         password = loadPassword(properties, password);
+        email = loadEmail(properties, email);
         jwtAuth = loadJWTAuth(properties, jwtAuth);
         useSsl = loadUseSsl(properties, useSsl);
         httpCookieSpec = loadhttpCookieSpec(properties, httpCookieSpec);
@@ -148,6 +151,10 @@ public abstract class InternalC8DBBuilder {
 
     protected void setHost(final String host, final int port) {
         hosts.add(new HostDescription(host, port));
+    }
+
+    protected void setEmail(String email) {
+        this.email = email;
     }
 
     protected void setTimeout(final Integer timeout) {
@@ -290,6 +297,10 @@ public abstract class InternalC8DBBuilder {
         return getProperty(properties, PROPERTY_KEY_PASSWORD, currentValue, null);
     }
 
+    private static String loadEmail(final Properties properties, final String currentValue) {
+        return getProperty(properties, PROPERTY_KEY_EMAIL, currentValue, null);
+    }
+    
     private static Boolean loadJWTAuth(final Properties properties, final Boolean currentValue) {
         return Boolean
                 .parseBoolean(getProperty(properties, PROPERTY_KEY_JWT_AUTH, currentValue, C8Defaults.DEFAULT_JWT_AUTH));
@@ -358,4 +369,5 @@ public abstract class InternalC8DBBuilder {
         }
         return hostList;
     }
+
 }

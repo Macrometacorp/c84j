@@ -99,6 +99,7 @@ public class HttpConnection implements Connection {
     public static class Builder {
         private String user;
         private String password;
+        private String email;
         private Boolean jwtAuthEnabled;
         private C8Serialization util;
         private Boolean useSsl;
@@ -116,6 +117,11 @@ public class HttpConnection implements Connection {
 
         public Builder password(final String password) {
             this.password = password;
+            return this;
+        }
+
+        public Builder email(final String email) {
+            this.email = email;
             return this;
         }
 
@@ -165,7 +171,7 @@ public class HttpConnection implements Connection {
         }
 
         public HttpConnection build() {
-            return new HttpConnection(host, timeout, user, password, jwtAuthEnabled, useSsl, sslContext, util,
+            return new HttpConnection(host, timeout, user, password, email, jwtAuthEnabled, useSsl, sslContext, util,
                     contentType, ttl, httpCookieSpec);
         }
     }
@@ -174,6 +180,7 @@ public class HttpConnection implements Connection {
     private final CloseableHttpClient client;
     private final String user;
     private final String password;
+    private final String email;
     private final Boolean jwtAuthEnabled;
     private final C8Serialization util;
     private final Boolean useSsl;
@@ -182,12 +189,13 @@ public class HttpConnection implements Connection {
     private volatile String jwt;
 
     private HttpConnection(final HostDescription host, final Integer timeout, final String user, final String password,
-            final Boolean jwtAuthEnabled, final Boolean useSsl, final SSLContext sslContext, final C8Serialization util,
+            final String email, final Boolean jwtAuthEnabled, final Boolean useSsl, final SSLContext sslContext, final C8Serialization util,
             final Protocol contentType, final Long ttl, final String httpCookieSpec) {
         super();
         this.host = host;
         this.user = user;
         this.password = password;
+        this.email = email;
         this.jwtAuthEnabled = jwtAuthEnabled;
         this.useSsl = useSsl;
         this.util = util;
@@ -296,9 +304,9 @@ public class HttpConnection implements Connection {
         Map<String, String> credentials = new HashMap<String, String>();
         credentials.put("username", user);
         credentials.put("password", password);
-        credentials.put("tenant", C8RequestParam.DEMO_TENANT);
+        credentials.put("email", email);
         final HttpRequestBase authHttpRequest = buildHttpRequestBase(
-                new Request(C8RequestParam.DEMO_TENANT, C8RequestParam.SYSTEM, RequestType.POST, authUrl)
+                new Request("_mm", C8RequestParam.SYSTEM, RequestType.POST, authUrl)
                         .setBody(util.serialize(credentials)),
                 authUrl);
         authHttpRequest.setHeader("User-Agent", "Mozilla/5.0 (compatible; C8DB-JavaDriver/1.1; +http://mt.orz.at/)");
