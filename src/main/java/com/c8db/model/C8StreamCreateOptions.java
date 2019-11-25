@@ -32,7 +32,7 @@ public class C8StreamCreateOptions {
      * @param isLocal Operate on a local stream instead of a global one. Default value: false
      * @return options
      */
-    protected C8StreamCreateOptions isLocal(final Boolean isLocal) {
+    public C8StreamCreateOptions isLocal(final Boolean isLocal) {
         this.isLocal = isLocal;
         return this;
     }
