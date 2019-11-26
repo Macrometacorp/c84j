@@ -1,7 +1,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.c8</groupId>
+    <groupId>co.macrometa</groupId>
     <artifactId>c84j</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <inceptionYear>2019</inceptionYear>
@@ -287,7 +287,6 @@
         <url>https://github.com/Macrometacorp/C84j.git</url>
         <connection>scm:git:https://github.com/Macrometacorp/C84j.git</connection>
         <developerConnection>scm:git:https://github.com/Macrometacorp/C84j.git</developerConnection>
-    <tag>c84j-1.0.0</tag>
   </scm>
 
     <organization>
