@@ -36,6 +36,13 @@
         <javadoc.opts />
     </properties>
 
+    <developers>
+        <developer>
+            <name>Macrometa</name>
+            <url>https://github.com/macrometacorp</url>
+        </developer>
+    </developers>
+    
     <distributionManagement>
         <snapshotRepository>
             <id>ossrh</id>
