@@ -284,9 +284,9 @@
     </dependencyManagement>
 
     <scm>
-        <url>https://github.com/macrometacorp/c84j</url>
-        <connection>scm:git:git://github.com/macrometacorp/c84j.git</connection>
-        <developerConnection>scm:git:git://github.com/macrometacorp/c84j.git</developerConnection>
+        <url>https://github.com/Macrometacorp/C84j.git</url>
+        <connection>scm:git:git://github.com/Macrometacorp/C84j.git</connection>
+        <developerConnection>scm:git:git://github.com/Macrometacorp/C84j.git</developerConnection>
   </scm>
 
     <organization>
