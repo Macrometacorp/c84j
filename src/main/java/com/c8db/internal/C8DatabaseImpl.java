@@ -24,6 +24,7 @@ import com.c8db.C8Collection;
 import com.c8db.C8Cursor;
 import com.c8db.C8DBException;
 import com.c8db.C8Database;
+import com.c8db.C8Event;
 import com.c8db.C8Graph;
 import com.c8db.C8Stream;
 import com.c8db.Restql;
@@ -416,6 +417,11 @@ public class C8DatabaseImpl extends InternalC8Database<C8DBImpl, C8ExecutorSync>
         final HostHandle hostHandle = new HostHandle();
         final CursorEntity result = executor.execute(request, CursorEntity.class, hostHandle);
         return createCursor(result, type, null, hostHandle);
+    }
+
+    @Override
+    public C8Event event() {
+        return new C8EventImpl(this);
     }
     
 }

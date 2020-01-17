@@ -294,6 +294,8 @@ public class HttpConnection implements Connection {
                 httpRequest.addHeader("Authorization", "bearer " + jwt);
                 response = buildResponse(client.execute(httpRequest));
                 checkError(response);
+            } else {
+                checkError(response);
             }
         }
         return response;

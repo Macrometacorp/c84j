@@ -18,6 +18,7 @@ package com.c8db.model;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Map;
 
 import com.arangodb.velocypack.VPackSlice;
 import com.c8db.entity.EdgeDefinition;
@@ -110,5 +111,11 @@ public class OptionsBuilder {
             options.parameter(new HashMap<String,Object> ());
         return options.name(name);
     }
-
+    
+    public static EventCreateOptions build(final EventCreateOptions options, final String action,
+            final String description, final String entity, final String entityType, final String status,
+            final String details, final Map<String, String> attributes) {
+        return options.description(description).action(action).attributes(attributes).details(details)
+                .entityType(entityType).status(status);
+    }
 }

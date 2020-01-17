@@ -653,4 +653,5 @@ public interface C8Database extends C8SerializationAccessor {
      */
     <T> C8Cursor<T> executeUserQuery(final String userName, String name, Map<String, Object> bindVars, Class<T> type) throws C8DBException;
 
+    C8Event event();
 }
