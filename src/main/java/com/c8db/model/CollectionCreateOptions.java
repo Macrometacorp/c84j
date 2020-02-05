@@ -29,6 +29,7 @@ public class CollectionCreateOptions {
     private Boolean isSpot;
     private String[] shardKeys;
     private CollectionType type;
+    private Boolean isLocal;
     
 
     public CollectionCreateOptions() {
@@ -120,4 +121,16 @@ public class CollectionCreateOptions {
         return this;
     }
 
+    public Boolean getLocal() {
+        return isLocal;
+    }
+
+    /**
+     * @param isLocal If true replication type of the collection will be set as local (default: false)
+     * @return {@link CollectionCreateOptions}
+     */
+    public CollectionCreateOptions isLocal(final Boolean isLocal) {
+        this.isLocal = isLocal;
+        return this;
+    }
 }
