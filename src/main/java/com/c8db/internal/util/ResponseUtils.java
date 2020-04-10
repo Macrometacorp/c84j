@@ -43,7 +43,9 @@ public final class ResponseUtils {
                 if (responseCode == ERROR_INTERNAL && response.getMeta().containsKey(HEADER_ENDPOINT)) {
                     throw new C8DBRedirectException(String.format("Response Code: %s", responseCode),
                             response.getMeta().get(HEADER_ENDPOINT));
-                } else if (response.getBody() != null) {
+                } else if (responseCode == ERROR_INTERNAL) {
+                    throw new C8DBException(String.format("Response Code: %s", responseCode), responseCode);
+                } if (response.getBody() != null) {
                     final ErrorEntity errorEntity = util.deserialize(response.getBody(), ErrorEntity.class);
                     throw new C8DBException(errorEntity);
                 } else {

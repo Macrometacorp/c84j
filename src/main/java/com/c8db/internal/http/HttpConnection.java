@@ -16,19 +16,20 @@
 
 package com.c8db.internal.http;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.SocketException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.concurrent.TimeUnit;
-
-import javax.net.ssl.SSLContext;
-
+import com.arangodb.velocypack.VPackSlice;
+import com.c8db.C8DBException;
+import com.c8db.Protocol;
+import com.c8db.internal.C8RequestParam;
+import com.c8db.internal.net.Connection;
+import com.c8db.internal.net.HostDescription;
+import com.c8db.internal.util.CURLLogger;
+import com.c8db.internal.util.IOUtils;
+import com.c8db.internal.util.ResponseUtils;
+import com.c8db.util.C8Serialization;
+import com.c8db.util.C8Serializer.Options;
+import com.c8db.velocystream.Request;
+import com.c8db.velocystream.RequestType;
+import com.c8db.velocystream.Response;
 import org.apache.http.Header;
 import org.apache.http.HeaderElement;
 import org.apache.http.HeaderElementIterator;
@@ -38,7 +39,6 @@ import org.apache.http.NameValuePair;
 import org.apache.http.auth.AuthenticationException;
 import org.apache.http.auth.Credentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
@@ -70,21 +70,16 @@ import org.apache.http.ssl.SSLContexts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.arangodb.velocypack.VPackSlice;
-import com.c8db.C8DBException;
-import com.c8db.Protocol;
-import com.c8db.internal.C8Defaults;
-import com.c8db.internal.C8RequestParam;
-import com.c8db.internal.net.Connection;
-import com.c8db.internal.net.HostDescription;
-import com.c8db.internal.util.CURLLogger;
-import com.c8db.internal.util.IOUtils;
-import com.c8db.internal.util.ResponseUtils;
-import com.c8db.util.C8Serialization;
-import com.c8db.util.C8Serializer.Options;
-import com.c8db.velocystream.Request;
-import com.c8db.velocystream.RequestType;
-import com.c8db.velocystream.Response;
+import javax.net.ssl.SSLContext;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.concurrent.TimeUnit;
 
 /**
  *
@@ -95,6 +90,314 @@ public class HttpConnection implements Connection {
     private static final ContentType CONTENT_TYPE_APPLICATION_JSON_UTF8 = ContentType.create("application/json",
             "utf-8");
     private static final ContentType CONTENT_TYPE_VPACK = ContentType.create("application/x-velocypack");
+    private static final int INITIAL_SLEEP_TIME_SEC = 4;
+    private static final int SLEEP_TIME_MULTIPLIER = 2;
+    private static final int MAX_SLEEP_TIME_SEC = 128;
+    private final PoolingHttpClientConnectionManager cm;
+    private final CloseableHttpClient client;
+    private final String user;
+    private final String password;
+    private final String email;
+    private final Boolean jwtAuthEnabled;
+    private final C8Serialization util;
+    private final Boolean useSsl;
+    private final Protocol contentType;
+    private final HostDescription host;
+    private volatile String jwt;
+    private HttpConnection(final HostDescription host, final Integer timeout, final String user, final String password,
+                           final String email, final Boolean jwtAuthEnabled, final Boolean useSsl, final SSLContext sslContext, final C8Serialization util,
+                           final Protocol contentType, final Long ttl, final String httpCookieSpec) {
+        super();
+        this.host = host;
+        this.user = user;
+        this.password = password;
+        this.email = email;
+        this.jwtAuthEnabled = jwtAuthEnabled;
+        this.useSsl = useSsl;
+        this.util = util;
+        this.contentType = contentType;
+        final RegistryBuilder<ConnectionSocketFactory> registryBuilder = RegistryBuilder
+                .create();
+        if (Boolean.TRUE == useSsl) {
+            if (sslContext != null) {
+                registryBuilder.register("https", new SSLConnectionSocketFactory(sslContext));
+            } else {
+                registryBuilder.register("https", new SSLConnectionSocketFactory(SSLContexts.createSystemDefault()));
+            }
+        } else {
+            registryBuilder.register("http", new PlainConnectionSocketFactory());
+        }
+        cm = new PoolingHttpClientConnectionManager(registryBuilder.build());
+        cm.setDefaultMaxPerRoute(1);
+        cm.setMaxTotal(1);
+        final RequestConfig.Builder requestConfig = RequestConfig.custom();
+        if (timeout != null && timeout >= 0) {
+            requestConfig.setConnectTimeout(timeout);
+            requestConfig.setConnectionRequestTimeout(timeout);
+            requestConfig.setSocketTimeout(timeout);
+        }
+
+        if (httpCookieSpec != null && httpCookieSpec.length() > 1) {
+            requestConfig.setCookieSpec(httpCookieSpec);
+        }
+
+        final ConnectionKeepAliveStrategy keepAliveStrategy = new ConnectionKeepAliveStrategy() {
+            @Override
+            public long getKeepAliveDuration(final HttpResponse response, final HttpContext context) {
+                return HttpConnection.this.getKeepAliveDuration(response);
+            }
+        };
+        final HttpClientBuilder builder = HttpClientBuilder.create().setDefaultRequestConfig(requestConfig.build())
+                .setConnectionManager(cm).setKeepAliveStrategy(keepAliveStrategy)
+                .setRetryHandler(new DefaultHttpRequestRetryHandler());
+        if (ttl != null) {
+            builder.setConnectionTimeToLive(ttl, TimeUnit.MILLISECONDS);
+        }
+        client = builder.build();
+    }
+
+    private static String buildUrl(final String baseUrl, final Request request) throws UnsupportedEncodingException {
+        final StringBuilder sb = new StringBuilder().append(baseUrl);
+        final String database = request.getDatabase();
+        final String tenant = request.getTenant();
+        if (tenant != null && !tenant.isEmpty()) {
+            sb.append("/_tenant/").append(tenant);
+        }
+
+        if (database != null && !database.isEmpty()) {
+            sb.append("/_fabric/").append(database);
+        }
+
+        sb.append(request.getRequest());
+        if (!request.getQueryParam().isEmpty()) {
+            if (request.getRequest().contains("?")) {
+                sb.append("&");
+            } else {
+                sb.append("?");
+            }
+            final String paramString = URLEncodedUtils.format(toList(request.getQueryParam()), "utf-8");
+            sb.append(paramString);
+        }
+        return sb.toString();
+    }
+
+    private static List<NameValuePair> toList(final Map<String, String> parameters) {
+        final ArrayList<NameValuePair> paramList = new ArrayList<NameValuePair>(parameters.size());
+        for (final Entry<String, String> param : parameters.entrySet()) {
+            if (param.getValue() != null) {
+                paramList.add(new BasicNameValuePair(param.getKey(), param.getValue()));
+            }
+        }
+        return paramList;
+    }
+
+    private static void addHeader(final Request request, final HttpRequestBase httpRequest) {
+        for (final Entry<String, String> header : request.getHeaderParam().entrySet()) {
+            httpRequest.addHeader(header.getKey(), header.getValue());
+        }
+    }
+
+    private long getKeepAliveDuration(final HttpResponse response) {
+        final HeaderElementIterator it = new BasicHeaderElementIterator(response.headerIterator(HTTP.CONN_KEEP_ALIVE));
+        while (it.hasNext()) {
+            final HeaderElement he = it.nextElement();
+            final String param = he.getName();
+            final String value = he.getValue();
+            if (value != null && "timeout".equalsIgnoreCase(param)) {
+                try {
+                    return Long.parseLong(value) * 1000L;
+                } catch (final NumberFormatException ignore) {
+                }
+            }
+        }
+        return 30L * 1000L;
+    }
+
+    @Override
+    public void close() throws IOException {
+        cm.shutdown();
+        client.close();
+    }
+
+    public Response execute(final Request request) throws C8DBException, IOException {
+        final String url = buildUrl(buildBaseUrl(host), request);
+        final HttpRequestBase httpRequest = buildHttpRequestBase(request, url);
+        httpRequest.setHeader("User-Agent", "Mozilla/5.0 (compatible; C8DB-JavaDriver/1.1; +http://mt.orz.at/)");
+        if (contentType == Protocol.HTTP_VPACK) {
+            httpRequest.setHeader("Accept", "application/x-velocypack");
+        }
+        addHeader(request, httpRequest);
+        if (jwtAuthEnabled) {
+            if (jwt == null) {
+                addJWT();
+            }
+            httpRequest.addHeader("Authorization", "bearer " + jwt);
+        } else {
+            // basic auth instead
+            final Credentials credentials = addCredentials(httpRequest);
+            if (LOGGER.isDebugEnabled()) {
+                CURLLogger.log(url, request, credentials, util);
+            }
+        }
+        Response response = null;
+        try {
+            response = buildResponse(client.execute(httpRequest));
+            checkError(response);
+        } catch (C8DBException ex) {
+            if (ex.getResponseCode().equals(401)) {
+                // jwt might has expired refresh it
+                addJWT();
+                httpRequest.removeHeaders("Authorization");
+                httpRequest.addHeader("Authorization", "bearer " + jwt);
+                response = buildResponse(client.execute(httpRequest));
+                checkError(response);
+            } else if (ex.getResponseCode() >= 500) {
+                boolean recovered = false;
+                for (int currentWaitTime = INITIAL_SLEEP_TIME_SEC; currentWaitTime <= MAX_SLEEP_TIME_SEC; currentWaitTime *= SLEEP_TIME_MULTIPLIER) {
+                    try {
+                        LOGGER.info(String.format("Retrying connection to C8DB in %d seconds...", currentWaitTime));
+                        Thread.sleep(currentWaitTime * 1000);
+                        response = buildResponse(client.execute(httpRequest));
+                        checkError(response);
+
+                        recovered = true;
+                        break;
+                    } catch (C8DBException | InterruptedException e) {
+                        if (ex.getResponseCode().equals(401)) {
+                            // jwt might has expired refresh it
+                            addJWT();
+                            httpRequest.removeHeaders("Authorization");
+                            httpRequest.addHeader("Authorization", "bearer " + jwt);
+                        }
+                    }
+                }
+                if (!recovered) {
+                    LOGGER.info(String.format("Unable to connect to the C8DB after %d seconds. No more retries will be made", MAX_SLEEP_TIME_SEC));
+                }
+            } else {
+                checkError(response);
+            }
+        }
+        return response;
+    }
+
+    private synchronized void addJWT() throws IOException {
+        String authUrl = buildBaseUrl(host) + "/_open/auth";
+        Map<String, String> credentials = new HashMap<String, String>();
+        credentials.put("username", user);
+        credentials.put("password", password);
+        credentials.put("email", email);
+        final HttpRequestBase authHttpRequest = buildHttpRequestBase(
+                new Request("_mm", C8RequestParam.SYSTEM, RequestType.POST, authUrl)
+                        .setBody(util.serialize(credentials)),
+                authUrl);
+        authHttpRequest.setHeader("User-Agent", "Mozilla/5.0 (compatible; C8DB-JavaDriver/1.1; +http://mt.orz.at/)");
+        if (contentType == Protocol.HTTP_VPACK) {
+            authHttpRequest.setHeader("Accept", "application/x-velocypack");
+        }
+        Response authResponse = buildResponse(client.execute(authHttpRequest));
+        checkError(authResponse);
+        setJwt(authResponse.getBody().get("jwt").getAsString());
+    }
+
+    private HttpRequestBase buildHttpRequestBase(final Request request, final String url) {
+        final HttpRequestBase httpRequest;
+        switch (request.getRequestType()) {
+            case POST:
+                httpRequest = requestWithBody(new HttpPost(url), request);
+                break;
+            case PUT:
+                httpRequest = requestWithBody(new HttpPut(url), request);
+                break;
+            case PATCH:
+                httpRequest = requestWithBody(new HttpPatch(url), request);
+                break;
+            case DELETE:
+                httpRequest = requestWithBody(new HttpDeleteWithBody(url), request);
+                break;
+            case HEAD:
+                httpRequest = new HttpHead(url);
+                break;
+            case GET:
+            default:
+                httpRequest = new HttpGet(url);
+                break;
+        }
+        return httpRequest;
+    }
+
+    private HttpRequestBase requestWithBody(final HttpEntityEnclosingRequestBase httpRequest, final Request request) {
+        final VPackSlice body = request.getBody();
+        if (body != null) {
+            if (contentType == Protocol.HTTP_VPACK) {
+                httpRequest.setEntity(new ByteArrayEntity(
+                        Arrays.copyOfRange(body.getBuffer(), body.getStart(), body.getStart() + body.getByteSize()),
+                        CONTENT_TYPE_VPACK));
+            } else {
+                httpRequest.setEntity(new StringEntity(body.toString(), CONTENT_TYPE_APPLICATION_JSON_UTF8));
+            }
+        }
+        return httpRequest;
+    }
+
+    private String buildBaseUrl(final HostDescription host) {
+        return (Boolean.TRUE == useSsl ? "https://" : "http://") + host.getHost() + ":" + host.getPort();
+    }
+
+    public Credentials addCredentials(final HttpRequestBase httpRequest) {
+        Credentials credentials = null;
+        if (user != null) {
+            credentials = new UsernamePasswordCredentials(user, password != null ? password : "");
+            try {
+                httpRequest.addHeader(new BasicScheme().authenticate(credentials, httpRequest, null));
+            } catch (final AuthenticationException e) {
+                throw new C8DBException(e);
+            }
+        }
+        return credentials;
+    }
+
+    public Response buildResponse(final CloseableHttpResponse httpResponse)
+            throws UnsupportedOperationException, IOException {
+        final Response response = new Response();
+        response.setResponseCode(httpResponse.getStatusLine().getStatusCode());
+        final HttpEntity entity = httpResponse.getEntity();
+        if (entity != null && entity.getContent() != null) {
+            if (contentType == Protocol.HTTP_VPACK) {
+                final byte[] content = IOUtils.toByteArray(entity.getContent());
+                if (content.length > 0) {
+                    response.setBody(new VPackSlice(content));
+                }
+            } else {
+                final String content = IOUtils.toString(entity.getContent());
+                if (!content.isEmpty()) {
+                    try {
+                        response.setBody(
+                                util.serialize(content, new Options().stringAsJson(true).serializeNullValues(true)));
+                    } catch (C8DBException e) {
+                        final byte[] contentAsByteArray = content.getBytes();
+                        if (contentAsByteArray.length > 0) {
+                            response.setBody(new VPackSlice(contentAsByteArray));
+                        }
+                    }
+                }
+            }
+        }
+        final Header[] headers = httpResponse.getAllHeaders();
+        final Map<String, String> meta = response.getMeta();
+        for (final Header header : headers) {
+            meta.put(header.getName(), header.getValue());
+        }
+        return response;
+    }
+
+    protected void checkError(final Response response) throws C8DBException {
+        ResponseUtils.checkError(util, response);
+    }
+
+    public void setJwt(String jwt) {
+        this.jwt = jwt;
+    }
 
     public static class Builder {
         private String user;
@@ -174,283 +477,6 @@ public class HttpConnection implements Connection {
             return new HttpConnection(host, timeout, user, password, email, jwtAuthEnabled, useSsl, sslContext, util,
                     contentType, ttl, httpCookieSpec);
         }
-    }
-
-    private final PoolingHttpClientConnectionManager cm;
-    private final CloseableHttpClient client;
-    private final String user;
-    private final String password;
-    private final String email;
-    private final Boolean jwtAuthEnabled;
-    private final C8Serialization util;
-    private final Boolean useSsl;
-    private final Protocol contentType;
-    private HostDescription host;
-    private volatile String jwt;
-
-    private HttpConnection(final HostDescription host, final Integer timeout, final String user, final String password,
-            final String email, final Boolean jwtAuthEnabled, final Boolean useSsl, final SSLContext sslContext, final C8Serialization util,
-            final Protocol contentType, final Long ttl, final String httpCookieSpec) {
-        super();
-        this.host = host;
-        this.user = user;
-        this.password = password;
-        this.email = email;
-        this.jwtAuthEnabled = jwtAuthEnabled;
-        this.useSsl = useSsl;
-        this.util = util;
-        this.contentType = contentType;
-        final RegistryBuilder<ConnectionSocketFactory> registryBuilder = RegistryBuilder
-                .<ConnectionSocketFactory>create();
-        if (Boolean.TRUE == useSsl) {
-            if (sslContext != null) {
-                registryBuilder.register("https", new SSLConnectionSocketFactory(sslContext));
-            } else {
-                registryBuilder.register("https", new SSLConnectionSocketFactory(SSLContexts.createSystemDefault()));
-            }
-        } else {
-            registryBuilder.register("http", new PlainConnectionSocketFactory());
-        }
-        cm = new PoolingHttpClientConnectionManager(registryBuilder.build());
-        cm.setDefaultMaxPerRoute(1);
-        cm.setMaxTotal(1);
-        final RequestConfig.Builder requestConfig = RequestConfig.custom();
-        if (timeout != null && timeout >= 0) {
-            requestConfig.setConnectTimeout(timeout);
-            requestConfig.setConnectionRequestTimeout(timeout);
-            requestConfig.setSocketTimeout(timeout);
-        }
-
-        if (httpCookieSpec != null && httpCookieSpec.length() > 1) {
-            requestConfig.setCookieSpec(httpCookieSpec);
-        }
-
-        final ConnectionKeepAliveStrategy keepAliveStrategy = new ConnectionKeepAliveStrategy() {
-            @Override
-            public long getKeepAliveDuration(final HttpResponse response, final HttpContext context) {
-                return HttpConnection.this.getKeepAliveDuration(response);
-            }
-        };
-        final HttpClientBuilder builder = HttpClientBuilder.create().setDefaultRequestConfig(requestConfig.build())
-                .setConnectionManager(cm).setKeepAliveStrategy(keepAliveStrategy)
-                .setRetryHandler(new DefaultHttpRequestRetryHandler());
-        if (ttl != null) {
-            builder.setConnectionTimeToLive(ttl, TimeUnit.MILLISECONDS);
-        }
-        client = builder.build();
-    }
-
-    private long getKeepAliveDuration(final HttpResponse response) {
-        final HeaderElementIterator it = new BasicHeaderElementIterator(response.headerIterator(HTTP.CONN_KEEP_ALIVE));
-        while (it.hasNext()) {
-            final HeaderElement he = it.nextElement();
-            final String param = he.getName();
-            final String value = he.getValue();
-            if (value != null && "timeout".equalsIgnoreCase(param)) {
-                try {
-                    return Long.parseLong(value) * 1000L;
-                } catch (final NumberFormatException ignore) {
-                }
-            }
-        }
-        return 30L * 1000L;
-    }
-
-    @Override
-    public void close() throws IOException {
-        cm.shutdown();
-        client.close();
-    }
-
-    public Response execute(final Request request) throws C8DBException, IOException, SocketException {
-        final String url = buildUrl(buildBaseUrl(host), request);
-        final HttpRequestBase httpRequest = buildHttpRequestBase(request, url);
-        httpRequest.setHeader("User-Agent", "Mozilla/5.0 (compatible; C8DB-JavaDriver/1.1; +http://mt.orz.at/)");
-        if (contentType == Protocol.HTTP_VPACK) {
-            httpRequest.setHeader("Accept", "application/x-velocypack");
-        }
-        addHeader(request, httpRequest);
-        if (jwtAuthEnabled) {
-            if (jwt == null) {
-                addJWT();
-            }
-            httpRequest.addHeader("Authorization", "bearer " + jwt);
-        } else {
-            // basic auth instead
-            final Credentials credentials = addCredentials(httpRequest);
-            if (LOGGER.isDebugEnabled()) {
-                CURLLogger.log(url, request, credentials, util);
-            }
-        }
-        Response response = null;
-        try {
-            response = buildResponse(client.execute(httpRequest));
-            checkError(response);
-        } catch (C8DBException ex) {
-            if (ex.getResponseCode().equals(401)) {
-                // jwt might has expired refresh it
-                addJWT();
-                httpRequest.removeHeaders("Authorization");
-                httpRequest.addHeader("Authorization", "bearer " + jwt);
-                response = buildResponse(client.execute(httpRequest));
-                checkError(response);
-            } else {
-                checkError(response);
-            }
-        }
-        return response;
-    }
-
-    private synchronized void addJWT() throws IOException, ClientProtocolException {
-        String authUrl = buildBaseUrl(host) + "/_open/auth";
-        Map<String, String> credentials = new HashMap<String, String>();
-        credentials.put("username", user);
-        credentials.put("password", password);
-        credentials.put("email", email);
-        final HttpRequestBase authHttpRequest = buildHttpRequestBase(
-                new Request("_mm", C8RequestParam.SYSTEM, RequestType.POST, authUrl)
-                        .setBody(util.serialize(credentials)),
-                authUrl);
-        authHttpRequest.setHeader("User-Agent", "Mozilla/5.0 (compatible; C8DB-JavaDriver/1.1; +http://mt.orz.at/)");
-        if (contentType == Protocol.HTTP_VPACK) {
-            authHttpRequest.setHeader("Accept", "application/x-velocypack");
-        }
-        Response authResponse = buildResponse(client.execute(authHttpRequest));
-        checkError(authResponse);
-        setJwt(authResponse.getBody().get("jwt").getAsString());
-    }
-
-    private HttpRequestBase buildHttpRequestBase(final Request request, final String url) {
-        final HttpRequestBase httpRequest;
-        switch (request.getRequestType()) {
-        case POST:
-            httpRequest = requestWithBody(new HttpPost(url), request);
-            break;
-        case PUT:
-            httpRequest = requestWithBody(new HttpPut(url), request);
-            break;
-        case PATCH:
-            httpRequest = requestWithBody(new HttpPatch(url), request);
-            break;
-        case DELETE:
-            httpRequest = requestWithBody(new HttpDeleteWithBody(url), request);
-            break;
-        case HEAD:
-            httpRequest = new HttpHead(url);
-            break;
-        case GET:
-        default:
-            httpRequest = new HttpGet(url);
-            break;
-        }
-        return httpRequest;
-    }
-
-    private HttpRequestBase requestWithBody(final HttpEntityEnclosingRequestBase httpRequest, final Request request) {
-        final VPackSlice body = request.getBody();
-        if (body != null) {
-            if (contentType == Protocol.HTTP_VPACK) {
-                httpRequest.setEntity(new ByteArrayEntity(
-                        Arrays.copyOfRange(body.getBuffer(), body.getStart(), body.getStart() + body.getByteSize()),
-                        CONTENT_TYPE_VPACK));
-            } else {
-                httpRequest.setEntity(new StringEntity(body.toString(), CONTENT_TYPE_APPLICATION_JSON_UTF8));
-            }
-        }
-        return httpRequest;
-    }
-
-    private String buildBaseUrl(final HostDescription host) {
-        return (Boolean.TRUE == useSsl ? "https://" : "http://") + host.getHost() + ":" + host.getPort();
-    }
-
-    private static String buildUrl(final String baseUrl, final Request request) throws UnsupportedEncodingException {
-        final StringBuilder sb = new StringBuilder().append(baseUrl);
-        final String database = request.getDatabase();
-        final String tenant = request.getTenant();
-        if (tenant != null && !tenant.isEmpty()) {
-            sb.append("/_tenant/").append(tenant);
-        }
-
-        if (database != null && !database.isEmpty()) {
-            sb.append("/_fabric/").append(database);
-        }
-
-        sb.append(request.getRequest());
-        if (!request.getQueryParam().isEmpty()) {
-            if (request.getRequest().contains("?")) {
-                sb.append("&");
-            } else {
-                sb.append("?");
-            }
-            final String paramString = URLEncodedUtils.format(toList(request.getQueryParam()), "utf-8");
-            sb.append(paramString);
-        }
-        return sb.toString();
-    }
-
-    private static List<NameValuePair> toList(final Map<String, String> parameters) {
-        final ArrayList<NameValuePair> paramList = new ArrayList<NameValuePair>(parameters.size());
-        for (final Entry<String, String> param : parameters.entrySet()) {
-            if (param.getValue() != null) {
-                paramList.add(new BasicNameValuePair(param.getKey(), param.getValue().toString()));
-            }
-        }
-        return paramList;
-    }
-
-    private static void addHeader(final Request request, final HttpRequestBase httpRequest) {
-        for (final Entry<String, String> header : request.getHeaderParam().entrySet()) {
-            httpRequest.addHeader(header.getKey(), header.getValue());
-        }
-    }
-
-    public Credentials addCredentials(final HttpRequestBase httpRequest) {
-        Credentials credentials = null;
-        if (user != null) {
-            credentials = new UsernamePasswordCredentials(user, password != null ? password : "");
-            try {
-                httpRequest.addHeader(new BasicScheme().authenticate(credentials, httpRequest, null));
-            } catch (final AuthenticationException e) {
-                throw new C8DBException(e);
-            }
-        }
-        return credentials;
-    }
-
-    public Response buildResponse(final CloseableHttpResponse httpResponse)
-            throws UnsupportedOperationException, IOException {
-        final Response response = new Response();
-        response.setResponseCode(httpResponse.getStatusLine().getStatusCode());
-        final HttpEntity entity = httpResponse.getEntity();
-        if (entity != null && entity.getContent() != null) {
-            if (contentType == Protocol.HTTP_VPACK) {
-                final byte[] content = IOUtils.toByteArray(entity.getContent());
-                if (content.length > 0) {
-                    response.setBody(new VPackSlice(content));
-                }
-            } else {
-                final String content = IOUtils.toString(entity.getContent());
-                if (!content.isEmpty()) {
-                    response.setBody(
-                            util.serialize(content, new Options().stringAsJson(true).serializeNullValues(true)));
-                }
-            }
-        }
-        final Header[] headers = httpResponse.getAllHeaders();
-        final Map<String, String> meta = response.getMeta();
-        for (final Header header : headers) {
-            meta.put(header.getName(), header.getValue());
-        }
-        return response;
-    }
-
-    protected void checkError(final Response response) throws C8DBException {
-        ResponseUtils.checkError(util, response);
-    }
-
-    public void setJwt(String jwt) {
-        this.jwt = jwt;
     }
 
 }
