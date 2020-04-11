@@ -36,6 +36,7 @@ import org.apache.http.HeaderElementIterator;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
+import org.apache.http.NoHttpResponseException;
 import org.apache.http.auth.AuthenticationException;
 import org.apache.http.auth.Credentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -257,7 +258,7 @@ public class HttpConnection implements Connection {
             } else {
                 checkError(response);
             }
-        } catch (UnknownHostException ex) {
+        } catch (UnknownHostException | NoHttpResponseException ex) {
             response = retryRequest(httpRequest);
         }
         return response;
@@ -275,7 +276,6 @@ public class HttpConnection implements Connection {
 
                 return response;
             } catch (InterruptedException e) {
-                e.printStackTrace();
             } catch (Exception e) {
                 if (e instanceof C8DBException && ((C8DBException) e).getResponseCode().equals(401)) {
                     // jwt might has expired refresh it
