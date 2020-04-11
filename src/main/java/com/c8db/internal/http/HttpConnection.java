@@ -73,6 +73,7 @@ import org.slf4j.LoggerFactory;
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -252,32 +253,40 @@ public class HttpConnection implements Connection {
                 response = buildResponse(client.execute(httpRequest));
                 checkError(response);
             } else if (ex.getResponseCode() >= 500) {
-                boolean recovered = false;
-                for (int currentWaitTime = INITIAL_SLEEP_TIME_SEC; currentWaitTime <= MAX_SLEEP_TIME_SEC; currentWaitTime *= SLEEP_TIME_MULTIPLIER) {
-                    try {
-                        LOGGER.info(String.format("Retrying connection to C8DB in %d seconds...", currentWaitTime));
-                        Thread.sleep(currentWaitTime * 1000);
-                        response = buildResponse(client.execute(httpRequest));
-                        checkError(response);
-
-                        recovered = true;
-                        break;
-                    } catch (C8DBException | InterruptedException e) {
-                        if (ex.getResponseCode().equals(401)) {
-                            // jwt might has expired refresh it
-                            addJWT();
-                            httpRequest.removeHeaders("Authorization");
-                            httpRequest.addHeader("Authorization", "bearer " + jwt);
-                        }
-                    }
-                }
-                if (!recovered) {
-                    LOGGER.info(String.format("Unable to connect to the C8DB after %d seconds. No more retries will be made", MAX_SLEEP_TIME_SEC));
-                }
+                response = retryRequest(httpRequest);
             } else {
                 checkError(response);
             }
+        } catch (UnknownHostException ex) {
+            response = retryRequest(httpRequest);
         }
+        return response;
+    }
+
+    private Response retryRequest(HttpRequestBase httpRequest) throws IOException {
+        Response response = null;
+
+        for (int currentWaitTime = INITIAL_SLEEP_TIME_SEC; currentWaitTime <= MAX_SLEEP_TIME_SEC; currentWaitTime *= SLEEP_TIME_MULTIPLIER) {
+            try {
+                LOGGER.info(String.format("Retrying connection to C8DB in %d seconds...", currentWaitTime));
+                Thread.sleep(currentWaitTime * 1000);
+                response = buildResponse(client.execute(httpRequest));
+                checkError(response);
+
+                return response;
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (Exception e) {
+                if (e instanceof C8DBException && ((C8DBException) e).getResponseCode().equals(401)) {
+                    // jwt might has expired refresh it
+                    addJWT();
+                    httpRequest.removeHeaders("Authorization");
+                    httpRequest.addHeader("Authorization", "bearer " + jwt);
+                }
+            }
+        }
+
+        LOGGER.info(String.format("Unable to connect to the C8DB after %d seconds. No more retries will be made", MAX_SLEEP_TIME_SEC));
         return response;
     }
 
