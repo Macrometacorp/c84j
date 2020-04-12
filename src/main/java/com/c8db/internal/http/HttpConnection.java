@@ -246,6 +246,7 @@ public class HttpConnection implements Connection {
             response = buildResponse(client.execute(httpRequest));
             checkError(response);
         } catch (C8DBException ex) {
+            LOGGER.error("C8DBException: Unable to complete C8DB Request due to ", ex);
             if (ex.getResponseCode().equals(401)) {
                 // jwt might has expired refresh it
                 addJWT();
@@ -260,6 +261,8 @@ public class HttpConnection implements Connection {
             }
         } catch (UnknownHostException | NoHttpResponseException ex) {
             response = retryRequest(httpRequest);
+        } catch (Exception ex) {
+            LOGGER.error("Exception: Unable to complete C8DB Request due to ", ex);
         }
         return response;
     }
