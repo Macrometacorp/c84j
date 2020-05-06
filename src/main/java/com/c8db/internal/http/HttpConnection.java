@@ -261,6 +261,7 @@ public class HttpConnection implements Connection {
                 // Handle HTTP Error messages here where we just want to log the info and don' want to treat it as
                 // an exception
                 LOGGER.info(String.format("C8DBException: HTTP %d - %s", ex.getResponseCode(), ex.getErrorMessage()));
+                checkError(response);
             } else {
                 LOGGER.error("C8DBException: Unable to complete C8DB Request due to ", ex);
                 checkError(response);
