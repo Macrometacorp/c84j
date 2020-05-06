@@ -246,8 +246,8 @@ public class HttpConnection implements Connection {
             response = buildResponse(client.execute(httpRequest));
             checkError(response);
         } catch (C8DBException ex) {
-            LOGGER.error("C8DBException: Unable to complete C8DB Request due to ", ex);
             if (ex.getResponseCode().equals(401)) {
+                LOGGER.error("C8DBException: Received HTP 401. Re-authenticating to C8DB");
                 // jwt might has expired refresh it
                 addJWT();
                 httpRequest.removeHeaders("Authorization");
@@ -255,8 +255,14 @@ public class HttpConnection implements Connection {
                 response = buildResponse(client.execute(httpRequest));
                 checkError(response);
             } else if (ex.getResponseCode() >= 500) {
+                LOGGER.error(String.format("C8DBException: Received HTTP %d. Retrying C8DB Connection", ex.getResponseCode()));
                 response = retryRequest(httpRequest);
+            } else if (ex.getResponseCode().equals(404)) {
+                // Handle HTTP Error messages here where we just want to log the info and don' want to treat it as
+                // an exception
+                LOGGER.info(String.format("C8DBException: HTTP %d - %s", ex.getResponseCode(), ex.getErrorMessage()));
             } else {
+                LOGGER.error("C8DBException: Unable to complete C8DB Request due to ", ex);
                 checkError(response);
             }
         } catch (UnknownHostException | NoHttpResponseException ex) {
