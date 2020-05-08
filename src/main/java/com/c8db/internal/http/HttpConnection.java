@@ -233,7 +233,8 @@ public class HttpConnection implements Connection {
             if (jwt == null) {
                 addJWT();
             }
-            httpRequest.addHeader("Authorization", "bearer " + jwt);
+            httpRequest.addHeader("Authorization", "bearer " + "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjEuNTg4OTE2MjUwNzQwOTM0MmUrNiwiZXhwIjoxNTg4OTU5NDUwLCJpc3MiOiJhcmFuZ29kYiIsInByZWZlcnJlZF91c2VybmFtZSI6InJvb3QiLCJ0ZW5hbnQiOiJfbW0ifQ==.BjSrFxKNC5BmdEaHcVnYrOUw8gupbzlUchwvnA5Csl4=");
+            // httpRequest.addHeader("Authorization", "bearer " + jwt);
         } else {
             // basic auth instead
             final Credentials credentials = addCredentials(httpRequest);
@@ -310,7 +311,7 @@ public class HttpConnection implements Connection {
                 new Request("_mm", C8RequestParam.SYSTEM, RequestType.POST, authUrl)
                         .setBody(util.serialize(credentials)),
                 authUrl);
-        authHttpRequest.setHeader("User-Agent", "Mozilla/5.0 (compatible; C8DB-JavaDriver/1.1; +http://mt.orz.at/)");
+        // authHttpRequest.setHeader("User-Agent", "Mozilla/5.0 (compatible; C8DB-JavaDriver/1.1; +http://mt.orz.at/)");
         if (contentType == Protocol.HTTP_VPACK) {
             authHttpRequest.setHeader("Accept", "application/x-velocypack");
         }
