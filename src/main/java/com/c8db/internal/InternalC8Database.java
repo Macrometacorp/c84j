@@ -508,7 +508,7 @@ public abstract class InternalC8Database<A extends InternalC8DB<E>, E extends C8
 
     protected Request userQueryRequest(final String userName, final String restqlName, final Map<String, Object> bindVars) {
         final Request request = userName == null ? request(tenant, name, RequestType.POST, PATH_API_USER_QUERIES, "execute",  restqlName)
-                : request(tenant, name, RequestType.POST, PATH_API_USER_QUERIES, userName, name);
+                : request(tenant, name, RequestType.POST, PATH_API_USER_QUERIES, userName, "execute",  restqlName);
         request.setBody(util().serialize(bindVars == null ? new HashMap<String, Object>() : bindVars));
         return request;
     }

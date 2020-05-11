@@ -55,7 +55,7 @@ public class C8CursorIterator<T> implements C8Iterator<T> {
 
     @Override
     public boolean hasNext() {
-        return pos < result.getResult().size() || result.getHasMore();
+        return pos < result.getResult().size() || (result.getHasMore() != null && result.getHasMore());
     }
 
     @Override
