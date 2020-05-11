@@ -310,7 +310,7 @@ public class HttpConnection implements Connection {
                 new Request("_mm", C8RequestParam.SYSTEM, RequestType.POST, authUrl)
                         .setBody(util.serialize(credentials)),
                 authUrl);
-        // authHttpRequest.setHeader("User-Agent", "Mozilla/5.0 (compatible; C8DB-JavaDriver/1.1; +http://mt.orz.at/)");
+        authHttpRequest.setHeader("User-Agent", "Mozilla/5.0 (compatible; C8DB-JavaDriver/1.1; +http://mt.orz.at/)");
         if (contentType == Protocol.HTTP_VPACK) {
             authHttpRequest.setHeader("Accept", "application/x-velocypack");
         }
