@@ -17,6 +17,7 @@
 package com.c8db.internal;
 
 import java.util.Collection;
+import java.util.Map;
 
 import com.arangodb.velocypack.Type;
 import com.arangodb.velocypack.exception.VPackException;
@@ -57,7 +58,7 @@ public abstract class InternalRestql<A extends InternalC8DB<E>, D extends Intern
         return new ResponseDeserializer<Collection<UserQueryEntity>>() {
             @Override
             public Collection<UserQueryEntity> deserialize(final Response response) throws VPackException {
-                return util().deserialize(response.getBody().get(C8ResponseField.RESULT), new Type<Collection<String>>() {
+                return util().deserialize(response.getBody().get(C8ResponseField.RESULT), new Type<Collection<Map>>() {
                 }.getType());
             }
         };
