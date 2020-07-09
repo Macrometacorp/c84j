@@ -30,6 +30,7 @@ public class CollectionCreateOptions {
     private String[] shardKeys;
     private CollectionType type;
     private Boolean isLocal;
+    private Boolean isRealTime;
     
 
     public CollectionCreateOptions() {
@@ -132,5 +133,19 @@ public class CollectionCreateOptions {
     public CollectionCreateOptions isLocal(final Boolean isLocal) {
         this.isLocal = isLocal;
         return this;
+    }
+
+    /**
+     * @param isRealTime If true then the collection will create its corresponding stream. (default: false)
+     * @return options
+     */
+
+    public CollectionCreateOptions isRealTime(final Boolean isRealTime){
+        this.isRealTime = isRealTime;
+        return this;
+    }
+
+    public Boolean getRealTime() {
+        return isRealTime;
     }
 }
