@@ -3,7 +3,7 @@
 
     <groupId>co.macrometa</groupId>
     <artifactId>c84j</artifactId>
-    <version>1.0.10</version>
+    <version>1.0.11</version>
     <inceptionYear>2019</inceptionYear>
     <packaging>jar</packaging>
 
@@ -96,7 +96,7 @@
                 <configuration>
                     <serverId>ossrh</serverId>
                     <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-                    <autoReleaseAfterClose>false</autoReleaseAfterClose>
+                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
                 </configuration>
             </plugin>
             <plugin>
@@ -155,6 +155,7 @@
                         <include>**/*Test.java</include>
                         <include>**/*Example.java</include>
                     </includes>
+                    <skipTests>true</skipTests>
                 </configuration>
             </plugin>
             <plugin>
