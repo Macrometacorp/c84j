@@ -228,12 +228,7 @@ public abstract class InternalC8Database<A extends InternalC8DB<E>, E extends C8
     }
 
     protected Request queryNextRequest(final String id, Map<String, String> meta) {
-
         final Request request = request(tenant, name, RequestType.PUT, PATH_API_CURSOR, id);
-
-        if (meta != null) {
-            request.getHeaderParam().putAll(meta);
-        }
         return request;
     }
 
