@@ -20,8 +20,6 @@ import com.c8db.entity.CollectionType;
 import com.c8db.entity.KeyOptions;
 import com.c8db.entity.KeyType;
 
-/**
- */
 public class CollectionCreateOptions {
 
     private String name;
@@ -31,6 +29,7 @@ public class CollectionCreateOptions {
     private CollectionType type;
     private Boolean isLocal;
     private Boolean isRealTime;
+    private Boolean stream;
     
 
     public CollectionCreateOptions() {
@@ -126,7 +125,11 @@ public class CollectionCreateOptions {
         return isLocal;
     }
 
-    /**
+    public Boolean hasStream() {
+		return stream;
+	}
+
+	/**
      * @param isLocal If true replication type of the collection will be set as local (default: false)
      * @return {@link CollectionCreateOptions}
      */
@@ -134,6 +137,15 @@ public class CollectionCreateOptions {
         this.isLocal = isLocal;
         return this;
     }
+    
+    /**
+     * @param hasStream Indicates for associated streams
+     * @return {@link CollectionCreateOptions}
+     */
+    public CollectionCreateOptions stream(final Boolean stream) {
+        this.stream = stream;
+        return this;
+    }    
 
     /**
      * @param isRealTime If true then the collection will create its corresponding stream. (default: false)

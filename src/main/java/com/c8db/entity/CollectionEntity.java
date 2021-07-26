@@ -28,6 +28,7 @@ public class CollectionEntity implements Entity {
 	private Boolean isSystem;
 	private CollectionStatus status;
 	private CollectionType type;
+	private Boolean hasStream;
 
 	public CollectionEntity() {
 		super();
@@ -59,6 +60,10 @@ public class CollectionEntity implements Entity {
 
 	public CollectionType getType() {
 		return type;
+	}
+
+	public Boolean getHasStream() {
+		return hasStream;
 	}
 
 }

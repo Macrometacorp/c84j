@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.net.ssl.SSLContext;
@@ -669,6 +670,17 @@ public interface C8DB extends C8SerializationAccessor {
      */
     C8Database db(String tenant, String name);
 
+    /**
+     * Returns a {@code ArangoDatabase} instance for the given database name and
+     * tenant.
+     *
+     * @param tenant Name of the tenant
+     * @param name   Name of the database
+     * @param headerParams HTTP header parameters
+     * @return database handler
+     */
+    C8Database db(String tenant, String name, Map<String, String> headerParams);
+    
     /**
      * Creates a new database with the given name.
      *

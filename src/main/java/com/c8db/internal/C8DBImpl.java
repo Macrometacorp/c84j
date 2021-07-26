@@ -19,6 +19,7 @@ package com.c8db.internal;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -128,6 +129,12 @@ public class C8DBImpl extends InternalC8DB<C8ExecutorSync> implements C8DB {
         return new C8DatabaseImpl(this, tenant, name, spotDc, dcList).setCursorInitializer(cursorInitializer);
     }
 
+    @Override
+    public C8Database db(String tenant, String name, Map<String, String> headerParams) {
+        this.context.getHeaderParam().putAll(headerParams);
+        return db(tenant, name, "", "");
+    }
+    
     @Override
     public Boolean createGeoFabric(final String tenant, final String name, final String spotDc, final String dcList)
             throws C8DBException {
