@@ -58,7 +58,7 @@ public abstract class InternalC8DB<E extends C8Executor> extends C8Executeable<E
         };
     }
 
-    protected Request createGeoFabricRequest(final String tenant, final String name, final String spotDc, final String dcList, String getFabric) {
+    protected Request createGeoFabricRequest(final String tenant, final String name, final String spotDc, final String dcList, String geoFabric) {
         final Request request = request(tenant, name, RequestType.POST, InternalC8Database.PATH_API_DATABASE);
         request.setBody(util().serialize(OptionsBuilder.build(new DBCreateOptions(), tenant, getFabric, spotDc, dcList)));
         return request;
