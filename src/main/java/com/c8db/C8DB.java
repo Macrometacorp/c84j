@@ -1,20 +1,6 @@
 /*
- * DISCLAIMER
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
+ * Copyright (c) 2021 Macrometa Corp All rights reserved
  */
-
 package com.c8db;
 
 import java.io.InputStream;
@@ -695,10 +681,11 @@ public interface C8DB extends C8SerializationAccessor {
      * @param dcList The list of Edge Locations (Datacenters) as a comma-separated
      *               string. The individual elements for this parameter are your
      *               Edge Location URL prefixes up to the first . character.
+     * @param geoFabric The new of the new db              
      * @return true if the database was created successfully.
      * @throws C8DBException
      */
-    Boolean createGeoFabric(String tenant, String name, String spotDc, String dcList) throws C8DBException;
+    Boolean createGeoFabric(String tenant, String name, String spotDc, String dcList, String geoFabric) throws C8DBException;
 
     /**
      * Retrieves a list of all existing databases

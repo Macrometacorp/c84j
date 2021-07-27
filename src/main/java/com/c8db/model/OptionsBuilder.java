@@ -1,17 +1,5 @@
 /*
- * DISCLAIMER
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Copyright (c) 2021 Macrometa Corp All rights reserved
  */
 
 package com.c8db.model;
@@ -88,9 +76,9 @@ public class OptionsBuilder {
         return options.name(name);
     }
 
-    public static DBCreateOptions build(final DBCreateOptions options, final String name, final String spotDc,
+    public static DBCreateOptions build(final DBCreateOptions options, final String tenant, final String name, final String spotDc,
             final String dcList) {
-        return options.name(name).options(spotDc, dcList);
+        return options.geoFabric(tenant, name).options(spotDc, dcList);
     }
 
     public static DCListOptions build(final DCListOptions options, final String dcList) {
