@@ -20,9 +20,6 @@ import com.c8db.C8Database;
 import com.c8db.entity.C8DBVersion;
 import com.c8db.internal.C8Defaults;
 
-/**
- *
- */
 public class CommunicationTest {
 
     private static final String FAST = "fast";
@@ -30,22 +27,22 @@ public class CommunicationTest {
 
     @Test
     public void chunkSizeSmall() {
-        final C8DB arangoDB = new C8DB.Builder().chunksize(20).build();
-        final C8DBVersion version = arangoDB.getVersion();
+        final C8DB c8db = new C8DB.Builder().chunksize(20).build();
+        final C8DBVersion version = c8db.getVersion();
         assertThat(version, is(notNullValue()));
     }
 
     @Test
     public void multiThread() throws Exception {
-        final C8DB arangoDB = new C8DB.Builder().build();
-        arangoDB.getVersion();// authentication
+        final C8DB c8db = new C8DB.Builder().build();
+        c8db.getVersion();// authentication
 
         final Collection<String> result = new ConcurrentLinkedQueue<String>();
         final Thread fast = new Thread() {
             @Override
             public void run() {
                 try {
-                    arangoDB.db().query("return sleep(1)", null, null, null);
+                	c8db.db().query("return sleep(1)", null, null, null);
                     result.add(FAST);
                 } catch (final C8DBException e) {
                 }
@@ -55,7 +52,7 @@ public class CommunicationTest {
             @Override
             public void run() {
                 try {
-                    arangoDB.db().query("return sleep(4)", null, null, null);
+                	c8db.db().query("return sleep(4)", null, null, null);
                     result.add(SLOW);
                 } catch (final C8DBException e) {
                 }
@@ -76,10 +73,10 @@ public class CommunicationTest {
 
     @Test
     public void multiThreadSameDatabases() throws Exception {
-        final C8DB arangoDB = new C8DB.Builder().build();
-        arangoDB.getVersion();// authentication
+        final C8DB c8db = new C8DB.Builder().build();
+        c8db.getVersion();// authentication
 
-        final C8Database db = arangoDB.db();
+        final C8Database db = c8db.db();
 
         final Collection<String> result = new ConcurrentLinkedQueue<String>();
         final Thread t1 = new Thread() {
@@ -113,14 +110,14 @@ public class CommunicationTest {
 
     @Test
     public void multiThreadMultiDatabases() throws Exception {
-        final C8DB arangoDB = new C8DB.Builder().build();
-        arangoDB.getVersion();// authentication
+        final C8DB c8db = new C8DB.Builder().build();
+        c8db.getVersion();// authentication
 
         try {
-            arangoDB.createGeoFabric(C8Defaults.DEFAULT_TENANT, "db1", "", C8Defaults.DEFAULT_DC_LIST, "db1");
-            arangoDB.createGeoFabric(C8Defaults.DEFAULT_TENANT, "db2", "", C8Defaults.DEFAULT_DC_LIST, "db1");
-            final C8Database db1 = arangoDB.db(C8Defaults.DEFAULT_TENANT, "db1");
-            final C8Database db2 = arangoDB.db(C8Defaults.DEFAULT_TENANT, "db2");
+        	c8db.createGeoFabric(C8Defaults.DEFAULT_TENANT, "db1", "", C8Defaults.DEFAULT_DC_LIST, "db1");
+        	c8db.createGeoFabric(C8Defaults.DEFAULT_TENANT, "db2", "", C8Defaults.DEFAULT_DC_LIST, "db2");
+            final C8Database db1 = c8db.db(C8Defaults.DEFAULT_TENANT, "db1");
+            final C8Database db2 = c8db.db(C8Defaults.DEFAULT_TENANT, "db2");
 
             final Collection<String> result = new ConcurrentLinkedQueue<String>();
             final Thread t1 = new Thread() {
@@ -149,22 +146,22 @@ public class CommunicationTest {
             t1.join();
             assertThat(result.size(), is(2));
         } finally {
-            arangoDB.db(C8Defaults.DEFAULT_TENANT, "db1").drop();
-            arangoDB.db(C8Defaults.DEFAULT_TENANT, "db2").drop();
+        	c8db.db(C8Defaults.DEFAULT_TENANT, "db1").drop();
+        	c8db.db(C8Defaults.DEFAULT_TENANT, "db2").drop();
         }
     }
 
     @Test
     public void minOneConnection() {
-        final C8DB arangoDB = new C8DB.Builder().maxConnections(0).build();
-        final C8DBVersion version = arangoDB.getVersion();
+        final C8DB c8db = new C8DB.Builder().maxConnections(0).build();
+        final C8DBVersion version = c8db.getVersion();
         assertThat(version, is(notNullValue()));
     }
 
     @Test
     public void defaultMaxConnection() {
-        final C8DB arangoDB = new C8DB.Builder().maxConnections(null).build();
-        final C8DBVersion version = arangoDB.getVersion();
+        final C8DB c8db = new C8DB.Builder().maxConnections(null).build();
+        final C8DBVersion version = c8db.getVersion();
         assertThat(version, is(notNullValue()));
     }
 }
