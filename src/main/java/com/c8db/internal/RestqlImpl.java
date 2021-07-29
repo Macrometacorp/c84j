@@ -1,18 +1,7 @@
 /*
- * DISCLAIMER
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Copyright (c) 2021 Macrometa Corp All rights reserved
  */
+
 
 package com.c8db.internal;
 
@@ -25,9 +14,6 @@ import com.c8db.Restql;
 import com.c8db.entity.UserQueryEntity;
 import com.c8db.entity.UserQueryOptions;
 
-/**
- *
- */
 public class RestqlImpl extends InternalRestql<C8DBImpl, C8DatabaseImpl, C8ExecutorSync>
         implements Restql {
 

@@ -1,3 +1,6 @@
+/*
+ * Copyright (c) 2021 Macrometa Corp All rights reserved
+ */
 package com.c8db.example;
 
 import java.util.Map;
@@ -22,7 +25,7 @@ public class FirstProject {
         try {
             c8db.db(C8Defaults.DEFAULT_TENANT, dbName).collection("firstCollection").truncate();
             // arangoDB.db(ArangoDefaults.DEFAULT_TENANT, dbName).collection(dbName).drop();
-            c8db.createGeoFabric(C8Defaults.DEFAULT_TENANT, dbName, "",C8Defaults.DEFAULT_DC_LIST);
+            c8db.createGeoFabric(C8Defaults.DEFAULT_TENANT, dbName, "",C8Defaults.DEFAULT_DC_LIST, dbName);
             System.out.println("Database created: " + dbName);
         } catch (final C8DBException e) {
             System.err.println("Failed to create database: " + dbName + "; " + e.getMessage());

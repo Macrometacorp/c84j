@@ -1,17 +1,5 @@
 /*
- * DISCLAIMER
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Copyright (c) 2021 Macrometa Corp All rights reserved
  */
 
 package com.c8db;
@@ -91,7 +79,7 @@ public class C8DBTest {
     public void createAndDeleteDatabase() {
         final String dbName = "testDB-" + UUID.randomUUID().toString();
         final Boolean resultCreate = c8DB.createGeoFabric(C8Defaults.DEFAULT_TENANT, dbName, "",
-                C8Defaults.DEFAULT_DC_LIST);
+                C8Defaults.DEFAULT_DC_LIST, dbName);
         assertThat(resultCreate, is(true));
         C8Database testDb = c8DB.db(C8Defaults.DEFAULT_TENANT, dbName);
         final Boolean resultDelete = testDb.drop();
@@ -106,7 +94,7 @@ public class C8DBTest {
         assertThat(dbs.size(), is(greaterThan(0)));
         final int dbCount = dbs.size();
         assertThat(dbs.contains("_system"), is(true));
-        c8DB.createGeoFabric(C8Defaults.DEFAULT_TENANT, dbName, "", C8Defaults.DEFAULT_DC_LIST);
+        c8DB.createGeoFabric(C8Defaults.DEFAULT_TENANT, dbName, "", C8Defaults.DEFAULT_DC_LIST, dbName);
         dbs = c8DB.getGeoFabrics();
         assertThat(dbs.size(), is(greaterThan(dbCount)));
         assertThat(dbs, hasItem("_system"));
@@ -126,7 +114,7 @@ public class C8DBTest {
     public void updateDCList() {
         final String dbName = "testDB-" + UUID.randomUUID().toString();
         c8DB.createGeoFabric(C8Defaults.DEFAULT_TENANT, dbName, "",
-                C8Defaults.DEFAULT_DC_LIST.split(",")[0]);
+                C8Defaults.DEFAULT_DC_LIST.split(",")[0], dbName);
         Boolean result = c8DB.updateDataCentersForGeoFabric(C8Defaults.DEFAULT_TENANT, dbName,
                 C8Defaults.DEFAULT_DC_LIST);
         assertThat(result, is(true));
@@ -137,7 +125,7 @@ public class C8DBTest {
     public void getInfo() {
         final String dbName = "testDB-" + UUID.randomUUID().toString();
         try {
-            c8DB.createGeoFabric(C8Defaults.DEFAULT_TENANT, dbName, "", C8Defaults.DEFAULT_DC_LIST);
+            c8DB.createGeoFabric(C8Defaults.DEFAULT_TENANT, dbName, "", C8Defaults.DEFAULT_DC_LIST, dbName);
             final GeoFabricEntity dbInfo = c8DB.getGeoFabricInformation(C8Defaults.DEFAULT_TENANT, dbName);
             assertThat(dbInfo.getName(), is(dbName));
             assertThat(dbInfo.getIsSystem(), is(false));
@@ -153,7 +141,7 @@ public class C8DBTest {
     public void updateDcList() {
         final String dbName = "testDB-" + UUID.randomUUID().toString();
         try {
-            c8DB.createGeoFabric(C8Defaults.DEFAULT_TENANT, dbName, "", C8Defaults.DEFAULT_DC_LIST);
+            c8DB.createGeoFabric(C8Defaults.DEFAULT_TENANT, dbName, "", C8Defaults.DEFAULT_DC_LIST, dbName);
             String spotDC = C8Defaults.DEFAULT_DC_LIST.split(",")[0];
             Boolean update = c8DB.updateSpotRegionForGeoFabric(C8Defaults.DEFAULT_TENANT, dbName, spotDC);
             final GeoFabricEntity dbInfo = c8DB.getGeoFabricInformation(C8Defaults.DEFAULT_TENANT, dbName);
@@ -387,8 +375,8 @@ public class C8DBTest {
         String db2 = "multipledb2";
 
         try {
-            c8DB.createGeoFabric(C8Defaults.DEFAULT_TENANT, db1, "", C8Defaults.DEFAULT_DC_LIST);
-            c8DB.createGeoFabric(C8Defaults.DEFAULT_TENANT, db2, "", C8Defaults.DEFAULT_DC_LIST);
+            c8DB.createGeoFabric(C8Defaults.DEFAULT_TENANT, db1, "", C8Defaults.DEFAULT_DC_LIST, db1);
+            c8DB.createGeoFabric(C8Defaults.DEFAULT_TENANT, db2, "", C8Defaults.DEFAULT_DC_LIST, db2);
 
             final C8DBVersion version1 = c8DB.db(C8Defaults.DEFAULT_TENANT, db1).getVersion();
             assertThat(version1, is(notNullValue()));

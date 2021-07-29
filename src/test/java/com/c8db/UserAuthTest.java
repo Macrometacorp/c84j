@@ -1,17 +1,5 @@
 /*
- * DISCLAIMER
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Copyright (c) 2021 Macrometa Corp All rights reserved
  */
 
 package com.c8db;
@@ -107,7 +95,7 @@ public class UserAuthTest {
         c8DBRoot = new C8DB.Builder().useProtocol(param.protocol).build();
         c8DBRoot.createUser(USER_NAME, "");
         c8DB = new C8DB.Builder().useProtocol(param.protocol).user(USER_NAME).build();
-        c8DBRoot.createGeoFabric(C8Defaults.DEFAULT_TENANT, DB_NAME, "", C8Defaults.DEFAULT_DC_LIST);
+        c8DBRoot.createGeoFabric(C8Defaults.DEFAULT_TENANT, DB_NAME, "", C8Defaults.DEFAULT_DC_LIST, DB_NAME);
         c8DBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).createCollection(COLLECTION_NAME);
         c8DBRoot.db().grantAccess(USER_NAME, param.systemPermission);
         c8DBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).grantAccess(USER_NAME, param.dbPermission);
@@ -138,14 +126,14 @@ public class UserAuthTest {
             if (Permissions.RW.equals(param.systemPermission)) {
                 try {
                     assertThat(details, c8DB.createGeoFabric(C8Defaults.DEFAULT_TENANT, DB_NAME_NEW, "",
-                            C8Defaults.DEFAULT_DC_LIST), is(true));
+                            C8Defaults.DEFAULT_DC_LIST, DB_NAME_NEW), is(true));
                 } catch (final C8DBException e) {
                     fail(details);
                 }
                 assertThat(details, c8DBRoot.getGeoFabrics(), hasItem(DB_NAME_NEW));
             } else {
                 try {
-                    c8DB.createGeoFabric(C8Defaults.DEFAULT_TENANT, DB_NAME_NEW, "", C8Defaults.DEFAULT_DC_LIST);
+                    c8DB.createGeoFabric(C8Defaults.DEFAULT_TENANT, DB_NAME_NEW, "", C8Defaults.DEFAULT_DC_LIST, DB_NAME_NEW);
                     fail(details);
                 } catch (final C8DBException e) {
                 }
@@ -162,7 +150,7 @@ public class UserAuthTest {
     @Test
     public void dropDatabase() {
         try {
-            c8DBRoot.createGeoFabric(C8Defaults.DEFAULT_TENANT, DB_NAME_NEW, "", C8Defaults.DEFAULT_DC_LIST);
+            c8DBRoot.createGeoFabric(C8Defaults.DEFAULT_TENANT, DB_NAME_NEW, "", C8Defaults.DEFAULT_DC_LIST, DB_NAME_NEW);
             if (Permissions.RW.equals(param.systemPermission)) {
                 try {
                     assertThat(details, c8DB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).drop(), is(true));
