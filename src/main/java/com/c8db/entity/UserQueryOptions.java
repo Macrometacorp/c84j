@@ -26,9 +26,19 @@ import java.util.Map;
  */
 public class UserQueryOptions {
 
+    private String userid;
     private String name;
     private Map<String, Object> parameter;
     private String value;
+
+    public String getUserid() {
+        return userid;
+    }
+
+    public UserQueryOptions userid(final String userid) {
+        this.userid = userid;
+        return this;
+    }
 
     public String getName() {
         return name;
