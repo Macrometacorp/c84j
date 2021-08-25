@@ -5,14 +5,14 @@
 
 package com.c8db.internal;
 
-import java.util.Collection;
-import java.util.Map;
-
 import com.c8db.C8Cursor;
 import com.c8db.C8DBException;
 import com.c8db.Restql;
 import com.c8db.entity.UserQueryEntity;
 import com.c8db.entity.UserQueryOptions;
+
+import java.util.Collection;
+import java.util.Map;
 
 public class RestqlImpl extends InternalRestql<C8DBImpl, C8DatabaseImpl, C8ExecutorSync>
         implements Restql {
@@ -23,24 +23,24 @@ public class RestqlImpl extends InternalRestql<C8DBImpl, C8DatabaseImpl, C8Execu
 
     @Override
     public void drop(String name) throws C8DBException {
-        executor.execute(dropRequest(null), Void.class);
+        executor.execute(dropRequest(name), Void.class);
     }
-    
+
     @Override
     public UserQueryEntity createUserQuery(final UserQueryOptions userQueryDefinition) throws C8DBException {
         return db().createUserQuery(userQueryDefinition);
     }
 
     @Override
-    public <T> C8Cursor<T> executeUserQuery (final String name, final Map<String, Object> bindVars, Class<T> type) {
+    public <T> C8Cursor<T> executeUserQuery(final String name, final Map<String, Object> bindVars, Class<T> type) {
         return db().executeUserQuery(null, name, bindVars, type);
     }
 
     @Override
-    public <T> C8Cursor<T> executeUserQueryByUserNameAndName (final String userName, final String name, final Map<String, Object> bindVars, Class<T> type) {
+    public <T> C8Cursor<T> executeUserQueryByUserNameAndName(final String userName, final String name, final Map<String, Object> bindVars, Class<T> type) {
         return db().executeUserQuery(userName, name, bindVars, type);
     }
-    
+
     @Override
     public Collection<UserQueryEntity> getUserQueries() throws C8DBException {
         return executor.execute(getUserQueriesRequest(), getUserQueriesResponseDeserializer());
