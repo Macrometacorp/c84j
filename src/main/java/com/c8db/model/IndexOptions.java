@@ -29,6 +29,8 @@ public class IndexOptions {
 
     private final IndexType type;
     private Boolean inBackground;
+    // Macrometa Corp Modification: Add `name` field.
+    private String name;
 
     public IndexOptions(IndexType type) {
         super();
@@ -52,6 +54,15 @@ public class IndexOptions {
     // Macrometa Corp Modification: Introduce getType() abstraction.
     public IndexType getType() {
         return type;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public IndexOptions name(final String name) {
+        this.name = name;
+        return this;
     }
 
     // Macrometa Corp Modification: Introduce create() method.
