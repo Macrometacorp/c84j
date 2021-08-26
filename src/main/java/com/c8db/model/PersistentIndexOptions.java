@@ -12,6 +12,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * Modifications copyright (c) 2021 Macrometa Corp All rights reserved.
+ *
  */
 
 package com.c8db.model;
@@ -19,17 +22,16 @@ package com.c8db.model;
 import com.c8db.entity.IndexType;
 
 /**
- * 
+ *
  */
 public class PersistentIndexOptions extends IndexOptions {
 
     private Iterable<String> fields;
-    protected IndexType type = IndexType.persistent;
     private Boolean unique;
     private Boolean sparse;
 
     public PersistentIndexOptions() {
-        super();
+        super(IndexType.persistent);
     }
 
     protected Iterable<String> getFields() {
@@ -43,10 +45,6 @@ public class PersistentIndexOptions extends IndexOptions {
     protected PersistentIndexOptions fields(final Iterable<String> fields) {
         this.fields = fields;
         return this;
-    }
-
-    protected IndexType getType() {
-        return type;
     }
 
     public Boolean getUnique() {

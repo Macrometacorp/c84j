@@ -12,6 +12,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * Modifications copyright (c) 2021 Macrometa Corp All rights reserved.
+ *
  */
 
 package com.c8db.model;
@@ -24,11 +27,10 @@ import com.c8db.entity.IndexType;
 public class FulltextIndexOptions extends IndexOptions {
 
     private Iterable<String> fields;
-    private final IndexType type = IndexType.fulltext;
     private Integer minLength;
 
     public FulltextIndexOptions() {
-        super();
+        super(IndexType.fulltext);
     }
 
     protected Iterable<String> getFields() {
@@ -42,10 +44,6 @@ public class FulltextIndexOptions extends IndexOptions {
     protected FulltextIndexOptions fields(final Iterable<String> fields) {
         this.fields = fields;
         return this;
-    }
-
-    protected IndexType getType() {
-        return type;
     }
 
     public Integer getMinLength() {
