@@ -26,6 +26,7 @@ import java.util.Map;
 /**
  * Index type enum.
  */
+// Macrometa Corp Modification: Improve IndexType enum.
 public enum IndexType {
     primary("primary"),
     hash("hash"),

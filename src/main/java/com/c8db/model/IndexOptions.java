@@ -49,10 +49,12 @@ public class IndexOptions {
         return inBackground;
     }
 
+    // Macrometa Corp Modification: Introduce getType() abstraction.
     public IndexType getType() {
         return type;
     }
 
+    // Macrometa Corp Modification: Introduce create() method.
     public static IndexOptions create(IndexType indexType) {
         switch (indexType) {
             case hash:
