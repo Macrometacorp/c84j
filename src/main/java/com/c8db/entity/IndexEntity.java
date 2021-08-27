@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
+ * Modifications copyright (c) 2021 Macrometa Corp All rights reserved.
+ *
  */
 
 package com.c8db.entity;
@@ -25,6 +27,7 @@ import java.util.Collection;
 public class IndexEntity implements Entity {
 
     private String id;
+    private String name;
     private IndexType type;
     private Collection<String> fields;
     private Double selectivityEstimate;
@@ -44,6 +47,11 @@ public class IndexEntity implements Entity {
 
     public String getId() {
         return id;
+    }
+
+    // Macrometa Corp Modification: Add `name` field.
+    public String getName() {
+        return name;
     }
 
     public Boolean getInBackground() {
