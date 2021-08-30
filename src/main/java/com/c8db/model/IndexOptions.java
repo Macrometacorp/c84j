@@ -12,20 +12,29 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * Modifications copyright (c) 2021 Macrometa Corp All rights reserved.
+ *
  */
 
 package com.c8db.model;
 
+import com.c8db.C8DBException;
+import com.c8db.entity.IndexType;
+
 /**
- *
  * This class is used for all index similarities
  */
 public class IndexOptions {
 
+    private final IndexType type;
     private Boolean inBackground;
+    // Macrometa Corp Modification: Add `name` field.
+    private String name;
 
-    public IndexOptions() {
+    public IndexOptions(IndexType type) {
         super();
+        this.type = type;
     }
 
     /**
@@ -40,6 +49,44 @@ public class IndexOptions {
 
     public Boolean getInBackground() {
         return inBackground;
+    }
+
+    // Macrometa Corp Modification: Introduce getType() abstraction.
+    public IndexType getType() {
+        return type;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public IndexOptions name(final String name) {
+        this.name = name;
+        return this;
+    }
+
+    // Macrometa Corp Modification: Introduce create() method.
+    public static IndexOptions create(IndexType indexType) {
+        switch (indexType) {
+            case hash:
+                return new HashIndexOptions();
+            case skiplist:
+                return new SkiplistIndexOptions();
+            case persistent:
+                return new PersistentIndexOptions();
+            case geo:
+                return new GeoIndexOptions();
+            case fulltext:
+                return new FulltextIndexOptions();
+            case primary:
+            case geo1:
+            case geo2:
+            case edge:
+            case ttl:
+            default:
+                throw new C8DBException(String.format("Creating index options for index type %s not supported.",
+                        indexType.getValue()));
+        }
     }
 
 }

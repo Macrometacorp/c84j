@@ -12,6 +12,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * 
+ * Modifications copyright (c) 2021 Macrometa Corp All rights reserved.
  */
 
 package com.c8db.model;
@@ -28,8 +30,13 @@ public class CollectionCreateOptions {
     private String[] shardKeys;
     private CollectionType type;
     private Boolean isLocal;
-    private Boolean isRealTime;
+    private Boolean isSystem;
     private Boolean stream;
+    
+    // How many pieces the collection will be split (for big collections)
+    private int numberOfShards = 1;
+    // the number of replicas
+    private int replicationFactor = 1;
     
 
     public CollectionCreateOptions() {
@@ -139,25 +146,65 @@ public class CollectionCreateOptions {
     }
     
     /**
-     * @param hasStream Indicates for associated streams
+     * @param stream If true an associated stream will be created
      * @return {@link CollectionCreateOptions}
      */
     public CollectionCreateOptions stream(final Boolean stream) {
         this.stream = stream;
         return this;
-    }    
-
+    }
+    
     /**
-     * @param isRealTime If true then the collection will create its corresponding stream. (default: false)
-     * @return options
+     * @param isSystem Creates a system collection when is true
+     * @return {@link CollectionCreateOptions}
      */
-
-    public CollectionCreateOptions isRealTime(final Boolean isRealTime){
-        this.isRealTime = isRealTime;
+    public CollectionCreateOptions isSystem(final Boolean isSystem) {
+        this.isSystem = isSystem;
+        return this;
+    }
+    
+    /**
+     * @param numberOfShards How many pieces the collection will be splitted (for big collections only)
+     * @return {@link CollectionCreateOptions}
+     */
+    public CollectionCreateOptions numberOfShards(final int numberOfShards) {
+        this.numberOfShards = numberOfShards;
+        return this;
+    }
+    
+    /**
+     * @param numberOfShards The number of replicas
+     * @return {@link CollectionCreateOptions}
+     */
+    public CollectionCreateOptions replicationFactor(final int replicationFactor) {
+        this.replicationFactor = replicationFactor;
         return this;
     }
 
-    public Boolean getRealTime() {
-        return isRealTime;
-    }
+    /**
+     * Checks whether the collection is system
+     * 
+     * @return true or false
+     */
+	public final Boolean isSystem() {
+		return isSystem;
+	}
+
+	/**
+	 * Checks the number of shards for this collection
+	 * @return numberOfShards value
+	 */
+	public final int getNumberOfShards() {
+		return numberOfShards;
+	}
+
+	/**
+	 * Checks the number of replicas for this collection
+	 * @return replicationFactor value
+	 */
+	public final int getReplicationFactor() {
+		return replicationFactor;
+	}
+    
+    
 }
