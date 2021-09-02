@@ -12,6 +12,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * Modifications copyright (c) 2021 Macrometa Corp All rights reserved.
+ *
  */
 
 package com.c8db.internal;
@@ -53,6 +56,7 @@ import com.c8db.model.HashIndexOptions;
 import com.c8db.model.OptionsBuilder;
 import com.c8db.model.PersistentIndexOptions;
 import com.c8db.model.SkiplistIndexOptions;
+import com.c8db.model.TTLIndexOptions;
 import com.c8db.model.UserAccessOptions;
 import com.c8db.util.C8Serializer;
 import com.c8db.velocystream.Request;
@@ -623,6 +627,15 @@ public abstract class InternalC8Collection<A extends InternalC8DB<E>, D extends 
         request.putQueryParam(COLLECTION, name);
         request.setBody(
                 util().serialize(OptionsBuilder.build(options != null ? options : new FulltextIndexOptions(), fields)));
+        return request;
+    }
+
+    // Macrometa Corp Modification: Add `createTTLIndexRequest` method.
+    protected Request createTTLIndexRequest(final Iterable<String> fields, final TTLIndexOptions options) {
+        final Request request = request(db.tenant(), db.name(), RequestType.POST, PATH_API_INDEX);
+        request.putQueryParam(COLLECTION, name);
+        request.setBody(
+                util().serialize(OptionsBuilder.build(options != null ? options : new TTLIndexOptions(), fields)));
         return request;
     }
 

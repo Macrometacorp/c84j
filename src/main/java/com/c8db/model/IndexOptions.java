@@ -78,11 +78,12 @@ public class IndexOptions {
                 return new GeoIndexOptions();
             case fulltext:
                 return new FulltextIndexOptions();
+            case ttl:
+                return new TTLIndexOptions();
             case primary:
             case geo1:
             case geo2:
             case edge:
-            case ttl:
             default:
                 throw new C8DBException(String.format("Creating index options for index type %s not supported.",
                         indexType.getValue()));

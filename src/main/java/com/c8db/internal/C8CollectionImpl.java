@@ -12,12 +12,16 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * Modifications copyright (c) 2021 Macrometa Corp All rights reserved.
+ *
  */
 
 package com.c8db.internal;
 
 import java.util.Collection;
 
+import com.c8db.model.TTLIndexOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -374,6 +378,13 @@ public class C8CollectionImpl extends InternalC8Collection<C8DBImpl, C8DatabaseI
     public IndexEntity ensureFulltextIndex(final Iterable<String> fields, final FulltextIndexOptions options)
             throws C8DBException {
         return executor.execute(createFulltextIndexRequest(fields, options), IndexEntity.class);
+    }
+
+    // Macrometa Corp Modification: Add `ensureTTLIndex` method.
+    @Override
+    public IndexEntity ensureTTLIndex(final Iterable<String> fields, final TTLIndexOptions options)
+            throws C8DBException {
+        return executor.execute(createTTLIndexRequest(fields, options), IndexEntity.class);
     }
 
     @Override
