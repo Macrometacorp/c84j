@@ -314,7 +314,7 @@
         <url>https://github.com/Macrometacorp/C84j.git</url>
         <connection>scm:git:git@github.com:Macrometacorp/C84j.git</connection>
         <developerConnection>scm:git:git@github.com:Macrometacorp/C84j.git</developerConnection>
-        <tag>c84j-1.0.18-SNAPSHOT</tag>
+        <tag>c84j-1.0.19-SNAPSHOT</tag>
     </scm>
 
     <organization>
