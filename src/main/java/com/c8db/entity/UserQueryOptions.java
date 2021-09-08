@@ -12,6 +12,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * Modifications copyright (c) 2021 Macrometa Corp All rights reserved.
+ *
  */
 
 package com.c8db.entity;
@@ -29,6 +32,8 @@ public class UserQueryOptions {
     private String name;
     private Map<String, Object> parameter;
     private String value;
+    // Macrometa Corp Modification: Add `user` field.
+    private String user;
 
     public String getName() {
         return name;
@@ -56,4 +61,14 @@ public class UserQueryOptions {
         this.value = value;
         return this;
     }
+
+    public String getUser() {
+        return user;
+    }
+
+    public UserQueryOptions user(final String user) {
+        this.user = user;
+        return this;
+    }
+
 }
