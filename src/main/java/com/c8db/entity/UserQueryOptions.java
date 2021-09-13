@@ -32,8 +32,6 @@ public class UserQueryOptions {
     private String name;
     private Map<String, Object> parameter;
     private String value;
-    // Macrometa Corp Modification: Add `user` field.
-    private String user;
 
     public String getName() {
         return name;
@@ -59,15 +57,6 @@ public class UserQueryOptions {
 
     public UserQueryOptions value(final String value) {
         this.value = value;
-        return this;
-    }
-
-    public String getUser() {
-        return user;
-    }
-
-    public UserQueryOptions user(final String user) {
-        this.user = user;
         return this;
     }
 
