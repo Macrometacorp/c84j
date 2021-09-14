@@ -22,13 +22,24 @@ public class RestqlImpl extends InternalRestql<C8DBImpl, C8DatabaseImpl, C8Execu
     }
 
     @Override
-    public void drop(String name) throws C8DBException {
+    public void drop(final String name) throws C8DBException {
         executor.execute(dropRequest(name), Void.class);
+    }
+
+    @Override
+    public void drop(final String name, final String user) throws C8DBException {
+        executor.execute(dropRequest(name, user), Void.class);
     }
 
     @Override
     public UserQueryEntity createUserQuery(final UserQueryOptions userQueryDefinition) throws C8DBException {
         return db().createUserQuery(userQueryDefinition);
+    }
+
+    @Override
+    public UserQueryEntity createUserQuery(final UserQueryOptions userQueryDefinition, final String user)
+            throws C8DBException {
+        return db().createUserQuery(userQueryDefinition, user);
     }
 
     @Override

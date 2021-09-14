@@ -4,9 +4,6 @@
 
 package com.c8db.internal;
 
-import java.util.Collection;
-import java.util.Map;
-
 import com.arangodb.velocypack.Type;
 import com.c8db.C8Collection;
 import com.c8db.C8Cursor;
@@ -50,8 +47,11 @@ import com.c8db.model.TraversalOptions;
 import com.c8db.util.C8CursorInitializer;
 import com.c8db.velocystream.Request;
 
+import java.util.Collection;
+import java.util.Map;
+
 /**
- * 
+ *
  */
 public class C8DatabaseImpl extends InternalC8Database<C8DBImpl, C8ExecutorSync>
         implements C8Database {
@@ -59,7 +59,7 @@ public class C8DatabaseImpl extends InternalC8Database<C8DBImpl, C8ExecutorSync>
     private C8CursorInitializer cursorInitializer;
 
     protected C8DatabaseImpl(final C8DBImpl c8DB, final String tenant, final String name,
-            final String spotDc, final String dcList) {
+                             final String spotDc, final String dcList) {
         super(c8DB, tenant, name, spotDc, dcList);
     }
 
@@ -131,11 +131,11 @@ public class C8DatabaseImpl extends InternalC8Database<C8DBImpl, C8ExecutorSync>
     public Boolean create() throws C8DBException {
         return c8db().createGeoFabric(tenant(), name(), spotDc(), dcList(), name());
     }
-    
+
     @Override
     public Boolean create(String geoFabric) throws C8DBException {
         return c8db().createGeoFabric(tenant(), name(), spotDc(), dcList(), geoFabric);
-    }    
+    }
 
     @Override
     public Boolean drop() throws C8DBException {
@@ -169,7 +169,7 @@ public class C8DatabaseImpl extends InternalC8Database<C8DBImpl, C8ExecutorSync>
 
     @Override
     public <T> C8Cursor<T> query(final String query, final Map<String, Object> bindVars,
-            final C8qlQueryOptions options, final Class<T> type) throws C8DBException {
+                                 final C8qlQueryOptions options, final Class<T> type) throws C8DBException {
 
         final Request request = queryRequest(query, bindVars, options);
         final HostHandle hostHandle = new HostHandle();
@@ -205,7 +205,7 @@ public class C8DatabaseImpl extends InternalC8Database<C8DBImpl, C8ExecutorSync>
     }
 
     private <T> C8Cursor<T> createCursor(final CursorEntity result, final Class<T> type,
-            final C8qlQueryOptions options, final HostHandle hostHandle) {
+                                         final C8qlQueryOptions options, final HostHandle hostHandle) {
 
         final C8CursorExecute execute = new C8CursorExecute() {
             @Override
@@ -227,7 +227,7 @@ public class C8DatabaseImpl extends InternalC8Database<C8DBImpl, C8ExecutorSync>
     public C8qlParseEntity parseQuery(final String query) throws C8DBException {
         return executor.execute(parseQueryRequest(query), C8qlParseEntity.class);
     }
-    
+
     @Override
     public Collection<QueryEntity> getCurrentlyRunningQueries() throws C8DBException {
         return executor.execute(getCurrentlyRunningQueriesRequest(), new Type<Collection<QueryEntity>>() {
@@ -236,7 +236,7 @@ public class C8DatabaseImpl extends InternalC8Database<C8DBImpl, C8ExecutorSync>
 
     @Override
     public C8qlExecutionExplainEntity explainQuery(final String query, final Map<String, Object> bindVars,
-            final C8qlQueryExplainOptions options) throws C8DBException {
+                                                   final C8qlQueryExplainOptions options) throws C8DBException {
         return executor.execute(explainQueryRequest(query, bindVars, options), C8qlExecutionExplainEntity.class);
     }
 
@@ -250,7 +250,7 @@ public class C8DatabaseImpl extends InternalC8Database<C8DBImpl, C8ExecutorSync>
         return executor.execute(getSlowQueriesRequest(), new Type<Collection<QueryEntity>>() {
         }.getType());
     }
-    
+
     @Override
     public QueryTrackingPropertiesEntity getQueryTrackingProperties() throws C8DBException {
         return executor.execute(getQueryTrackingPropertiesRequest(), QueryTrackingPropertiesEntity.class);
@@ -262,12 +262,11 @@ public class C8DatabaseImpl extends InternalC8Database<C8DBImpl, C8ExecutorSync>
         return executor.execute(setQueryTrackingPropertiesRequest(properties), QueryTrackingPropertiesEntity.class);
     }
 
-
     @Override
     public void killQuery(final String id) throws C8DBException {
         executor.execute(killQueryRequest(id), Void.class);
     }
-    
+
     @Override
     public C8Graph graph(final String name) {
         return new C8GraphImpl(this, name);
@@ -282,7 +281,7 @@ public class C8DatabaseImpl extends InternalC8Database<C8DBImpl, C8ExecutorSync>
 
     @Override
     public GraphEntity createGraph(final String name, final Collection<EdgeDefinition> edgeDefinitions,
-            final GraphCreateOptions options) throws C8DBException {
+                                   final GraphCreateOptions options) throws C8DBException {
         return executor.execute(createGraphRequest(name, edgeDefinitions, options), createGraphResponseDeserializer());
     }
 
@@ -329,7 +328,7 @@ public class C8DatabaseImpl extends InternalC8Database<C8DBImpl, C8ExecutorSync>
 
     @Override
     public <V, E> TraversalEntity<V, E> executeTraversal(final Class<V> vertexClass, final Class<E> edgeClass,
-            final TraversalOptions options) throws C8DBException {
+                                                         final TraversalOptions options) throws C8DBException {
         final Request request = executeTraversalRequest(options);
         return executor.execute(request, executeTraversalResponseDeserializer(vertexClass, edgeClass));
     }
@@ -385,7 +384,7 @@ public class C8DatabaseImpl extends InternalC8Database<C8DBImpl, C8ExecutorSync>
     public void clearBacklog(final String subscriptionName) {
         executor.execute(clearC8StreamBacklogRequest(subscriptionName), Void.class);
     }
-    
+
     @Override
     public void unsubscribe(final String subscriptionName) {
         executor.execute(unsubscribeRequest(subscriptionName), Void.class);
@@ -399,7 +398,14 @@ public class C8DatabaseImpl extends InternalC8Database<C8DBImpl, C8ExecutorSync>
     @Override
     public UserQueryEntity createUserQuery(final UserQueryOptions userQueryDefinition)
             throws C8DBException {
-        return executor.execute(createUserQueryRequest(userQueryDefinition),
+        return executor.execute(createUserQueryRequest(userQueryDefinition, null),
+                createUserQueryResponseDeserializer());
+    }
+
+    @Override
+    public UserQueryEntity createUserQuery(final UserQueryOptions userQueryDefinition, final String user)
+            throws C8DBException {
+        return executor.execute(createUserQueryRequest(userQueryDefinition, user),
                 createUserQueryResponseDeserializer());
     }
 
@@ -416,5 +422,5 @@ public class C8DatabaseImpl extends InternalC8Database<C8DBImpl, C8ExecutorSync>
     public C8Event event() {
         return new C8EventImpl(this);
     }
-    
+
 }

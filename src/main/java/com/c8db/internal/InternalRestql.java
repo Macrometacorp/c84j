@@ -16,9 +16,6 @@
 
 package com.c8db.internal;
 
-import java.util.Collection;
-import java.util.Map;
-
 import com.arangodb.velocypack.Type;
 import com.arangodb.velocypack.exception.VPackException;
 import com.c8db.entity.GraphEntity;
@@ -27,6 +24,9 @@ import com.c8db.internal.C8Executor.ResponseDeserializer;
 import com.c8db.velocystream.Request;
 import com.c8db.velocystream.RequestType;
 import com.c8db.velocystream.Response;
+
+import java.util.Collection;
+import java.util.Map;
 
 /**
  *
@@ -51,7 +51,15 @@ public abstract class InternalRestql<A extends InternalC8DB<E>, D extends Intern
     }
 
     protected Request dropRequest(final String name) {
-        return request(db.tenant(), db.name(), RequestType.DELETE, PATH_API_RESTQL, name);
+        return dropRequest(name, null);
+    }
+
+    protected Request dropRequest(final String name, final String user) {
+        if (user == null) {
+            return request(db.tenant(), db.name(), RequestType.DELETE, PATH_API_RESTQL, name);
+        } else {
+            return request(db.tenant(), db.name(), RequestType.DELETE, PATH_API_RESTQL, name, user);
+        }
     }
 
     protected ResponseDeserializer<Collection<UserQueryEntity>> getUserQueriesResponseDeserializer() {
@@ -67,15 +75,10 @@ public abstract class InternalRestql<A extends InternalC8DB<E>, D extends Intern
     protected Request getUserQueriesRequest() {
         return request(db.tenant(), db.name(), RequestType.GET, PATH_API_RESTQL, "user");
     }
-    
+
     protected Request getUserQueriesRequest(final String userName) {
         return request(db.tenant(), db.name(), RequestType.GET, PATH_API_RESTQL, "user", userName);
     }
-    
-    
-    
-    
-
 
     protected ResponseDeserializer<Collection<String>> getVertexCollectionsResponseDeserializer() {
         return new ResponseDeserializer<Collection<String>>() {
@@ -87,7 +90,6 @@ public abstract class InternalRestql<A extends InternalC8DB<E>, D extends Intern
         };
     }
 
-
     protected ResponseDeserializer<Collection<String>> getEdgeDefinitionsDeserializer() {
         return new ResponseDeserializer<Collection<String>>() {
             @Override
@@ -98,7 +100,6 @@ public abstract class InternalRestql<A extends InternalC8DB<E>, D extends Intern
         };
     }
 
-
     protected ResponseDeserializer<GraphEntity> addEdgeDefinitionResponseDeserializer() {
         return new ResponseDeserializer<GraphEntity>() {
             @Override
@@ -108,7 +109,6 @@ public abstract class InternalRestql<A extends InternalC8DB<E>, D extends Intern
         };
     }
 
-
     protected ResponseDeserializer<GraphEntity> replaceEdgeDefinitionResponseDeserializer() {
         return new ResponseDeserializer<GraphEntity>() {
             @Override
@@ -117,7 +117,6 @@ public abstract class InternalRestql<A extends InternalC8DB<E>, D extends Intern
             }
         };
     }
-
 
     protected ResponseDeserializer<GraphEntity> removeEdgeDefinitionResponseDeserializer() {
         return new ResponseDeserializer<GraphEntity>() {
