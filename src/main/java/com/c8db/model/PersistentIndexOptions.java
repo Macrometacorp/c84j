@@ -29,6 +29,7 @@ public class PersistentIndexOptions extends IndexOptions {
     private Iterable<String> fields;
     private Boolean unique;
     private Boolean sparse;
+    private Boolean deduplicate;
 
     public PersistentIndexOptions() {
         super(IndexType.persistent);
@@ -70,6 +71,19 @@ public class PersistentIndexOptions extends IndexOptions {
      */
     public PersistentIndexOptions sparse(final Boolean sparse) {
         this.sparse = sparse;
+        return this;
+    }
+
+    public Boolean getDeduplicate() {
+        return deduplicate;
+    }
+
+    /**
+     * @param deduplicate if false, the deduplication of array values is turned off.
+     * @return options
+     */
+    public PersistentIndexOptions deduplicate(final Boolean deduplicate) {
+        this.deduplicate = deduplicate;
         return this;
     }
 
