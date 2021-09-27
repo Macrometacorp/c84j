@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
+ * Modifications copyright (c) 2021 Macrometa Corp All rights reserved.
+ *
  */
 
 package com.c8db;
@@ -42,6 +44,7 @@ import com.c8db.model.GeoIndexOptions;
 import com.c8db.model.HashIndexOptions;
 import com.c8db.model.PersistentIndexOptions;
 import com.c8db.model.SkiplistIndexOptions;
+import com.c8db.model.TTLIndexOptions;
 
 /**
  * Interface for operations on C8DB collection level.
@@ -485,6 +488,17 @@ public interface C8Collection extends C8SerializationAccessor {
      *      Documentation</a>
      */
     IndexEntity ensureFulltextIndex(Iterable<String> fields, FulltextIndexOptions options) throws C8DBException;
+
+    // Macrometa Corp Modification: Add `ensureTTLIndex` method.
+    /**
+     * Creates a ttl index for the collection, if it does not already exist.
+     *
+     * @param fields  A list of attribute paths
+     * @param options Additional options, can be null
+     * @return information about the index
+     * @throws C8DBException
+     */
+    IndexEntity ensureTTLIndex(Iterable<String> fields, TTLIndexOptions options) throws C8DBException;
 
     /**
      * Fetches a list of all indexes on this collection.

@@ -17,15 +17,14 @@
 
 package com.c8db;
 
-import java.util.Collection;
-import java.util.Map;
-
 import com.c8db.entity.UserQueryEntity;
 import com.c8db.entity.UserQueryOptions;
 
+import java.util.Collection;
+import java.util.Map;
+
 /**
  * Interface for operations on restql level.
- *
  */
 public interface Restql extends C8SerializationAccessor {
 
@@ -39,25 +38,45 @@ public interface Restql extends C8SerializationAccessor {
     /**
      * Deletes user query from the database.
      *
-     * @see <a href=
-     *      "https://docs.arangodb.com/current/HTTP/Gharial/Management.html#drop-a-graph">API
-     *      Documentation</a>
      * @throws C8DBException
+     * @see <a href=
+     * "https://docs.arangodb.com/current/HTTP/Gharial/Management.html#drop-a-graph">API
+     * Documentation</a>
      */
-    void drop(String name) throws C8DBException;
+    void drop(final String name) throws C8DBException;
+
+    /**
+     * Deletes user query from the database.
+     *
+     * @throws C8DBException
+     * @see <a href=
+     * "https://docs.arangodb.com/current/HTTP/Gharial/Management.html#drop-a-graph">API
+     * Documentation</a>
+     */
+    void drop(final String name, final String user) throws C8DBException;
 
     /**
      * Saves a query for a user for a given fabric.
-     * 
-     * @param userQueryDefinition
-     * @return
+     *
+     * @param userQueryDefinition user query options
+     * @return user query entity.
      * @throws C8DBException
      */
     UserQueryEntity createUserQuery(final UserQueryOptions userQueryDefinition) throws C8DBException;
 
     /**
+     * Saves a query for a user for a given fabric and a given user.
+     *
+     * @param userQueryDefinition user query options
+     * @param user                username
+     * @return user query entity.
+     * @throws C8DBException
+     */
+    UserQueryEntity createUserQuery(final UserQueryOptions userQueryDefinition, final String user) throws C8DBException;
+
+    /**
      * Executes saved query by name
-     * 
+     *
      * @param name     name of the saved query
      * @param bindVars vars for the query
      * @param type     result type
@@ -67,7 +86,7 @@ public interface Restql extends C8SerializationAccessor {
 
     /**
      * Executes saved query by name for the give user
-     * 
+     *
      * @param <T>
      * @param userName user name
      * @param name     query name
@@ -76,7 +95,7 @@ public interface Restql extends C8SerializationAccessor {
      * @return
      */
     <T> C8Cursor<T> executeUserQueryByUserNameAndName(String userName, String name, Map<String, Object> bindVars,
-            Class<T> type);
+                                                      Class<T> type);
 
     /**
      * Fetches all user queries associated with the current user
@@ -88,11 +107,10 @@ public interface Restql extends C8SerializationAccessor {
 
     /**
      * Fetches all user queries associated with given user
-     * 
-     * @userName userName
      *
      * @return all user queries for given user
      * @throws C8DBException
+     * @userName userName
      */
     Collection<UserQueryEntity> getUserQueries(final String userName) throws C8DBException;
 

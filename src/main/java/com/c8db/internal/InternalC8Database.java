@@ -12,15 +12,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * Modifications copyright (c) 2021 Macrometa Corp All rights reserved.
+ *
  */
 
 package com.c8db.internal;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 
 import com.arangodb.velocypack.Type;
 import com.arangodb.velocypack.VPackSlice;
@@ -59,7 +56,14 @@ import com.c8db.velocystream.Request;
 import com.c8db.velocystream.RequestType;
 import com.c8db.velocystream.Response;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
 /**
+ *
  */
 public abstract class InternalC8Database<A extends InternalC8DB<E>, E extends C8Executor>
         extends C8Executeable<E> {
@@ -91,7 +95,7 @@ public abstract class InternalC8Database<A extends InternalC8DB<E>, E extends C8
     private final A c8db;
 
     protected InternalC8Database(final A c8db, final String tenant, final String name, final String spotDc,
-            final String dcList) {
+                                 final String dcList) {
         super(c8db.executor, c8db.util, c8db.context);
         this.c8db = c8db;
         this.tenant = tenant;
@@ -180,7 +184,7 @@ public abstract class InternalC8Database<A extends InternalC8DB<E>, E extends C8
     protected Request grantAccessRequest(final String user, final Permissions permissions) {
         return request(C8RequestParam.DEMO_TENANT, C8RequestParam.SYSTEM, RequestType.PUT, PATH_API_USER, user,
                 C8RequestParam.DATABASE, name)
-                        .setBody(util().serialize(OptionsBuilder.build(new UserAccessOptions(), permissions)));
+                .setBody(util().serialize(OptionsBuilder.build(new UserAccessOptions(), permissions)));
     }
 
     protected Request resetAccessRequest(final String user) {
@@ -210,20 +214,20 @@ public abstract class InternalC8Database<A extends InternalC8DB<E>, E extends C8
     }
 
     protected Request queryRequest(final String query, final Map<String, Object> bindVars,
-            final C8qlQueryOptions options) {
+                                   final C8qlQueryOptions options) {
         final C8qlQueryOptions opt = options != null ? options : new C8qlQueryOptions();
         final Request request = request(tenant, name, RequestType.POST,
                 PATH_API_CURSOR)
-                        .setBody(
-                                util().serialize(
-                                        OptionsBuilder
-                                                .build(opt, query,
-                                                        bindVars != null
-                                                                ? util(C8SerializationFactory.Serializer.CUSTOM)
-                                                                        .serialize(bindVars,
-                                                                                new C8Serializer.Options()
-                                                                                        .serializeNullValues(true))
-                                                                : null)));
+                .setBody(
+                        util().serialize(
+                                OptionsBuilder
+                                        .build(opt, query,
+                                                bindVars != null
+                                                        ? util(C8SerializationFactory.Serializer.CUSTOM)
+                                                        .serialize(bindVars,
+                                                                new C8Serializer.Options()
+                                                                        .serializeNullValues(true))
+                                                        : null)));
         return request;
     }
 
@@ -253,22 +257,22 @@ public abstract class InternalC8Database<A extends InternalC8DB<E>, E extends C8
     }
 
     protected Request explainQueryRequest(final String query, final Map<String, Object> bindVars,
-            final C8qlQueryExplainOptions options) {
+                                          final C8qlQueryExplainOptions options) {
 
         final C8qlQueryExplainOptions opt = options != null ? options : new C8qlQueryExplainOptions();
 
         return request(tenant, name, RequestType.POST, PATH_API_QUERY,
                 PATH_API_EXPLAIN)
-                        .setBody(
-                                util().serialize(
-                                        OptionsBuilder
-                                                .build(opt, query,
-                                                        bindVars != null
-                                                                ? util(C8SerializationFactory.Serializer.CUSTOM)
-                                                                        .serialize(bindVars,
-                                                                                new C8Serializer.Options()
-                                                                                        .serializeNullValues(true))
-                                                                : null)));
+                .setBody(
+                        util().serialize(
+                                OptionsBuilder
+                                        .build(opt, query,
+                                                bindVars != null
+                                                        ? util(C8SerializationFactory.Serializer.CUSTOM)
+                                                        .serialize(bindVars,
+                                                                new C8Serializer.Options()
+                                                                        .serializeNullValues(true))
+                                                        : null)));
     }
 
     protected Request getQueryTrackingPropertiesRequest() {
@@ -292,7 +296,7 @@ public abstract class InternalC8Database<A extends InternalC8DB<E>, E extends C8
     }
 
     protected Request createGraphRequest(final String name, final Collection<EdgeDefinition> edgeDefinitions,
-            final GraphCreateOptions options) {
+                                         final GraphCreateOptions options) {
         return request(tenant(), name(), RequestType.POST, InternalC8Graph.PATH_API_GHARIAL).setBody(util().serialize(
                 OptionsBuilder.build(options != null ? options : new GraphCreateOptions(), name, edgeDefinitions)));
     }
@@ -412,7 +416,7 @@ public abstract class InternalC8Database<A extends InternalC8DB<E>, E extends C8
                 result.setVertices(deserializeVertices(vertexClass, visited));
 
                 final Collection<PathEntity<V, E>> paths = new ArrayList<PathEntity<V, E>>();
-                for (final Iterator<VPackSlice> iterator = visited.get("paths").arrayIterator(); iterator.hasNext();) {
+                for (final Iterator<VPackSlice> iterator = visited.get("paths").arrayIterator(); iterator.hasNext(); ) {
                     final PathEntity<V, E> path = new PathEntity<V, E>();
                     final VPackSlice next = iterator.next();
                     path.setEdges(deserializeEdges(edgeClass, next));
@@ -429,17 +433,17 @@ public abstract class InternalC8Database<A extends InternalC8DB<E>, E extends C8
     protected <V> Collection<V> deserializeVertices(final Class<V> vertexClass, final VPackSlice vpack)
             throws VPackException {
         final Collection<V> vertices = new ArrayList<V>();
-        for (final Iterator<VPackSlice> iterator = vpack.get("vertices").arrayIterator(); iterator.hasNext();) {
+        for (final Iterator<VPackSlice> iterator = vpack.get("vertices").arrayIterator(); iterator.hasNext(); ) {
             vertices.add((V) util(Serializer.CUSTOM).deserialize(iterator.next(), vertexClass));
         }
         return vertices;
     }
 
-    @SuppressWarnings({ "hiding", "unchecked" })
+    @SuppressWarnings({"hiding", "unchecked"})
     protected <E> Collection<E> deserializeEdges(final Class<E> edgeClass, final VPackSlice next)
             throws VPackException {
         final Collection<E> edges = new ArrayList<E>();
-        for (final Iterator<VPackSlice> iteratorEdge = next.get("edges").arrayIterator(); iteratorEdge.hasNext();) {
+        for (final Iterator<VPackSlice> iteratorEdge = next.get("edges").arrayIterator(); iteratorEdge.hasNext(); ) {
             edges.add((E) util(Serializer.CUSTOM).deserialize(iteratorEdge.next(), edgeClass));
         }
         return edges;
@@ -485,9 +489,10 @@ public abstract class InternalC8Database<A extends InternalC8DB<E>, E extends C8
         return request(tenant(), name(), RequestType.POST, PATH_API_STREAMS, "unsubscribe", subscriptionName);
     }
 
-    protected Request createUserQueryRequest(UserQueryOptions options) {
+    // Macrometa Corp Modification: Add `user` as a parameter.
+    protected Request createUserQueryRequest(UserQueryOptions options, String user) {
         Request request = request(tenant(), name(), RequestType.POST, PATH_API_USER_QUERIES);
-        request.setBody(util().serialize(new UserQuery(options != null ? options : new UserQueryOptions()),
+        request.setBody(util().serialize(new UserQuery(options != null ? options : new UserQueryOptions(), user),
                 new C8Serializer.Options().serializeNullValues(true)));
         return request;
     }
@@ -503,7 +508,7 @@ public abstract class InternalC8Database<A extends InternalC8DB<E>, E extends C8
 
     protected Request userQueryRequest(final String userName, final String restqlName, final Map<String, Object> bindVars) {
         final Request request = userName == null ?
-                request(tenant, name, RequestType.POST, PATH_API_USER_QUERIES, "execute", "root",  restqlName)
+                request(tenant, name, RequestType.POST, PATH_API_USER_QUERIES, "execute", "root", restqlName)
                 : request(tenant, name, RequestType.POST, PATH_API_USER_QUERIES, "execute", userName, restqlName);
         request.setBody(util().serialize(bindVars == null ? new HashMap<String, Object>() : bindVars));
         return request;

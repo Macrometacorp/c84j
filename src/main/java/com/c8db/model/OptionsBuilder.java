@@ -46,6 +46,10 @@ public class OptionsBuilder {
         return options.fields(fields);
     }
 
+    public static TTLIndexOptions build(final TTLIndexOptions options, final Iterable<String> fields) {
+        return options.fields(fields);
+    }
+
     public static CollectionCreateOptions build(final CollectionCreateOptions options, final String name) {
         return options.name(name);
     }

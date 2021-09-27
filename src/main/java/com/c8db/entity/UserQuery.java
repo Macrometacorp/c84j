@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
+ * Modifications copyright (c) 2021 Macrometa Corp All rights reserved.
+ *
  */
 
 package com.c8db.entity;
@@ -21,18 +23,27 @@ package com.c8db.entity;
  *
  */
 public class UserQuery implements Entity {
+
     private UserQueryOptions query;
+    // Macrometa Corp Modification: Add `user` field.
+    private String user;
 
     public UserQuery() {
         super();
     }
 
-    public UserQuery(UserQueryOptions query) {
+    public UserQuery(UserQueryOptions query, String user) {
         super();
         this.query = query;
+        this.user = user;
     }
 
     public UserQueryOptions getQuery() {
         return query;
     }
+
+    public String getUser() {
+        return user;
+    }
+
 }

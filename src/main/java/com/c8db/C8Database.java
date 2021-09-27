@@ -4,9 +4,6 @@
 
 package com.c8db;
 
-import java.util.Collection;
-import java.util.Map;
-
 import com.c8db.entity.C8DBVersion;
 import com.c8db.entity.C8StreamEntity;
 import com.c8db.entity.C8qlExecutionExplainEntity;
@@ -35,9 +32,11 @@ import com.c8db.model.GraphCreateOptions;
 import com.c8db.model.StreamTransactionOptions;
 import com.c8db.model.TraversalOptions;
 
+import java.util.Collection;
+import java.util.Map;
+
 /**
  * Interface for operations on C8DB database level.
- *
  */
 public interface C8Database extends C8SerializationAccessor {
 
@@ -131,8 +130,8 @@ public interface C8Database extends C8SerializationAccessor {
      * @return list of information about all collections
      * @throws C8DBException
      * @see <a href=
-     *      "https://docs.arangodb.com/current/HTTP/Collection/Getting.html#reads-all-collections">API
-     *      Documentation</a>
+     * "https://docs.arangodb.com/current/HTTP/Collection/Getting.html#reads-all-collections">API
+     * Documentation</a>
      */
     Collection<CollectionEntity> getCollections(CollectionsReadOptions options) throws C8DBException;
 
@@ -143,8 +142,8 @@ public interface C8Database extends C8SerializationAccessor {
      * @return information about the index
      * @throws C8DBException
      * @see <a href=
-     *      "https://docs.arangodb.com/current/HTTP/Indexes/WorkingWith.html#read-index">API
-     *      Documentation</a>
+     * "https://docs.arangodb.com/current/HTTP/Indexes/WorkingWith.html#read-index">API
+     * Documentation</a>
      */
     IndexEntity getIndex(String id) throws C8DBException;
 
@@ -155,8 +154,8 @@ public interface C8Database extends C8SerializationAccessor {
      * @return the id of the index
      * @throws C8DBException
      * @see <a href=
-     *      "https://docs.arangodb.com/current/HTTP/Indexes/WorkingWith.html#delete-index">API
-     *      Documentation</a>
+     * "https://docs.arangodb.com/current/HTTP/Indexes/WorkingWith.html#delete-index">API
+     * Documentation</a>
      */
     String deleteIndex(String id) throws C8DBException;
 
@@ -166,8 +165,8 @@ public interface C8Database extends C8SerializationAccessor {
      * @return true if the database was created successfully.
      * @throws C8DBException
      * @see <a href=
-     *      "https://docs.arangodb.com/current/HTTP/Database/DatabaseManagement.html#create-database">API
-     *      Documentation</a>
+     * "https://docs.arangodb.com/current/HTTP/Database/DatabaseManagement.html#create-database">API
+     * Documentation</a>
      */
     Boolean create() throws C8DBException;
 
@@ -177,8 +176,8 @@ public interface C8Database extends C8SerializationAccessor {
      * @return true if the database was dropped successfully
      * @throws C8DBException
      * @see <a href=
-     *      "https://docs.arangodb.com/current/HTTP/Database/DatabaseManagement.html#drop-database">API
-     *      Documentation</a>
+     * "https://docs.arangodb.com/current/HTTP/Database/DatabaseManagement.html#drop-database">API
+     * Documentation</a>
      */
     Boolean drop() throws C8DBException;
 
@@ -190,8 +189,8 @@ public interface C8Database extends C8SerializationAccessor {
      * @param permissions The permissions the user grant
      * @throws C8DBException
      * @see <a href=
-     *      "https://docs.arangodb.com/current/HTTP/UserManagement/index.html#grant-or-revoke-database-access">
-     *      API Documentation</a>
+     * "https://docs.arangodb.com/current/HTTP/UserManagement/index.html#grant-or-revoke-database-access">
+     * API Documentation</a>
      */
     void grantAccess(String user, Permissions permissions) throws C8DBException;
 
@@ -202,8 +201,8 @@ public interface C8Database extends C8SerializationAccessor {
      * @param user The name of the user
      * @throws C8DBException
      * @see <a href=
-     *      "https://docs.arangodb.com/current/HTTP/UserManagement/index.html#grant-or-revoke-database-access">
-     *      API Documentation</a>
+     * "https://docs.arangodb.com/current/HTTP/UserManagement/index.html#grant-or-revoke-database-access">
+     * API Documentation</a>
      */
     void grantAccess(String user) throws C8DBException;
 
@@ -222,8 +221,8 @@ public interface C8Database extends C8SerializationAccessor {
      * @param user The name of the user
      * @throws C8DBException
      * @see <a href=
-     *      "https://docs.arangodb.com/current/HTTP/UserManagement/index.html#grant-or-revoke-database-access">
-     *      API Documentation</a>
+     * "https://docs.arangodb.com/current/HTTP/UserManagement/index.html#grant-or-revoke-database-access">
+     * API Documentation</a>
      * @since ArangoDB 3.2.0
      */
     void resetAccess(String user) throws C8DBException;
@@ -235,8 +234,8 @@ public interface C8Database extends C8SerializationAccessor {
      * @return permissions of the user
      * @throws C8DBException
      * @see <a href=
-     *      "https://docs.arangodb.com/current/HTTP/UserManagement/#get-the-database-access-level">
-     *      API Documentation</a>
+     * "https://docs.arangodb.com/current/HTTP/UserManagement/#get-the-database-access-level">
+     * API Documentation</a>
      * @since ArangoDB 3.2.0
      */
     Permissions getPermissions(String user) throws C8DBException;
@@ -254,8 +253,8 @@ public interface C8Database extends C8SerializationAccessor {
      * @return cursor of the results
      * @throws C8DBException
      * @see <a href=
-     *      "https://docs.arangodb.com/current/HTTP/AqlQueryCursor/AccessingCursors.html#create-cursor">API
-     *      Documentation</a>
+     * "https://docs.arangodb.com/current/HTTP/AqlQueryCursor/AccessingCursors.html#create-cursor">API
+     * Documentation</a>
      */
     <T> C8Cursor<T> query(String query, Map<String, Object> bindVars, C8qlQueryOptions options, Class<T> type)
             throws C8DBException;
@@ -272,8 +271,8 @@ public interface C8Database extends C8SerializationAccessor {
      * @return cursor of the results
      * @throws C8DBException
      * @see <a href=
-     *      "https://docs.arangodb.com/current/HTTP/AqlQueryCursor/AccessingCursors.html#create-cursor">API
-     *      Documentation</a>
+     * "https://docs.arangodb.com/current/HTTP/AqlQueryCursor/AccessingCursors.html#create-cursor">API
+     * Documentation</a>
      */
     <T> C8Cursor<T> query(String query, C8qlQueryOptions options, Class<T> type) throws C8DBException;
 
@@ -288,8 +287,8 @@ public interface C8Database extends C8SerializationAccessor {
      * @return cursor of the results
      * @throws C8DBException
      * @see <a href=
-     *      "https://docs.arangodb.com/current/HTTP/AqlQueryCursor/AccessingCursors.html#create-cursor">API
-     *      Documentation</a>
+     * "https://docs.arangodb.com/current/HTTP/AqlQueryCursor/AccessingCursors.html#create-cursor">API
+     * Documentation</a>
      */
     <T> C8Cursor<T> query(String query, Map<String, Object> bindVars, Class<T> type) throws C8DBException;
 
@@ -303,8 +302,8 @@ public interface C8Database extends C8SerializationAccessor {
      * @return cursor of the results
      * @throws C8DBException
      * @see <a href=
-     *      "https://docs.arangodb.com/current/HTTP/AqlQueryCursor/AccessingCursors.html#create-cursor">API
-     *      Documentation</a>
+     * "https://docs.arangodb.com/current/HTTP/AqlQueryCursor/AccessingCursors.html#create-cursor">API
+     * Documentation</a>
      */
     <T> C8Cursor<T> query(String query, Class<T> type) throws C8DBException;
 
@@ -317,8 +316,8 @@ public interface C8Database extends C8SerializationAccessor {
      * @return cursor of the results
      * @throws C8DBException
      * @see <a href=
-     *      "https://docs.arangodb.com/current/HTTP/AqlQueryCursor/AccessingCursors.html#read-next-batch-from-cursor">API
-     *      Documentation</a>
+     * "https://docs.arangodb.com/current/HTTP/AqlQueryCursor/AccessingCursors.html#read-next-batch-from-cursor">API
+     * Documentation</a>
      */
     <T> C8Cursor<T> cursor(String cursorId, Class<T> type) throws C8DBException;
 
@@ -331,8 +330,8 @@ public interface C8Database extends C8SerializationAccessor {
      * @return information about the query
      * @throws C8DBException
      * @see <a href=
-     *      "https://docs.arangodb.com/current/HTTP/AqlQuery/index.html#explain-an-aql-query">API
-     *      Documentation</a>
+     * "https://docs.arangodb.com/current/HTTP/AqlQuery/index.html#explain-an-aql-query">API
+     * Documentation</a>
      */
     C8qlExecutionExplainEntity explainQuery(String query, Map<String, Object> bindVars, C8qlQueryExplainOptions options)
             throws C8DBException;
@@ -346,8 +345,8 @@ public interface C8Database extends C8SerializationAccessor {
      * @return imformation about the query
      * @throws C8DBException
      * @see <a href=
-     *      "https://docs.arangodb.com/current/HTTP/AqlQuery/index.html#parse-an-aql-query">API
-     *      Documentation</a>
+     * "https://docs.arangodb.com/current/HTTP/AqlQuery/index.html#parse-an-aql-query">API
+     * Documentation</a>
      */
     C8qlParseEntity parseQuery(String query) throws C8DBException;
 
@@ -399,8 +398,8 @@ public interface C8Database extends C8SerializationAccessor {
      * @param id The id of the query
      * @throws C8DBException
      * @see <a href=
-     *      "https://docs.arangodb.com/current/HTTP/AqlQuery/index.html#kills-a-running-aql-query">API
-     *      Documentation</a>
+     * "https://docs.arangodb.com/current/HTTP/AqlQuery/index.html#kills-a-running-aql-query">API
+     * Documentation</a>
      */
     void killQuery(String id) throws C8DBException;
 
@@ -421,8 +420,8 @@ public interface C8Database extends C8SerializationAccessor {
      * @return information about the graph
      * @throws C8DBException
      * @see <a href=
-     *      "https://docs.arangodb.com/current/HTTP/Gharial/Management.html#create-a-graph">API
-     *      Documentation</a>
+     * "https://docs.arangodb.com/current/HTTP/Gharial/Management.html#create-a-graph">API
+     * Documentation</a>
      */
     GraphEntity createGraph(String name, Collection<EdgeDefinition> edgeDefinitions) throws C8DBException;
 
@@ -436,8 +435,8 @@ public interface C8Database extends C8SerializationAccessor {
      * @return information about the graph
      * @throws C8DBException
      * @see <a href=
-     *      "https://docs.arangodb.com/current/HTTP/Gharial/Management.html#create-a-graph">API
-     *      Documentation</a>
+     * "https://docs.arangodb.com/current/HTTP/Gharial/Management.html#create-a-graph">API
+     * Documentation</a>
      */
     GraphEntity createGraph(String name, Collection<EdgeDefinition> edgeDefinitions, GraphCreateOptions options)
             throws C8DBException;
@@ -530,8 +529,8 @@ public interface C8Database extends C8SerializationAccessor {
      * @return Result of the executed traversal
      * @throws C8DBException
      * @see <a href=
-     *      "https://docs.arangodb.com/current/HTTP/Traversal/index.html#executes-a-traversal">API
-     *      Documentation</a>
+     * "https://docs.arangodb.com/current/HTTP/Traversal/index.html#executes-a-traversal">API
+     * Documentation</a>
      */
     <V, E> TraversalEntity<V, E> executeTraversal(Class<V> vertexClass, Class<E> edgeClass, TraversalOptions options)
             throws C8DBException;
@@ -545,8 +544,8 @@ public interface C8Database extends C8SerializationAccessor {
      * @return the document identified by the id
      * @throws C8DBException
      * @see <a href=
-     *      "https://docs.arangodb.com/current/HTTP/Document/WorkingWithDocuments.html#read-document">API
-     *      Documentation</a>
+     * "https://docs.arangodb.com/current/HTTP/Document/WorkingWithDocuments.html#read-document">API
+     * Documentation</a>
      */
     <T> T getDocument(String id, Class<T> type) throws C8DBException;
 
@@ -572,7 +571,7 @@ public interface C8Database extends C8SerializationAccessor {
 
     /**
      * Create asynchronously a persistent stream for a given fabric.
-     * 
+     *
      * @param name    of the stream
      * @param options C8StreamCreateOptions
      * @throws C8DBException
@@ -582,7 +581,7 @@ public interface C8Database extends C8SerializationAccessor {
     /**
      * Get list of persistent streams under the given stream db. Returns either a
      * list of global or of local streams.
-     * 
+     *
      * @param options
      * @return
      * @throws C8DBException
@@ -591,7 +590,7 @@ public interface C8Database extends C8SerializationAccessor {
 
     /**
      * Get list of all streams under given database.
-     * 
+     *
      * @return
      * @throws C8DBException
      */
@@ -604,26 +603,38 @@ public interface C8Database extends C8SerializationAccessor {
 
     /**
      * Clear backlog for given subscription.
-     * 
+     *
      * @param subscriptionName Name of the subscription
      */
     void clearBacklog(final String subscriptionName);
 
     /**
      * Unsubscribes the given subscription on all streams on a stream db.
-     * 
+     *
      * @param subscriptionName Identifying name of the subscripton.
      */
     void unsubscribe(final String subscriptionName);
 
     /**
-     * Creates user query
-     * 
-     * @param userQueryDefinition
-     * @return
+     * Creates user query as the current user
+     *
+     * @param userQueryDefinition user query definition
+     * @return user query entity.
      * @throws C8DBException
      */
     UserQueryEntity createUserQuery(UserQueryOptions userQueryDefinition) throws C8DBException;
+
+    /**
+     * Creates user query as a given user.
+     * <p>
+     * Note: this can only be invoked by a admin user.
+     *
+     * @param userQueryDefinition user query definition.
+     * @param user                user name.
+     * @return user query entity.
+     * @throws C8DBException
+     */
+    UserQueryEntity createUserQuery(UserQueryOptions userQueryDefinition, String user) throws C8DBException;
 
     /**
      * Executes a saved using query using the given {@code name} and
@@ -644,10 +655,10 @@ public interface C8Database extends C8SerializationAccessor {
 
     /**
      * Create a geofabric/db in Demo tenant
-     * 
+     *
      * @param geoFabric The name of the geofabric
      * @return
      * @throws C8DBException
      */
-	Boolean create(String geoFabric) throws C8DBException;
+    Boolean create(String geoFabric) throws C8DBException;
 }
