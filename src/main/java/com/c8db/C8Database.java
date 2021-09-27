@@ -661,4 +661,12 @@ public interface C8Database extends C8SerializationAccessor {
      * @throws C8DBException
      */
     Boolean create(String geoFabric) throws C8DBException;
+
+    /**
+     * Returns a {@code C8Admin} instance.
+     *
+     * @return C8Admin handler
+     */
+    C8Admin admin();
+
 }
