@@ -4,8 +4,14 @@
 
 package com.c8db.internal;
 
+import java.util.Collection;
+
+import com.arangodb.velocypack.Type;
+import com.arangodb.velocypack.VPackSlice;
 import com.arangodb.velocypack.exception.VPackException;
+import com.c8db.entity.CollectionEntity;
 import com.c8db.entity.FeaturesEntity;
+import com.c8db.entity.LimitsEntity;
 import com.c8db.internal.C8Executor.ResponseDeserializer;
 import com.c8db.velocystream.Request;
 import com.c8db.velocystream.RequestType;
@@ -18,6 +24,7 @@ public abstract class InternalC8Admin<A extends InternalC8DB<E>, D extends Inter
         extends C8Executeable<E> {
 
     protected static final String PATH_API_FEATURES = "/features";
+    protected static final String PATH_API_LIMITS = "/limits";
     protected static final String PATH_TENANT = "tenant";
     private final D db;
 
@@ -39,6 +46,20 @@ public abstract class InternalC8Admin<A extends InternalC8DB<E>, D extends Inter
         };
     }
 
+    protected ResponseDeserializer<LimitsEntity> getTenantLimitsResponseDeserializer() {
+        return new ResponseDeserializer<LimitsEntity>() {
+            @Override
+            public LimitsEntity deserialize(final Response response) throws VPackException {
+            	 final VPackSlice result = response.getBody().get(C8ResponseField.RESULT);
+                return util().deserialize(result,  new Type<LimitsEntity>(){}.getType());
+            }
+        };
+    }
+    
+    protected Request getTenantLimitsRequest(final String tenant) {
+        return request(db.tenant(), db.name(), RequestType.GET, PATH_API_LIMITS, PATH_TENANT, tenant);
+    }
+    
     protected Request getTenantFeaturesRequest(final String tenant) {
         return request(db.tenant(), db.name(), RequestType.GET, PATH_API_FEATURES, PATH_TENANT, tenant);
     }

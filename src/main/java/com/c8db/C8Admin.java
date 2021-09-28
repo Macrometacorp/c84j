@@ -5,6 +5,7 @@
 package com.c8db;
 
 import com.c8db.entity.FeaturesEntity;
+import com.c8db.entity.LimitsEntity;
 
 /**
  * Interface for operations on administration level.
@@ -12,7 +13,7 @@ import com.c8db.entity.FeaturesEntity;
 public interface C8Admin extends C8SerializationAccessor {
 
     /**
-     * The the handler of the database
+     * The handler of the database
      *
      * @return database handler
      */
@@ -26,6 +27,15 @@ public interface C8Admin extends C8SerializationAccessor {
      * @userName tenant
      */
     FeaturesEntity getTenantFeatures(final String tenant) throws C8DBException;
+    
+    /**
+     * Returns the the tenant limits
+     * 
+     * @param tenant The tenant name
+     * @return All limits for this tenant
+     * @throws C8DBException
+     */
+    LimitsEntity getTenantLimits(final String tenant) throws C8DBException;
 
     // TODO: Implement other required admin features.
 
