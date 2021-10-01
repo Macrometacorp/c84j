@@ -9,7 +9,7 @@ import lombok.Data;
 
 @Data
 public class TenantEntity {
-	private String tenant;
-	private List<String> dcList;
+    private String tenant;
+    private List<String> dcList;
     private String status;
 }
