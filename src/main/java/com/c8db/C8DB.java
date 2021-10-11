@@ -681,7 +681,7 @@ public interface C8DB extends C8SerializationAccessor {
      * @param dcList The list of Edge Locations (Datacenters) as a comma-separated
      *               string. The individual elements for this parameter are your
      *               Edge Location URL prefixes up to the first . character.
-     * @param geoFabric The name of the new db              
+     * @param geoFabric The name of the new db/geofabric              
      * @return true if the database was created successfully.
      * @throws C8DBException
      */
