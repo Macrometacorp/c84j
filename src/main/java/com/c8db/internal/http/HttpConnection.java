@@ -289,7 +289,7 @@ public class HttpConnection implements Connection {
     }
 
     private synchronized void addJWT() throws IOException {
-        String authUrl = buildBaseUrl(host) + "/_open/auth";
+        String authUrl = buildBaseUrl(host) + "/_open/auth/internal";
         Map<String, String> credentials = new HashMap<String, String>();
         credentials.put("username", user);
         credentials.put("password", password);
