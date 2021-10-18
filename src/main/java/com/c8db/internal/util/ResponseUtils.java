@@ -12,6 +12,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * Copyright (c) 2021 Macrometa Corp All rights reserved
+ *
  */
 
 package com.c8db.internal.util;
@@ -45,7 +48,9 @@ public final class ResponseUtils {
                             response.getMeta().get(HEADER_ENDPOINT));
                 } else if (responseCode == ERROR_INTERNAL) {
                     throw new C8DBException(String.format("Response Code: %s", responseCode), responseCode);
-                } if (response.getBody() != null) {
+                }
+
+                if (response.getBody() != null) {
                     final ErrorEntity errorEntity = util.deserialize(response.getBody(), ErrorEntity.class);
                     throw new C8DBException(errorEntity);
                 } else {

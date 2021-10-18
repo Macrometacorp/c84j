@@ -28,7 +28,6 @@ public class C8AdminImpl extends InternalC8Admin<C8DBImpl, C8DatabaseImpl, C8Exe
 	public LimitsEntity getTenantLimits(String tenant) throws C8DBException {
 		return executor.execute(getTenantLimitsRequest(tenant), getTenantLimitsResponseDeserializer());
 	}
-	
 
 	@Override
 	public List<TenantEntity> getTenants() throws C8DBException {
