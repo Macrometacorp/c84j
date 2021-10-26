@@ -60,10 +60,10 @@ public class LimitsEntity implements Entity {
 
 	@Data
 	public static class CEP {
-		private int maxMemoryPerWorker;
+		private int maxMemoryMBPerWorker;
 		private int maxPublishedWorkers;
-		private int maxWorkersMemorySizeMB;
-		private int maxWorkersCpuUsagePerMinute;
+		private int maxWorkersMemoryMB;
+		private int maxWorkersCpuSecondsPerMinute;
 		private int maxWorkersThroughputInMBPerMinute;
 		private int maxWorkersThroughputOutMBPerMinute;
 	}
