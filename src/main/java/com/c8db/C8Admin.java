@@ -8,6 +8,7 @@ import java.util.List;
 
 import com.c8db.entity.FeaturesEntity;
 import com.c8db.entity.LimitsEntity;
+import com.c8db.entity.TenantsEntity;
 import com.c8db.entity.TenantEntity;
 
 /**
@@ -37,7 +38,7 @@ public interface C8Admin extends C8SerializationAccessor {
      * @return All tenants 
      * @throws C8DBException
      */
-    List<TenantEntity> getTenants() throws C8DBException;
+    List<TenantsEntity> getTenants() throws C8DBException;
 
     /**
      * Returns the requested tenant

@@ -3,17 +3,17 @@
  */
 package com.c8db.entity;
 
-import java.util.List;
-import java.util.Map;
-
 import com.arangodb.velocypack.annotations.SerializedName;
 import lombok.Data;
+
+import java.util.List;
+import java.util.Map;
 
 @Data
 public class TenantEntity {
 
     private String tenant;
-    private List<String> dcList;
+    private String dcList;
     private String status;
     @SerializedName("associated_regions")
     private List<String> associatedRegions;

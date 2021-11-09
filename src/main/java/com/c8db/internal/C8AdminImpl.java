@@ -10,6 +10,7 @@ import com.c8db.C8Admin;
 import com.c8db.C8DBException;
 import com.c8db.entity.FeaturesEntity;
 import com.c8db.entity.LimitsEntity;
+import com.c8db.entity.TenantsEntity;
 import com.c8db.entity.TenantEntity;
 
 public class C8AdminImpl extends InternalC8Admin<C8DBImpl, C8DatabaseImpl, C8ExecutorSync>
@@ -31,7 +32,7 @@ public class C8AdminImpl extends InternalC8Admin<C8DBImpl, C8DatabaseImpl, C8Exe
 	
 
 	@Override
-	public List<TenantEntity> getTenants() throws C8DBException {
+	public List<TenantsEntity> getTenants() throws C8DBException {
 		return executor.execute(getTenantsRequest(), getTenantsResponseDeserializer());
 	}
 
