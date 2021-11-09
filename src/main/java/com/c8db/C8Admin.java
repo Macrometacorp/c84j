@@ -39,6 +39,15 @@ public interface C8Admin extends C8SerializationAccessor {
      */
     List<TenantEntity> getTenants() throws C8DBException;
 
+    /**
+     * Returns the requested tenant
+     *
+     * @param tenant The tenant name
+     * @return The tenant matching the given tenant name
+     * @throws C8DBException
+     */
+    TenantEntity getTenant(final String tenant) throws C8DBException;
+
     
     /**
      * Returns the tenant limits

@@ -24,6 +24,7 @@ public abstract class InternalC8Admin<A extends InternalC8DB<E>, D extends Inter
         extends C8Executeable<E> {
 
     protected static final String PATH_API_TENANTS = "/_api/tenants";
+    protected static final String PATH_API_TENANT = "/_api/tenant";
     protected static final String PATH_API_FEATURES = "/features";
     protected static final String PATH_API_LIMITS = "/limits";
     protected static final String PATH_TENANT = "tenant";
@@ -46,8 +47,18 @@ public abstract class InternalC8Admin<A extends InternalC8DB<E>, D extends Inter
                 return util().deserialize(result,  new Type<List<TenantEntity>>(){}.getType());
             }
         };
-    }    
-    
+    }
+
+    protected ResponseDeserializer<TenantEntity> getTenantResponseDeserializer() {
+        return new ResponseDeserializer<TenantEntity>() {
+            @Override
+            public TenantEntity deserialize(final Response response) throws VPackException {
+                final VPackSlice result = response.getBody().get(C8ResponseField.RESULT);
+                return util().deserialize(result,  new Type<TenantEntity>(){}.getType());
+            }
+        };
+    }
+
     protected ResponseDeserializer<FeaturesEntity> getTenantFeaturesResponseDeserializer() {
         return new ResponseDeserializer<FeaturesEntity>() {
             @Override
@@ -69,6 +80,10 @@ public abstract class InternalC8Admin<A extends InternalC8DB<E>, D extends Inter
     
     protected Request getTenantsRequest() {
         return request(null, null, RequestType.GET, PATH_API_TENANTS);
+    }
+
+    protected Request getTenantRequest(final String tenant) {
+        return request(null, null, RequestType.GET, PATH_API_TENANT, tenant);
     }
     
     protected Request getTenantLimitsRequest(final String tenant) {
