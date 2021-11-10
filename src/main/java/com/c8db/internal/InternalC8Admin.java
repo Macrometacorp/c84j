@@ -11,6 +11,7 @@ import com.arangodb.velocypack.VPackSlice;
 import com.arangodb.velocypack.exception.VPackException;
 import com.c8db.entity.FeaturesEntity;
 import com.c8db.entity.LimitsEntity;
+import com.c8db.entity.TenantsEntity;
 import com.c8db.entity.TenantEntity;
 import com.c8db.internal.C8Executor.ResponseDeserializer;
 import com.c8db.velocystream.Request;
@@ -24,6 +25,7 @@ public abstract class InternalC8Admin<A extends InternalC8DB<E>, D extends Inter
         extends C8Executeable<E> {
 
     protected static final String PATH_API_TENANTS = "/_api/tenants";
+    protected static final String PATH_API_TENANT = "/_api/tenant";
     protected static final String PATH_API_FEATURES = "/features";
     protected static final String PATH_API_LIMITS = "/limits";
     protected static final String PATH_TENANT = "tenant";
@@ -38,16 +40,26 @@ public abstract class InternalC8Admin<A extends InternalC8DB<E>, D extends Inter
         return db;
     }
 
-    protected ResponseDeserializer<List<TenantEntity>> getTenantsResponseDeserializer() {
-        return new ResponseDeserializer<List<TenantEntity>>() {
+    protected ResponseDeserializer<List<TenantsEntity>> getTenantsResponseDeserializer() {
+        return new ResponseDeserializer<List<TenantsEntity>>() {
             @Override
-            public List<TenantEntity> deserialize(final Response response) throws VPackException {
+            public List<TenantsEntity> deserialize(final Response response) throws VPackException {
             	 final VPackSlice result = response.getBody().get(C8ResponseField.RESULT);
-                return util().deserialize(result,  new Type<List<TenantEntity>>(){}.getType());
+                return util().deserialize(result,  new Type<List<TenantsEntity>>(){}.getType());
             }
         };
-    }    
-    
+    }
+
+    protected ResponseDeserializer<TenantEntity> getTenantResponseDeserializer() {
+        return new ResponseDeserializer<TenantEntity>() {
+            @Override
+            public TenantEntity deserialize(final Response response) throws VPackException {
+                final VPackSlice result = response.getBody().get(C8ResponseField.RESULT);
+                return util().deserialize(result,  new Type<TenantEntity>(){}.getType());
+            }
+        };
+    }
+
     protected ResponseDeserializer<FeaturesEntity> getTenantFeaturesResponseDeserializer() {
         return new ResponseDeserializer<FeaturesEntity>() {
             @Override
@@ -69,6 +81,10 @@ public abstract class InternalC8Admin<A extends InternalC8DB<E>, D extends Inter
     
     protected Request getTenantsRequest() {
         return request(null, null, RequestType.GET, PATH_API_TENANTS);
+    }
+
+    protected Request getTenantRequest(final String tenant) {
+        return request(null, null, RequestType.GET, PATH_API_TENANT, tenant);
     }
     
     protected Request getTenantLimitsRequest(final String tenant) {
