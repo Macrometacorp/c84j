@@ -11,7 +11,8 @@ public class LimitsEntity implements Entity {
 	private Database database; 
 	private Streams streamsLocal, streamsGlobal;
 	private Compute compute;
-	 
+	private CEP cep;
+
 	private boolean defaultsEnabled;
 	
 	@Data	
@@ -55,5 +56,15 @@ public class LimitsEntity implements Entity {
 		private int maxRequestsMemoryMB;
 		private int maxSecretsCount;
 		private int maxServicesCount;
+	}
+
+	@Data
+	public static class CEP {
+		private int maxMemoryMBPerWorker;
+		private int maxPublishedWorkers;
+		private int maxWorkersMemoryMB;
+		private int maxWorkersCpuSecondsPerMinute;
+		private int maxWorkersThroughputInMBPerMinute;
+		private int maxWorkersThroughputOutMBPerMinute;
 	}
 }
