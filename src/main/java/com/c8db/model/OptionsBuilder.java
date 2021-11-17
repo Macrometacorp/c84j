@@ -110,4 +110,8 @@ public class OptionsBuilder {
         return options.description(description).action(action).attributes(attributes).details(details)
                 .entityType(entityType).status(status);
     }
+
+    public static ApiKeyOptions build(final ApiKeyOptions options, final String apiKey) {
+        return options.apiKey(apiKey);
+    }
 }

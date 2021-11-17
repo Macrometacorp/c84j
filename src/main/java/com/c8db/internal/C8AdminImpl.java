@@ -40,9 +40,4 @@ public class C8AdminImpl extends InternalC8Admin<C8DBImpl, C8DatabaseImpl, C8Exe
 	public TenantEntity getTenant(String tenant) throws C8DBException {
 		return executor.execute(getTenantRequest(tenant), getTenantResponseDeserializer());
 	}
-
-	@Override
-	public ApiKeyEntity validateApiKey(String apikey) {
-		return executor.execute(validateApiKeyRequest(apikey), validateApiKeyResponseDeserializer());
-	}
 }

@@ -15,6 +15,11 @@ import com.c8db.entity.LimitsEntity;
 import com.c8db.entity.TenantsEntity;
 import com.c8db.entity.TenantEntity;
 import com.c8db.internal.C8Executor.ResponseDeserializer;
+import com.c8db.internal.util.C8SerializationFactory;
+import com.c8db.model.ApiKeyOptions;
+import com.c8db.model.DCListOptions;
+import com.c8db.model.OptionsBuilder;
+import com.c8db.util.C8Serializer;
 import com.c8db.velocystream.Request;
 import com.c8db.velocystream.RequestType;
 import com.c8db.velocystream.Response;
@@ -25,7 +30,6 @@ import com.c8db.velocystream.Response;
 public abstract class InternalC8Admin<A extends InternalC8DB<E>, D extends InternalC8Database<A, E>, E extends C8Executor>
         extends C8Executeable<E> {
 
-    protected static final String PATH_API_KEY_VALIDATE = "/_api/key/validate";
     protected static final String PATH_API_TENANTS = "/_api/tenants";
     protected static final String PATH_API_TENANT = "/_api/tenant";
     protected static final String PATH_API_FEATURES = "/features";
@@ -81,16 +85,6 @@ public abstract class InternalC8Admin<A extends InternalC8DB<E>, D extends Inter
         };
     }
 
-    protected ResponseDeserializer<ApiKeyEntity> validateApiKeyResponseDeserializer() {
-        return new ResponseDeserializer<ApiKeyEntity>() {
-            @Override
-            public ApiKeyEntity deserialize(final Response response) throws VPackException {
-                final VPackSlice result = response.getBody().get(C8ResponseField.RESULT);
-                return util().deserialize(result,  new Type<ApiKeyEntity>(){}.getType());
-            }
-        };
-    }
-    
     protected Request getTenantsRequest() {
         return request(null, null, RequestType.GET, PATH_API_TENANTS);
     }
@@ -107,8 +101,5 @@ public abstract class InternalC8Admin<A extends InternalC8DB<E>, D extends Inter
         return request(db.tenant(), db.name(), RequestType.GET, PATH_API_FEATURES, PATH_TENANT, tenant);
     }
 
-    protected Request validateApiKeyRequest(final String apikey) {
-        return request(db.tenant(), db.name(), RequestType.GET, PATH_API_KEY_VALIDATE, apikey);
-    }
 
 }
