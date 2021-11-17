@@ -6,7 +6,7 @@ package com.c8db.entity;
 import lombok.Data;
 
 @Data
-public class C8ApiKey {
+public class ApiKeyEntity {
     private String keyid;
     private String tenant;
     private String parent;

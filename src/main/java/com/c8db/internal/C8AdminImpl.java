@@ -8,6 +8,7 @@ import java.util.List;
 
 import com.c8db.C8Admin;
 import com.c8db.C8DBException;
+import com.c8db.entity.ApiKeyEntity;
 import com.c8db.entity.FeaturesEntity;
 import com.c8db.entity.LimitsEntity;
 import com.c8db.entity.TenantsEntity;
@@ -39,5 +40,9 @@ public class C8AdminImpl extends InternalC8Admin<C8DBImpl, C8DatabaseImpl, C8Exe
 	public TenantEntity getTenant(String tenant) throws C8DBException {
 		return executor.execute(getTenantRequest(tenant), getTenantResponseDeserializer());
 	}
-    
+
+	@Override
+	public ApiKeyEntity validateApiKey(String apikey) {
+		return executor.execute(validateApiKeyRequest(apikey), validateApiKeyResponseDeserializer());
+	}
 }

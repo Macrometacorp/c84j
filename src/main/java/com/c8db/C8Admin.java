@@ -6,10 +6,12 @@ package com.c8db;
 
 import java.util.List;
 
+import com.c8db.entity.ApiKeyEntity;
 import com.c8db.entity.FeaturesEntity;
 import com.c8db.entity.LimitsEntity;
 import com.c8db.entity.TenantsEntity;
 import com.c8db.entity.TenantEntity;
+import com.sun.tools.javac.util.DefinedBy;
 
 /**
  * Interface for operations on administration level.
@@ -58,6 +60,13 @@ public interface C8Admin extends C8SerializationAccessor {
      * @throws C8DBException
      */
     LimitsEntity getTenantLimits(final String tenant) throws C8DBException;
+
+    /**
+     * Validates APIKey and returns back its properties
+     * @param apikey The apiKey
+     * @return The api key properties
+     */
+    ApiKeyEntity validateApiKey(final String apikey);
 
     // TODO: Implement other required admin features.
 
