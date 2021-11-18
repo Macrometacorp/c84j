@@ -52,9 +52,6 @@ import com.c8db.velocystream.Request;
 import java.util.Collection;
 import java.util.Map;
 
-/**
- *
- */
 public class C8DatabaseImpl extends InternalC8Database<C8DBImpl, C8ExecutorSync>
         implements C8Database {
 
@@ -363,7 +360,13 @@ public class C8DatabaseImpl extends InternalC8Database<C8DBImpl, C8ExecutorSync>
     @Override
     public void createPersistentStream(final String name, final C8StreamCreateOptions options)
             throws C8DBException {
-        executor.execute(createC8PersistentStreamRequest(name, options), Void.class);
+        try {
+            executor.execute(createC8PersistentStreamRequest(name, options), Void.class);
+        } catch (final C8DBException e) {
+            if (!C8Errors.ERROR_STREAM_ALREADY_EXISTS.equals(e.getErrorNum())) {
+                throw e;
+            }
+        }
     }
 
     @Override
