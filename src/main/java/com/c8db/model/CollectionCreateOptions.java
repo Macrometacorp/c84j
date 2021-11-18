@@ -32,12 +32,7 @@ public class CollectionCreateOptions {
     private Boolean isLocal;
     private Boolean isSystem;
     private Boolean stream;
-    
-    // How many pieces the collection will be split (for big collections)
-    private int numberOfShards = 1;
-    // the number of replicas
-    private int replicationFactor = 1;
-    
+    private Boolean enableShards;
 
     public CollectionCreateOptions() {
         super();
@@ -162,24 +157,6 @@ public class CollectionCreateOptions {
         this.isSystem = isSystem;
         return this;
     }
-    
-    /**
-     * @param numberOfShards How many pieces the collection will be splitted (for big collections only)
-     * @return {@link CollectionCreateOptions}
-     */
-    public CollectionCreateOptions numberOfShards(final int numberOfShards) {
-        this.numberOfShards = numberOfShards;
-        return this;
-    }
-    
-    /**
-     * @param numberOfShards The number of replicas
-     * @return {@link CollectionCreateOptions}
-     */
-    public CollectionCreateOptions replicationFactor(final int replicationFactor) {
-        this.replicationFactor = replicationFactor;
-        return this;
-    }
 
     /**
      * Checks whether the collection is system
@@ -190,21 +167,21 @@ public class CollectionCreateOptions {
 		return isSystem;
 	}
 
-	/**
-	 * Checks the number of shards for this collection
-	 * @return numberOfShards value
-	 */
-	public final int getNumberOfShards() {
-		return numberOfShards;
-	}
+    /**
+     * Checks whether the shards are enabled.
+     * @return true of false
+     */
+    public Boolean isEnableShards() {
+        return enableShards;
+    }
 
-	/**
-	 * Checks the number of replicas for this collection
-	 * @return replicationFactor value
-	 */
-	public final int getReplicationFactor() {
-		return replicationFactor;
-	}
-    
-    
+    /**
+     *
+     * @param enableShards Sets numberOfShards to 8 if true else numberOfShards is set to 1
+     * @return {@link CollectionCreateOptions}
+     */
+    public CollectionCreateOptions enableShards(final Boolean enableShards) {
+        this.enableShards = enableShards;
+        return this;
+    }
 }
