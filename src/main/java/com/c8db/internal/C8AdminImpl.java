@@ -4,14 +4,14 @@
 
 package com.c8db.internal;
 
-import java.util.List;
-
 import com.c8db.C8Admin;
 import com.c8db.C8DBException;
 import com.c8db.entity.FeaturesEntity;
 import com.c8db.entity.LimitsEntity;
-import com.c8db.entity.TenantsEntity;
 import com.c8db.entity.TenantEntity;
+import com.c8db.entity.TenantsEntity;
+
+import java.util.List;
 
 public class C8AdminImpl extends InternalC8Admin<C8DBImpl, C8DatabaseImpl, C8ExecutorSync>
         implements C8Admin {
@@ -39,5 +39,4 @@ public class C8AdminImpl extends InternalC8Admin<C8DBImpl, C8DatabaseImpl, C8Exe
 	public TenantEntity getTenant(String tenant) throws C8DBException {
 		return executor.execute(getTenantRequest(tenant), getTenantResponseDeserializer());
 	}
-    
 }

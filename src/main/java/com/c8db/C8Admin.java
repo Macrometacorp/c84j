@@ -4,12 +4,12 @@
 
 package com.c8db;
 
-import java.util.List;
-
+import com.c8db.entity.ApiKeyEntity;
 import com.c8db.entity.FeaturesEntity;
 import com.c8db.entity.LimitsEntity;
-import com.c8db.entity.TenantsEntity;
 import com.c8db.entity.TenantEntity;
+import com.c8db.entity.TenantsEntity;
+import java.util.List;
 
 /**
  * Interface for operations on administration level.
