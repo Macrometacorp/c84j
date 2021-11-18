@@ -672,7 +672,7 @@ public interface C8Database extends C8SerializationAccessor {
     /**
      * Returns a {@code C8ApiKeys} instance.
      *
-     * @return C8Admin handler
+     * @return C8ApiKeys handler
      */
     C8ApiKeys apiKeys();
 }

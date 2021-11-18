@@ -4,25 +4,19 @@
 
 package com.c8db.internal;
 
-import java.util.List;
-
 import com.arangodb.velocypack.Type;
 import com.arangodb.velocypack.VPackSlice;
 import com.arangodb.velocypack.exception.VPackException;
-import com.c8db.entity.ApiKeyEntity;
 import com.c8db.entity.FeaturesEntity;
 import com.c8db.entity.LimitsEntity;
-import com.c8db.entity.TenantsEntity;
 import com.c8db.entity.TenantEntity;
+import com.c8db.entity.TenantsEntity;
 import com.c8db.internal.C8Executor.ResponseDeserializer;
-import com.c8db.internal.util.C8SerializationFactory;
-import com.c8db.model.ApiKeyOptions;
-import com.c8db.model.DCListOptions;
-import com.c8db.model.OptionsBuilder;
-import com.c8db.util.C8Serializer;
 import com.c8db.velocystream.Request;
 import com.c8db.velocystream.RequestType;
 import com.c8db.velocystream.Response;
+
+import java.util.List;
 
 /**
  * Internal request/response related functions.
