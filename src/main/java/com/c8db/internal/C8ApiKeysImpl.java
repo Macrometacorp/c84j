@@ -15,7 +15,7 @@ public class C8ApiKeysImpl extends InternalC8ApiKeys<C8DBImpl, C8DatabaseImpl, C
     }
 
 	@Override
-	public ApiKeyEntity validateApiKey(String apikey) {
-		return executor.execute(validateApiKeyRequest(apikey), validateApiKeyResponseDeserializer());
-	}
+    public ApiKeyEntity validateApiKey(String apikey) {
+	    return executor.execute(validateApiKeyRequest(apikey), validateApiKeyResponseDeserializer());
+    }
 }
