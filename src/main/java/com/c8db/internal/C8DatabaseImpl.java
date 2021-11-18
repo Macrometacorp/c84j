@@ -432,6 +432,6 @@ public class C8DatabaseImpl extends InternalC8Database<C8DBImpl, C8ExecutorSync>
 
     @Override 
     public C8ApiKeys apiKeys() {
-        return new C8ApiKeyImpl(this);
+        return new C8ApiKeysImpl(this);
     }
 }
