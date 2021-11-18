@@ -19,6 +19,6 @@ public interface C8ApiKeys extends C8SerializationAccessor {
      */
     ApiKeyEntity validateApiKey(final String apikey);
 
-    // TODO: Implement other required admin features.
+    // TODO: Implement other required apikeys features.
 
 }
