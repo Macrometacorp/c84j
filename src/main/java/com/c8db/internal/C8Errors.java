@@ -28,5 +28,5 @@ public final class C8Errors {
     public static final Integer ERROR_C8_DATA_SOURCE_NOT_FOUND = 1203;
     public static final Integer ERROR_C8_DATABASE_NOT_FOUND = 1228;
     public static final Integer ERROR_GRAPH_NOT_FOUND = 1924;
-
+    public static final Integer ERROR_STREAM_ALREADY_EXISTS = 100017;
 }
