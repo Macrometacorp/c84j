@@ -71,9 +71,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 
-/**
- *
- */
 public class HttpConnection implements Connection {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpCommunication.class);
@@ -95,7 +92,8 @@ public class HttpConnection implements Connection {
     private final HostDescription host;
     private volatile String jwt;
     private HttpConnection(final HostDescription host, final Integer timeout, final String user, final String password,
-                           final String email, final Boolean jwtAuthEnabled, final Boolean useSsl, final SSLContext sslContext, final C8Serialization util,
+                           final String email, final Boolean jwtAuthEnabled, final Boolean useSsl,
+                           final SSLContext sslContext, final C8Serialization util,
                            final Protocol contentType, final Long ttl, final String httpCookieSpec) {
         super();
         this.host = host;
@@ -245,7 +243,7 @@ public class HttpConnection implements Connection {
             } else if (ex.getResponseCode() >= 500) {
                 LOGGER.error(String.format("C8DBException: Received HTTP %d. Retrying C8DB Connection", ex.getResponseCode()));
                 response = retryRequest(httpRequest);
-            } else if (ex.getResponseCode().equals(404)) {
+            } else if (ex.getResponseCode().equals(400) || ex.getResponseCode().equals(404)) {
                 // Handle HTTP Error messages here where we just want to log the info and don' want to treat it as
                 // an exception
                 LOGGER.info(String.format("C8DBException: HTTP %d - %s", ex.getResponseCode(), ex.getErrorMessage()));
