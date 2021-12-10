@@ -59,7 +59,6 @@ import org.apache.http.ssl.SSLContexts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.UnknownHostException;
@@ -70,10 +69,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
+import javax.net.ssl.SSLContext;
 
 public class HttpConnection implements Connection {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(HttpCommunication.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(HttpConnection.class);
     private static final ContentType CONTENT_TYPE_APPLICATION_JSON_UTF8 = ContentType.create("application/json",
             "utf-8");
     private static final ContentType CONTENT_TYPE_VPACK = ContentType.create("application/x-velocypack");
@@ -91,6 +91,7 @@ public class HttpConnection implements Connection {
     private final Protocol contentType;
     private final HostDescription host;
     private volatile String jwt;
+
     private HttpConnection(final HostDescription host, final Integer timeout, final String user, final String password,
                            final String email, final Boolean jwtAuthEnabled, final Boolean useSsl,
                            final SSLContext sslContext, final C8Serialization util,
@@ -405,6 +406,7 @@ public class HttpConnection implements Connection {
     }
 
     public static class Builder {
+
         private String user;
         private String password;
         private String email;
