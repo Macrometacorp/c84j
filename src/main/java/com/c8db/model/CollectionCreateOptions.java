@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
+ *
  * Modifications copyright (c) 2021 Macrometa Corp All rights reserved.
  */
 
@@ -33,6 +33,8 @@ public class CollectionCreateOptions {
     private Boolean isSystem;
     private Boolean stream;
     private Boolean enableShards;
+    // Macrometa Corp Modification: Expose `waitForSync` property.
+    private Boolean waitForSync;
 
     public CollectionCreateOptions() {
         super();
@@ -70,7 +72,7 @@ public class CollectionCreateOptions {
      * @return options
      */
     public CollectionCreateOptions keyOptions(final Boolean allowUserKeys, final KeyType type, final Integer increment,
-            final Integer offset) {
+                                              final Integer offset) {
         this.keyOptions = new KeyOptions(allowUserKeys, type, increment, offset);
         return this;
     }
@@ -128,10 +130,10 @@ public class CollectionCreateOptions {
     }
 
     public Boolean hasStream() {
-		return stream;
-	}
+        return stream;
+    }
 
-	/**
+    /**
      * @param isLocal If true replication type of the collection will be set as local (default: false)
      * @return {@link CollectionCreateOptions}
      */
@@ -139,7 +141,7 @@ public class CollectionCreateOptions {
         this.isLocal = isLocal;
         return this;
     }
-    
+
     /**
      * @param stream If true an associated stream will be created
      * @return {@link CollectionCreateOptions}
@@ -148,7 +150,7 @@ public class CollectionCreateOptions {
         this.stream = stream;
         return this;
     }
-    
+
     /**
      * @param isSystem Creates a system collection when is true
      * @return {@link CollectionCreateOptions}
@@ -160,15 +162,16 @@ public class CollectionCreateOptions {
 
     /**
      * Checks whether the collection is system
-     * 
+     *
      * @return true or false
      */
-	public final Boolean isSystem() {
-		return isSystem;
-	}
+    public final Boolean isSystem() {
+        return isSystem;
+    }
 
     /**
      * Checks whether the shards are enabled.
+     *
      * @return true of false
      */
     public Boolean isEnableShards() {
@@ -176,7 +179,6 @@ public class CollectionCreateOptions {
     }
 
     /**
-     *
      * @param enableShards Sets numberOfShards to 8 if true else numberOfShards is set to 1
      * @return {@link CollectionCreateOptions}
      */
@@ -184,4 +186,24 @@ public class CollectionCreateOptions {
         this.enableShards = enableShards;
         return this;
     }
+
+    /**
+     * Checks whether the waitForSync is enabled.
+     *
+     * @return true of false
+     */
+    public Boolean isWaitForSync() {
+        return waitForSync;
+    }
+
+    /**
+     * Sets waitForSync collection creation property.
+     *
+     * @return {@link CollectionCreateOptions}
+     */
+    public CollectionCreateOptions waitForSync(final Boolean waitForSync) {
+        this.waitForSync = waitForSync;
+        return this;
+    }
+
 }
