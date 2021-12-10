@@ -245,9 +245,12 @@ public class HttpConnection implements Connection {
                 LOGGER.error(String.format("C8DBException: Received HTTP %d. Retrying C8DB Connection", ex.getResponseCode()));
                 response = retryRequest(httpRequest);
             } else if (ex.getResponseCode().equals(400) || ex.getResponseCode().equals(404)) {
-                // Handle HTTP Error messages here where we just want to log the info and don' want to treat it as
-                // an exception
-                LOGGER.info(String.format("C8DBException: HTTP %d - %s", ex.getResponseCode(), ex.getErrorMessage()));
+                // Handle HTTP Error messages.
+                if (ex.getErrorNum() != null) {
+                    // Here we only log the info and will not treat it as an exception.
+                    LOGGER.info("C8DBException: HTTP {} - [{}] {}.", ex.getResponseCode(),
+                            ex.getErrorNum(), ex.getErrorMessage());
+                }
                 checkError(response);
             } else {
                 LOGGER.error("C8DBException: Unable to complete C8DB Request due to ", ex);
