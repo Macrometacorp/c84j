@@ -59,7 +59,6 @@ import org.apache.http.ssl.SSLContexts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.UnknownHostException;
@@ -70,10 +69,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
+import javax.net.ssl.SSLContext;
 
 public class HttpConnection implements Connection {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(HttpCommunication.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(HttpConnection.class);
     private static final ContentType CONTENT_TYPE_APPLICATION_JSON_UTF8 = ContentType.create("application/json",
             "utf-8");
     private static final ContentType CONTENT_TYPE_VPACK = ContentType.create("application/x-velocypack");
@@ -91,6 +91,7 @@ public class HttpConnection implements Connection {
     private final Protocol contentType;
     private final HostDescription host;
     private volatile String jwt;
+
     private HttpConnection(final HostDescription host, final Integer timeout, final String user, final String password,
                            final String email, final Boolean jwtAuthEnabled, final Boolean useSsl,
                            final SSLContext sslContext, final C8Serialization util,
@@ -244,9 +245,12 @@ public class HttpConnection implements Connection {
                 LOGGER.error(String.format("C8DBException: Received HTTP %d. Retrying C8DB Connection", ex.getResponseCode()));
                 response = retryRequest(httpRequest);
             } else if (ex.getResponseCode().equals(400) || ex.getResponseCode().equals(404)) {
-                // Handle HTTP Error messages here where we just want to log the info and don' want to treat it as
-                // an exception
-                LOGGER.info(String.format("C8DBException: HTTP %d - %s", ex.getResponseCode(), ex.getErrorMessage()));
+                // Handle HTTP Error messages.
+                if (ex.getErrorNum() != null) {
+                    // Here we only log the info and will not treat it as an exception.
+                    LOGGER.info("C8DBException: HTTP {} - [{}] {}.", ex.getResponseCode(),
+                            ex.getErrorNum(), ex.getErrorMessage());
+                }
                 checkError(response);
             } else {
                 LOGGER.error("C8DBException: Unable to complete C8DB Request due to ", ex);
@@ -405,6 +409,7 @@ public class HttpConnection implements Connection {
     }
 
     public static class Builder {
+
         private String user;
         private String password;
         private String email;
