@@ -145,7 +145,8 @@ public abstract class InternalC8Database<A extends InternalC8DB<E>, E extends C8
         VPackSlice body = util()
                 .serialize(OptionsBuilder.build(options != null ? options : new CollectionCreateOptions(), name));
 
-        return request(tenant(), name(), RequestType.POST, InternalC8Collection.PATH_API_COLLECTION).setBody(body);
+        String database = String.format("%s.%s", tenant(), name());
+        return request(null, database, RequestType.POST, InternalC8Collection.PATH_API_COLLECTION).setBody(body);
     }
 
     protected Request getCollectionsRequest(final CollectionsReadOptions options) {
