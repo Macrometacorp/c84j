@@ -7,11 +7,11 @@ package com.c8db.internal;
 import com.arangodb.velocypack.Type;
 import com.arangodb.velocypack.VPackSlice;
 import com.arangodb.velocypack.exception.VPackException;
-import com.c8db.entity.FeaturesEntity;
-import com.c8db.entity.LimitsEntity;
-import com.c8db.entity.TenantEntity;
-import com.c8db.entity.TenantsEntity;
+import com.c8db.entity.*;
 import com.c8db.internal.C8Executor.ResponseDeserializer;
+import com.c8db.model.CollectionCreateOptions;
+import com.c8db.model.OptionsBuilder;
+import com.c8db.model.TenantMetricsOption;
 import com.c8db.velocystream.Request;
 import com.c8db.velocystream.RequestType;
 import com.c8db.velocystream.Response;
@@ -29,6 +29,8 @@ public abstract class InternalC8Admin<A extends InternalC8DB<E>, D extends Inter
     protected static final String PATH_API_FEATURES = "/features";
     protected static final String PATH_API_LIMITS = "/limits";
     protected static final String PATH_TENANT = "tenant";
+    protected static final String PATH_API_METRICS = "/_api/metrics/query";
+    protected static final String PATH_QUERY = "query";
     private final D db;
 
     protected InternalC8Admin(final D db) {
@@ -70,11 +72,24 @@ public abstract class InternalC8Admin<A extends InternalC8DB<E>, D extends Inter
     }
 
     protected ResponseDeserializer<LimitsEntity> getTenantLimitsResponseDeserializer() {
+        System.out.println("Building response....");
         return new ResponseDeserializer<LimitsEntity>() {
+
             @Override
             public LimitsEntity deserialize(final Response response) throws VPackException {
+                System.out.println("Deserialzing...");
             	 final VPackSlice result = response.getBody().get(C8ResponseField.RESULT);
                 return util().deserialize(result,  new Type<LimitsEntity>(){}.getType());
+            }
+        };
+    }
+
+    protected ResponseDeserializer<String> getTenantMetricResponseDeserializer() {
+        return new ResponseDeserializer<String>() {
+            @Override
+            public String deserialize(final Response response) throws VPackException {
+                final VPackSlice result = response.getBody().get(C8ResponseField.RESULT);
+                return util().deserialize(result,  new Type<String>(){}.getType());
             }
         };
     }
@@ -95,5 +110,11 @@ public abstract class InternalC8Admin<A extends InternalC8DB<E>, D extends Inter
         return request(db.tenant(), db.name(), RequestType.GET, PATH_API_FEATURES, PATH_TENANT, tenant);
     }
 
-
+    protected Request getTenantMetricsRequest(final String tenant, TenantMetricsOption options){
+        //Finalize defaults of TenantMetricsOption with Stoyan
+        VPackSlice body = util()
+                .serialize(options);
+        Request request= request(null,db.name(), RequestType.POST,PATH_API_METRICS).setBody(body);
+        return request;
+    }
 }
