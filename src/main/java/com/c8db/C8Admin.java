@@ -4,7 +4,12 @@
 
 package com.c8db;
 
-import com.c8db.entity.*;
+
+import com.c8db.entity.FeaturesEntity;
+import com.c8db.entity.LimitsEntity;
+import com.c8db.entity.TenantEntity;
+import com.c8db.entity.TenantsEntity;
+import com.c8db.entity.TenantMetricsEntity;
 import com.c8db.model.TenantMetricsOption;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -60,12 +65,11 @@ public interface C8Admin extends C8SerializationAccessor {
 
     /**
      * Returns metrics for a tenant
-     *  @param tenant The tenant name
      *  @param options The parameters passed as a part of request body
      *  @return metrics for this tenant
      *  @throws C8DBException
      */
-    TenantMetricsEntity getTenantMetrics(final String tenant, TenantMetricsOption options) throws C8DBException, JsonProcessingException;
+    TenantMetricsEntity getTenantMetrics(final TenantMetricsOption options) throws C8DBException;
 
     // TODO: Implement other required admin features.
 

@@ -53,6 +53,11 @@ public class C8DBException extends RuntimeException {
         this.responseCode = null;
     }
 
+    public C8DBException(final String message,final Throwable cause){
+        super(message,cause);
+        this.entity = null;
+        this.responseCode = null;
+    }
     /**
      * @return ArangoDB error message
      */
