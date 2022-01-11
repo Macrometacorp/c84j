@@ -11,7 +11,6 @@ import com.c8db.entity.TenantEntity;
 import com.c8db.entity.TenantsEntity;
 import com.c8db.entity.TenantMetricsEntity;
 import com.c8db.model.TenantMetricsOption;
-import com.fasterxml.jackson.core.JsonProcessingException;
 
 import java.util.List;
 
