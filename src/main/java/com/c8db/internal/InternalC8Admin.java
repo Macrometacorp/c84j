@@ -7,15 +7,23 @@ package com.c8db.internal;
 import com.arangodb.velocypack.Type;
 import com.arangodb.velocypack.VPackSlice;
 import com.arangodb.velocypack.exception.VPackException;
+import com.c8db.C8DBException;
 import com.c8db.entity.FeaturesEntity;
 import com.c8db.entity.LimitsEntity;
 import com.c8db.entity.TenantEntity;
 import com.c8db.entity.TenantsEntity;
+import com.c8db.entity.TenantMetricsEntity;
+import com.c8db.entity.TenantMetricsEntity.MetricsEntity;
 import com.c8db.internal.C8Executor.ResponseDeserializer;
+import com.c8db.model.TenantMetricsOption;
 import com.c8db.velocystream.Request;
 import com.c8db.velocystream.RequestType;
 import com.c8db.velocystream.Response;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -29,6 +37,10 @@ public abstract class InternalC8Admin<A extends InternalC8DB<E>, D extends Inter
     protected static final String PATH_API_FEATURES = "/features";
     protected static final String PATH_API_LIMITS = "/limits";
     protected static final String PATH_TENANT = "tenant";
+    protected static final String PATH_API_METRICS = "/_api/metrics/query";
+    protected static final String PATH_QUERY = "query";
+    private static final String C8CEP_THROUGHPUT_TOTAL = "c8cep_app_throughput_total";
+    private static final String C8CEP_LATENCY_SUM = "c8cep_app_latency_seconds_sum";
     private final D db;
 
     protected InternalC8Admin(final D db) {
@@ -71,10 +83,23 @@ public abstract class InternalC8Admin<A extends InternalC8DB<E>, D extends Inter
 
     protected ResponseDeserializer<LimitsEntity> getTenantLimitsResponseDeserializer() {
         return new ResponseDeserializer<LimitsEntity>() {
+
             @Override
             public LimitsEntity deserialize(final Response response) throws VPackException {
             	 final VPackSlice result = response.getBody().get(C8ResponseField.RESULT);
-                return util().deserialize(result,  new Type<LimitsEntity>(){}.getType());
+                 return util().deserialize(result,  new Type<LimitsEntity>(){}.getType());
+            }
+        };
+    }
+
+    protected ResponseDeserializer<TenantMetricsEntity> getTenantMetricResponseDeserializer() {
+        return new ResponseDeserializer<TenantMetricsEntity>() {
+            @Override
+            public TenantMetricsEntity deserialize(final Response response) throws VPackException {
+                final VPackSlice result = response.getBody().get(C8ResponseField.RESULT);
+                String responseObj = util().deserialize(result,  new Type<String>(){}.getType());
+                TenantMetricsEntity tenantMetrics = getTenantMetrics(responseObj);
+                return tenantMetrics;
             }
         };
     }
@@ -95,5 +120,40 @@ public abstract class InternalC8Admin<A extends InternalC8DB<E>, D extends Inter
         return request(db.tenant(), db.name(), RequestType.GET, PATH_API_FEATURES, PATH_TENANT, tenant);
     }
 
+    protected Request getTenantMetricsRequest(TenantMetricsOption options){
+        //TODO: Finalize default values
+        VPackSlice body = util()
+                .serialize(options);
+        Request request= request(null,db.name(), RequestType.POST,PATH_API_METRICS).setBody(body);
+        return request;
+    }
 
+    /**
+     * This method returns metrics only for the requested metric types for a tenant
+     * TODO : Return metric for all metric-types or a default metric type
+     * @param response - the response of the mertic API
+     * @return retuns the requested tenant metrics
+     */
+    private TenantMetricsEntity getTenantMetrics(String response){
+        ObjectMapper mapper = new ObjectMapper();
+        TenantMetricsEntity tenantMetrics = new TenantMetricsEntity();
+        try {
+            JsonNode json = mapper.readValue(response, JsonNode.class);
+            if(json.has(C8CEP_THROUGHPUT_TOTAL)) {
+                String throughtputJson = mapper.readValue(response, JsonNode.class)
+                        .get(C8CEP_THROUGHPUT_TOTAL).toString();
+                List<MetricsEntity> throughputlist = Arrays.asList(mapper.readValue(throughtputJson, MetricsEntity[].class));
+                tenantMetrics.setThroughput(throughputlist);
+            }
+            if(json.has(C8CEP_LATENCY_SUM)) {
+                String latencySumJson = mapper.readValue(response, JsonNode.class)
+                        .get(C8CEP_LATENCY_SUM).toString();
+                List<MetricsEntity> latencySumlist = Arrays.asList(mapper.readValue(latencySumJson, MetricsEntity[].class));
+                tenantMetrics.setLatencySum(latencySumlist);
+            }
+        }catch (JsonProcessingException ex){
+            throw new C8DBException("PerfTestClient-Mapping-Tenant-Metrics : Exception processing Json while mapping",ex);
+        }
+        return tenantMetrics;
+    }
 }

@@ -10,6 +10,8 @@ import com.c8db.entity.FeaturesEntity;
 import com.c8db.entity.LimitsEntity;
 import com.c8db.entity.TenantEntity;
 import com.c8db.entity.TenantsEntity;
+import com.c8db.entity.TenantMetricsEntity;
+import com.c8db.model.TenantMetricsOption;
 
 import java.util.List;
 
@@ -38,5 +40,12 @@ public class C8AdminImpl extends InternalC8Admin<C8DBImpl, C8DatabaseImpl, C8Exe
 	@Override
 	public TenantEntity getTenant(String tenant) throws C8DBException {
 		return executor.execute(getTenantRequest(tenant), getTenantResponseDeserializer());
+	}
+
+	@Override
+	public TenantMetricsEntity getTenantMetrics(TenantMetricsOption options) throws C8DBException {
+		TenantMetricsEntity tenantMetrics =  executor.execute(getTenantMetricsRequest(options),
+				getTenantMetricResponseDeserializer());
+		return tenantMetrics;
 	}
 }

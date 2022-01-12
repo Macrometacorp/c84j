@@ -4,11 +4,14 @@
 
 package com.c8db;
 
-import com.c8db.entity.ApiKeyEntity;
+
 import com.c8db.entity.FeaturesEntity;
 import com.c8db.entity.LimitsEntity;
 import com.c8db.entity.TenantEntity;
 import com.c8db.entity.TenantsEntity;
+import com.c8db.entity.TenantMetricsEntity;
+import com.c8db.model.TenantMetricsOption;
+
 import java.util.List;
 
 /**
@@ -58,6 +61,14 @@ public interface C8Admin extends C8SerializationAccessor {
      * @throws C8DBException
      */
     LimitsEntity getTenantLimits(final String tenant) throws C8DBException;
+
+    /**
+     * Returns metrics for a tenant
+     *  @param options The parameters passed as a part of request body
+     *  @return metrics for this tenant
+     *  @throws C8DBException
+     */
+    TenantMetricsEntity getTenantMetrics(final TenantMetricsOption options) throws C8DBException;
 
     // TODO: Implement other required admin features.
 
