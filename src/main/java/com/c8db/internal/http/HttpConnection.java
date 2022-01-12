@@ -244,11 +244,11 @@ public class HttpConnection implements Connection {
             } else if (ex.getResponseCode() >= 500) {
                 LOGGER.error(String.format("C8DBException: Received HTTP %d. Retrying C8DB Connection", ex.getResponseCode()));
                 response = retryRequest(httpRequest);
-            } else if (ex.getResponseCode().equals(400) || ex.getResponseCode().equals(404)) {
+            } else if (ex.getResponseCode() >= 400) {
                 // Handle HTTP Error messages.
                 if (ex.getErrorNum() != null) {
                     // Here we only log the info and will not treat it as an exception.
-                    LOGGER.info("C8DBException: HTTP {} - [{}] {}.", ex.getResponseCode(),
+                    LOGGER.warn("C8DBException: HTTP {} - [{}] {}.", ex.getResponseCode(),
                             ex.getErrorNum(), ex.getErrorMessage());
                 }
                 checkError(response);
