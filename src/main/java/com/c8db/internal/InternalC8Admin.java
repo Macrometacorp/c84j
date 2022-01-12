@@ -130,20 +130,22 @@ public abstract class InternalC8Admin<A extends InternalC8DB<E>, D extends Inter
 
     private TenantMetricsEntity getTenantMetrics(String response){
         ObjectMapper mapper = new ObjectMapper();
-        TenantMetricsEntity tenantMetrics;
+        TenantMetricsEntity tenantMetrics = new TenantMetricsEntity();
         try {
-            String throughtputJson = mapper.readValue(response, JsonNode.class)
-                    .get(C8CEP_THROUGHPUT_TOTAL).toString();
-            String latencySumJson = mapper.readValue(response, JsonNode.class)
-                    .get(C8CEP_LATENCY_SUM).toString();
-
-            List<MetricsEntity> throughputlist = Arrays.asList(mapper.readValue(throughtputJson, MetricsEntity[].class));
-            List<MetricsEntity> latencySumlist = Arrays.asList(mapper.readValue(latencySumJson, MetricsEntity[].class));
-            tenantMetrics = new TenantMetricsEntity();
-            tenantMetrics.setThroughput(throughputlist);
-            tenantMetrics.setLatencySum(latencySumlist);
+            JsonNode json = mapper.readValue(response, JsonNode.class);
+            if(json.has(C8CEP_THROUGHPUT_TOTAL)) {
+                String throughtputJson = mapper.readValue(response, JsonNode.class)
+                        .get(C8CEP_THROUGHPUT_TOTAL).toString();
+                List<MetricsEntity> throughputlist = Arrays.asList(mapper.readValue(throughtputJson, MetricsEntity[].class));
+                tenantMetrics.setThroughput(throughputlist);
+            }
+            if(json.has(C8CEP_LATENCY_SUM)) {
+                String latencySumJson = mapper.readValue(response, JsonNode.class)
+                        .get(C8CEP_LATENCY_SUM).toString();
+                List<MetricsEntity> latencySumlist = Arrays.asList(mapper.readValue(latencySumJson, MetricsEntity[].class));
+                tenantMetrics.setLatencySum(latencySumlist);
+            }
         }catch (JsonProcessingException ex){
-            ex.printStackTrace();
             throw new C8DBException("PerfTestClient-Mapping-Tenant-Metrics : Exception processing Json while mapping",ex);
         }
         return tenantMetrics;
