@@ -128,6 +128,12 @@ public abstract class InternalC8Admin<A extends InternalC8DB<E>, D extends Inter
         return request;
     }
 
+    /**
+     * This method returns metrics only for the requested metric types for a tenant
+     * TODO : Return metric for all metric-types or a default metric type
+     * @param response - the response of the mertic API
+     * @return retuns the requested tenant metrics
+     */
     private TenantMetricsEntity getTenantMetrics(String response){
         ObjectMapper mapper = new ObjectMapper();
         TenantMetricsEntity tenantMetrics = new TenantMetricsEntity();
