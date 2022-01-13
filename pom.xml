@@ -33,7 +33,7 @@
 		<junit.version>4.13.1</junit.version>
 
 		<!-- javadoc -->
-		<javadoc.opts />
+		<javadoc.opts/>
 	</properties>
 
 	<developers>
@@ -284,7 +284,7 @@
 			<dependency>
 				<groupId>commons-codec</groupId>
 				<artifactId>commons-codec</artifactId>
-				<version>1.13</version>
+				<version>1.15</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-logging</groupId>
