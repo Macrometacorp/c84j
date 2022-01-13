@@ -25,7 +25,7 @@
 		<arangodb.velocypack.version>1.4.2</arangodb.velocypack.version>
 		<jackson.version>2.13.1</jackson.version>
 		<!-- provided -->
-		<httpclient.version>4.5.9</httpclient.version>
+		<httpclient.version>4.5.13</httpclient.version>
 
 		<!-- test -->
 		<logback-classic.version>1.2.3</logback-classic.version>
@@ -33,7 +33,7 @@
 		<junit.version>4.13.1</junit.version>
 
 		<!-- javadoc -->
-		<javadoc.opts />
+		<javadoc.opts/>
 	</properties>
 
 	<developers>
