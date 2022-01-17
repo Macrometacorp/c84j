@@ -23,7 +23,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <slf4j-api.version>1.7.32</slf4j-api.version>
-        <arangodb.velocypack.version>1.4.2</arangodb.velocypack.version>
+        <arangodb.velocypack.version>1.4.3</arangodb.velocypack.version>
         <jackson.version>2.13.1</jackson.version>
         <!-- provided -->
         <httpclient.version>4.5.13</httpclient.version>
