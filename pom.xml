@@ -33,7 +33,7 @@
         <junit.version>4.13.1</junit.version>
 
         <!-- javadoc -->
-        <javadoc.opts />
+        <javadoc.opts/>
     </properties>
 
     <developers>
@@ -264,7 +264,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.20</version>
+            <version>1.18.22</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
