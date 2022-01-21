@@ -22,7 +22,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<slf4j-api.version>1.7.13</slf4j-api.version>
+		<slf4j-api.version>1.7.32</slf4j-api.version>
 		<arangodb.velocypack.version>1.4.3</arangodb.velocypack.version>
 
 		<!-- provided -->
