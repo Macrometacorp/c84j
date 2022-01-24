@@ -55,6 +55,9 @@ public class UserEntity implements Entity {
         return changePassword;
     }
 
+    /**
+     * @return The email of the user as a string
+     */
     public String getEmail() {
         return email;
     }
