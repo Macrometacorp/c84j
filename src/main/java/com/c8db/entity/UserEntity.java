@@ -17,11 +17,18 @@
 
 package com.c8db.entity;
 
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+
 import java.util.Map;
 
 /**
  *
  */
+@Data
+@NoArgsConstructor
+@EqualsAndHashCode
 public class UserEntity implements Entity {
 
     private String user;
@@ -29,36 +36,4 @@ public class UserEntity implements Entity {
     private Map<String, Object> extra;
     private Boolean changePassword;
     private String email;
-
-    /**
-     * @return The name of the user as a string
-     */
-    public String getUser() {
-        return user;
-    }
-
-    /**
-     * @return An flag that specifies whether the user is active
-     */
-    public Boolean getActive() {
-        return active;
-    }
-
-    /**
-     * @return An object with arbitrary extra data about the user
-     */
-    public Map<String, Object> getExtra() {
-        return extra;
-    }
-
-    public Boolean getChangePassword() {
-        return changePassword;
-    }
-
-    /**
-     * @return The email of the user as a string
-     */
-    public String getEmail() {
-        return email;
-    }
 }
