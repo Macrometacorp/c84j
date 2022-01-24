@@ -28,6 +28,7 @@ public class UserEntity implements Entity {
     private Boolean active;
     private Map<String, Object> extra;
     private Boolean changePassword;
+    private String email;
 
     /**
      * @return The name of the user as a string
@@ -54,4 +55,7 @@ public class UserEntity implements Entity {
         return changePassword;
     }
 
+    public String getEmail() {
+        return email;
+    }
 }
