@@ -877,6 +877,21 @@ public interface C8DB extends C8SerializationAccessor {
     UserEntity getUser(String user) throws C8DBException;
 
     /**
+     * Fetches data about the specified user for a given tenant. You can fetch information about
+     * yourself or you need permission to the _system database in order to execute
+     * this call.
+     *
+     * @see <a href=
+     *      "https://docs.arangodb.com/current/HTTP/UserManagement/index.html#fetch-user">API
+     *      Documentation</a>
+     * @param user The name of the user
+     * @param tenant The tenant of the user
+     * @return information about the user
+     * @throws C8DBException
+     */
+    UserEntity getUser(final String user, final String tenant) throws C8DBException;
+
+    /**
      * Fetches data about all users. You can only execute this call if you have
      * access to the _system database.
      *
