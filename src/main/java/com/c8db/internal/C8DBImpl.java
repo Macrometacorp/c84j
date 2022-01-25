@@ -221,6 +221,11 @@ public class C8DBImpl extends InternalC8DB<C8ExecutorSync> implements C8DB {
     }
 
     @Override
+    public UserEntity getUser(final String user, final String tenant) throws C8DBException {
+        return executor.execute(getUserRequest(tenant, C8RequestParam.SYSTEM, user), UserEntity.class);
+    }
+
+    @Override
     public Collection<UserEntity> getUsers() throws C8DBException {
         return executor.execute(getUsersRequest(db().tenant(), C8RequestParam.SYSTEM), getUsersResponseDeserializer());
     }
