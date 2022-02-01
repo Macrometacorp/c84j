@@ -315,9 +315,9 @@
     </dependencyManagement>
 
     <scm>
-        <url>https://github.com-macrometa/Macrometacorp/C84j.git</url>
-        <connection>scm:git:git@github.com-macrometa:Macrometacorp/C84j.git</connection>
-        <developerConnection>scm:git:git@github.com-macrometa:Macrometacorp/C84j.git</developerConnection>
+        <url>https://github.com/Macrometacorp/C84j.git</url>
+        <connection>scm:git:git@github.com:Macrometacorp/C84j.git</connection>
+        <developerConnection>scm:git:git@github.com:Macrometacorp/C84j.git</developerConnection>
         <tag>c84j-1.1.11-SNAPSHOT</tag>
     </scm>
 
