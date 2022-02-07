@@ -92,13 +92,20 @@ public class C8DatabaseImpl extends InternalC8Database<C8DBImpl, C8ExecutorSync>
 
     @Override
     public CollectionEntity createCollection(final String name) throws C8DBException {
-        return executor.execute(createCollectionRequest(name, new CollectionCreateOptions()), CollectionEntity.class);
+        return createCollection(name, new CollectionCreateOptions());
     }
 
     @Override
     public CollectionEntity createCollection(final String name, final CollectionCreateOptions options)
             throws C8DBException {
-        return executor.execute(createCollectionRequest(name, options), CollectionEntity.class);
+        try {
+            return collection(name).getInfo();
+        } catch (final C8DBException e) {
+            if (C8Errors.ERROR_C8_DATA_SOURCE_NOT_FOUND.equals(e.getErrorNum())) {
+                return executor.execute(createCollectionRequest(name, options), CollectionEntity.class);
+            }
+            throw e;
+        }
     }
 
     @Override
