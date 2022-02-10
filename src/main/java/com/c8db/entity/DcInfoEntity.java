@@ -118,14 +118,15 @@ public class DcInfoEntity implements Entity {
     }
 
     public static class Tag {
-        private String role;
+
+        private String api;
         private String url;
 
         /**
          * @return the role
          */
-        public String getRole() {
-            return role;
+        public String getApi() {
+            return api;
         }
 
         /**
