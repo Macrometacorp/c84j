@@ -16,6 +16,8 @@
 
 package com.c8db.internal.net;
 
+import com.c8db.C8DBException;
+
 import java.io.IOException;
 import java.util.List;
 
@@ -39,7 +41,12 @@ public class FallbackHostHandler implements HostHandler {
 
     @Override
     public Host get(final HostHandle hostHandle, AccessType accessType) {
-        return current != lastSuccess || iterations < 3 ? current : null;
+        if (current != lastSuccess || iterations < 3) {
+            return current;
+        } else {
+            reset();
+            throw new C8DBException("Cannot contact any host!");
+        }
     }
 
     @Override

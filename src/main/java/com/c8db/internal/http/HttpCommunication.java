@@ -95,7 +95,6 @@ public class HttpCommunication implements Closeable {
                         LOGGER.warn(String.format("Could not connect to %s. Try connecting to %s",
                                 failedHost.getDescription(), host.getDescription()));
                     } else {
-                        hostHandler.reset();
                         throw se;
                     }
                 }
