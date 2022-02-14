@@ -3,7 +3,7 @@
 
     <groupId>co.macrometa</groupId>
     <artifactId>c84j</artifactId>
-    <version>1.1.13</version>
+    <version>1.1.14-SNAPSHOT</version>
     <inceptionYear>2019</inceptionYear>
     <packaging>jar</packaging>
 
@@ -318,7 +318,7 @@
         <url>https://github.com/Macrometacorp/C84j.git</url>
         <connection>scm:git:git@github.com:Macrometacorp/C84j.git</connection>
         <developerConnection>scm:git:git@github.com:Macrometacorp/C84j.git</developerConnection>
-        <tag>c84j-1.1.13</tag>
+        <tag>c84j-1.1.14-SNAPSHOT</tag>
     </scm>
 
     <organization>
