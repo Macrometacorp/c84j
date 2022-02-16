@@ -33,12 +33,12 @@ public class HttpConnectionFactory implements ConnectionFactory {
 
     public HttpConnectionFactory(final Integer timeout, final String user, final String password, final String email,
             final Boolean jwtAuth, final Boolean useSsl, final SSLContext sslContext, final C8Serialization util,
-            final Protocol protocol, final Long connectionTtl, String httpCookieSpec) {
+            final Protocol protocol, final Long connectionTtl, String httpCookieSpec,String jwtToken,String apiKey) {
         super();
         builder = new HttpConnection.Builder().timeout(timeout).user(user).password(password).email(email)
                 .jwtAuthEnabled(jwtAuth).useSsl(useSsl).sslContext(sslContext).serializationUtil(util)
-                .contentType(protocol).ttl(connectionTtl).httpCookieSpec(httpCookieSpec);
-
+                .contentType(protocol).ttl(connectionTtl).httpCookieSpec(httpCookieSpec).jwt(jwtToken)
+                .apiKey(apiKey);
     }
 
     @Override

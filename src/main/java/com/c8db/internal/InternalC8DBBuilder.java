@@ -25,6 +25,10 @@ import java.util.Properties;
 
 import javax.net.ssl.SSLContext;
 
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Header;
+import io.jsonwebtoken.Jwt;
+import io.jsonwebtoken.Jwts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,6 +70,7 @@ public abstract class InternalC8DBBuilder {
     private static final String PROPERTY_KEY_PASSWORD = "c8db.password";
     private static final String PROPERTY_KEY_EMAIL = "c8db.email";
     private static final String PROPERTY_KEY_JWT_AUTH = "c8db.jwt";
+    private static final String PROPERTY_KEY_APIKEY = "c8db.apikey";
     private static final String PROPERTY_KEY_USE_SSL = "c8db.usessl";
     private static final String PROPERTY_KEY_COOKIE_SPEC = "c8db.httpCookieSpec";
     private static final String PROPERTY_KEY_V_STREAM_CHUNK_CONTENT_SIZE = "c8db.chunksize";
@@ -82,6 +87,7 @@ public abstract class InternalC8DBBuilder {
     protected String user;
     protected String password;
     protected String email;
+    protected String jwtToken;
     protected Boolean jwtAuth;
     protected Boolean useSsl;
     protected String httpCookieSpec;
@@ -97,6 +103,8 @@ public abstract class InternalC8DBBuilder {
     protected Integer acquireHostListInterval;
     protected LoadBalancingStrategy loadBalancingStrategy;
     protected C8Serialization customSerializer;
+    protected String apiKey;
+    protected Boolean apiKeyEnabled;
 
     public InternalC8DBBuilder() {
         super();
@@ -138,7 +146,9 @@ public abstract class InternalC8DBBuilder {
         user = loadUser(properties, user);
         password = loadPassword(properties, password);
         email = loadEmail(properties, email);
+        jwtToken = loadJWTToken(properties,jwtToken);
         jwtAuth = loadJWTAuth(properties, jwtAuth);
+        apiKey = loadApiKey(properties,apiKey);
         useSsl = loadUseSsl(properties, useSsl);
         httpCookieSpec = loadhttpCookieSpec(properties, httpCookieSpec);
         chunksize = loadChunkSize(properties, chunksize);
@@ -155,6 +165,14 @@ public abstract class InternalC8DBBuilder {
 
     protected void setEmail(String email) {
         this.email = email;
+    }
+
+    protected void setJwtToken(String jwtToken) {
+        this.jwtToken = jwtToken;
+    }
+
+    protected void setApiKey(String apiKey) {
+        this.apiKey = apiKey;
     }
 
     protected void setTimeout(final Integer timeout) {
@@ -205,6 +223,32 @@ public abstract class InternalC8DBBuilder {
         this.serializer = serializer;
     }
 
+    protected HostHandler createHostHandler(final HostResolver hostResolver) {
+
+        final HostHandler hostHandler;
+
+        if (loadBalancingStrategy != null) {
+            switch (loadBalancingStrategy) {
+                case ONE_RANDOM:
+                    hostHandler = new RandomHostHandler(hostResolver, new FallbackHostHandler(hostResolver));
+                    break;
+                case ROUND_ROBIN:
+                    hostHandler = new RoundRobinHostHandler(hostResolver);
+                    break;
+                case NONE:
+                default:
+                    hostHandler = new FallbackHostHandler(hostResolver);
+                    break;
+            }
+        } else {
+            hostHandler = new FallbackHostHandler(hostResolver);
+        }
+
+        LOG.debug("HostHandler is " + hostHandler.getClass().getSimpleName());
+
+        return new DirtyReadHostHandler(hostHandler, new RoundRobinHostHandler(hostResolver));
+    }
+
     protected void deserializer(final C8Deserializer deserializer) {
         this.deserializer = deserializer;
     }
@@ -225,32 +269,6 @@ public abstract class InternalC8DBBuilder {
             return new SimpleHostResolver(new ArrayList<Host>(hosts));
         }
 
-    }
-
-    protected HostHandler createHostHandler(final HostResolver hostResolver) {
-
-        final HostHandler hostHandler;
-
-        if (loadBalancingStrategy != null) {
-            switch (loadBalancingStrategy) {
-            case ONE_RANDOM:
-                hostHandler = new RandomHostHandler(hostResolver, new FallbackHostHandler(hostResolver));
-                break;
-            case ROUND_ROBIN:
-                hostHandler = new RoundRobinHostHandler(hostResolver);
-                break;
-            case NONE:
-            default:
-                hostHandler = new FallbackHostHandler(hostResolver);
-                break;
-            }
-        } else {
-            hostHandler = new FallbackHostHandler(hostResolver);
-        }
-
-        LOG.debug("HostHandler is " + hostHandler.getClass().getSimpleName());
-
-        return new DirtyReadHostHandler(hostHandler, new RoundRobinHostHandler(hostResolver));
     }
 
     private static void loadHosts(final Properties properties, final Collection<HostDescription> hosts) {
@@ -293,6 +311,10 @@ public abstract class InternalC8DBBuilder {
         return getProperty(properties, PROPERTY_KEY_USER, currentValue, C8Defaults.DEFAULT_USER);
     }
 
+    private static String loadJWTToken(final Properties properties, final String currentValue) {
+        return getProperty(properties, PROPERTY_KEY_JWT_AUTH, currentValue, null);
+    }
+
     private static String loadPassword(final Properties properties, final String currentValue) {
         return getProperty(properties, PROPERTY_KEY_PASSWORD, currentValue, null);
     }
@@ -304,6 +326,10 @@ public abstract class InternalC8DBBuilder {
     private static Boolean loadJWTAuth(final Properties properties, final Boolean currentValue) {
         return Boolean
                 .parseBoolean(getProperty(properties, PROPERTY_KEY_JWT_AUTH, currentValue, C8Defaults.DEFAULT_JWT_AUTH));
+    }
+
+    private static String loadApiKey(final Properties properties, final String currentValue) {
+        return getProperty(properties, PROPERTY_KEY_APIKEY, currentValue, null);
     }
     
     private static Boolean loadUseSsl(final Properties properties, final Boolean currentValue) {
@@ -369,5 +395,4 @@ public abstract class InternalC8DBBuilder {
         }
         return hostList;
     }
-
 }
