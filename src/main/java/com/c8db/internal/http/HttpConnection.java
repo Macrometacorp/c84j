@@ -229,14 +229,14 @@ public class HttpConnection implements Connection {
             if (jwt == null) {
                 addJWT();
             }
-            System.out.println("Using JWT = " + jwt);
+            LOGGER.info("Using JWT for authentication.");
             httpRequest.addHeader("Authorization", "bearer " + jwt);
         }else if(apiKeyEnabled && apiKey != null){
-            System.out.println("Using API Key = " + apiKey);
+            LOGGER.info("Using API Key for authenication.");
             httpRequest.addHeader("Authorization", "apikey " + apiKey);
         } else {
             // basic auth instead
-            System.out.println("Using credentials..");
+            LOGGER.info("Using Credentials for authenication.");
             final Credentials credentials = addCredentials(httpRequest);
             if (LOGGER.isDebugEnabled()) {
                 CURLLogger.log(url, request, credentials, util);
