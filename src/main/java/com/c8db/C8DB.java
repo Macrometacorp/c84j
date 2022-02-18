@@ -24,6 +24,7 @@ import com.arangodb.velocypack.VPackParser;
 import com.arangodb.velocypack.VPackParserModule;
 import com.arangodb.velocypack.VPackSerializer;
 import com.arangodb.velocypack.ValueType;
+import com.c8db.entity.AlertEntity;
 import com.c8db.entity.C8DBVersion;
 import com.c8db.entity.DataCenterEntity;
 import com.c8db.entity.DcInfoEntity;
@@ -1014,5 +1015,30 @@ public interface C8DB extends C8SerializationAccessor {
      * @return ArangoDB
      */
     C8DB _setCursorInitializer(C8CursorInitializer cursorInitializer);
+
+    /**
+     * Gets Alerts
+     * @param queryParamMap
+     * @return
+     * @throws C8DBException
+     */
+    Collection<AlertEntity>  getAlerts(Map<String, String> queryParamMap) throws C8DBException;
+
+    /**
+     * Acknowledges or Resolves an alert
+     * @param updateParam
+     * @param queryParamMap
+     * @return
+     * @throws C8DBException
+     */
+    public AlertEntity updateAlerts(String updateParam, Map<String, String> queryParamMap) throws C8DBException;
+
+    /**
+     * Creates an Alert
+     * @param entity
+     * @return
+     * @throws C8DBException
+     */
+    public AlertEntity createAlerts(AlertEntity entity) throws C8DBException;
 
 }

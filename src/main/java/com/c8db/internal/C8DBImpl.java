@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import com.c8db.entity.AlertEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -290,6 +291,21 @@ public class C8DBImpl extends InternalC8DB<C8ExecutorSync> implements C8DB {
     public C8DBImpl _setCursorInitializer(final C8CursorInitializer cursorInitializer) {
         this.cursorInitializer = cursorInitializer;
         return this;
+    }
+
+    @Override
+    public Collection<AlertEntity> getAlerts(Map<String, String> queryParamMap) throws C8DBException {
+        return executor.execute(getAlertRequest(queryParamMap), getAlertsResponseDeserializer());
+    }
+
+    @Override
+    public AlertEntity updateAlerts(String updateParam, Map<String, String> queryParamMap) throws C8DBException {
+        return executor.execute(updateAlertRequest(updateParam, queryParamMap), alertsResponseDeserializer());
+    }
+
+    @Override
+    public AlertEntity createAlerts(AlertEntity entity) throws C8DBException {
+        return executor.execute(createAlertRequest(entity), alertsResponseDeserializer());
     }
 
 }

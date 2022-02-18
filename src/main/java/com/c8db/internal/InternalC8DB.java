@@ -8,11 +8,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import com.arangodb.velocypack.Type;
 import com.arangodb.velocypack.VPackSlice;
 import com.arangodb.velocypack.exception.VPackException;
+import com.c8db.entity.AlertEntity;
 import com.c8db.entity.DataCenterEntity;
 import com.c8db.entity.DcInfoEntity;
 import com.c8db.entity.GeoFabricEntity;
@@ -29,6 +31,7 @@ import com.c8db.model.OptionsBuilder;
 import com.c8db.model.UserAccessOptions;
 import com.c8db.model.UserCreateOptions;
 import com.c8db.model.UserUpdateOptions;
+import com.c8db.util.C8Serializer;
 import com.c8db.velocystream.Request;
 import com.c8db.velocystream.RequestType;
 import com.c8db.velocystream.Response;
@@ -40,6 +43,7 @@ public abstract class InternalC8DB<E extends C8Executor> extends C8Executeable<E
     private static final String PATH_API_ADMIN_LOG = "/_admin/log";
     private static final String PATH_API_ADMIN_LOG_LEVEL = "/_admin/log/level";
     private static final String PATH_API_ROLE = "/_admin/server/role";
+    protected static final String PATH_ALERT = "/_api/alerts";
 
     protected InternalC8DB(final E executor, final C8SerializationFactory util, final C8Context context) {
         super(executor, util, context);
@@ -245,6 +249,24 @@ public abstract class InternalC8DB<E extends C8Executor> extends C8Executeable<E
         return request(tenant, database, RequestType.GET, PATH_API_USER, user);
     }
 
+    protected Request getAlertRequest(final Map<String, String> queryParamMap) {
+        Request request = request(null, null, RequestType.GET, PATH_ALERT);
+        queryParamMap.forEach((key, value) -> request.putQueryParam(key, value));
+        return request;
+    }
+
+    protected Request updateAlertRequest(String updateParam,  Map<String, String> queryParamMap) {
+        Request request = request(null, null, RequestType.PUT, PATH_ALERT, updateParam);
+        queryParamMap.forEach((key, value) -> request.putQueryParam(key, value));
+        return request;
+    }
+
+    protected Request createAlertRequest(AlertEntity entity) {
+        final Request request = request(null, null, RequestType.POST, PATH_ALERT);
+        request.setBody(util(C8SerializationFactory.Serializer.CUSTOM).serialize(entity, new C8Serializer.Options()));
+        return request;
+    }
+
     protected ResponseDeserializer<Collection<UserEntity>> getUsersResponseDeserializer() {
         return new ResponseDeserializer<Collection<UserEntity>>() {
             @Override
@@ -252,6 +274,30 @@ public abstract class InternalC8DB<E extends C8Executor> extends C8Executeable<E
                 final VPackSlice result = response.getBody().get(C8ResponseField.RESULT);
                 return util().deserialize(result, new Type<Collection<UserEntity>>() {
                 }.getType());
+            }
+        };
+    }
+
+    protected ResponseDeserializer<Collection<AlertEntity>> getAlertsResponseDeserializer() {
+        return new ResponseDeserializer<Collection<AlertEntity>>() {
+            @Override
+            public Collection<AlertEntity> deserialize(final Response response) throws VPackException {
+                Collection<AlertEntity> alertList = new ArrayList<>();
+                for (Iterator<VPackSlice> iterator = response.getBody().arrayIterator(); iterator.hasNext();) {
+                    alertList.add(util().deserialize(iterator.next(), new Type<AlertEntity>() {}.getType()));
+                }
+                return alertList;
+            }
+        };
+    }
+
+    protected ResponseDeserializer<AlertEntity> alertsResponseDeserializer() {
+        return new ResponseDeserializer<AlertEntity>() {
+            @Override
+            public AlertEntity deserialize(final Response response) throws VPackException {
+                AlertEntity entity = util().deserialize(response.getBody(), new Type<AlertEntity>() {
+                }.getType());
+                return entity;
             }
         };
     }
