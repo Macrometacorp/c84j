@@ -24,11 +24,6 @@ import java.util.List;
 import java.util.Properties;
 
 import javax.net.ssl.SSLContext;
-
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Header;
-import io.jsonwebtoken.Jwt;
-import io.jsonwebtoken.Jwts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -104,7 +99,6 @@ public abstract class InternalC8DBBuilder {
     protected LoadBalancingStrategy loadBalancingStrategy;
     protected C8Serialization customSerializer;
     protected String apiKey;
-    protected Boolean apiKeyEnabled;
 
     public InternalC8DBBuilder() {
         super();
