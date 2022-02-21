@@ -675,4 +675,11 @@ public interface C8Database extends C8SerializationAccessor {
      * @return C8ApiKeys handler
      */
     C8ApiKeys apiKeys();
+
+    /**
+     * Returns a {@code C8Alerts} instance.
+     *
+     * @return C8Alerts handler
+     */
+    C8Alerts alerts();
 }
