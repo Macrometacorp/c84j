@@ -99,7 +99,7 @@ public class HttpConnection implements Connection {
                            final String email, final Boolean jwtAuthEnabled, final Boolean useSsl,
                            final SSLContext sslContext, final C8Serialization util,
                            final Protocol contentType, final Long ttl, final String httpCookieSpec,
-                           String jwt,String apiKey) {
+                           final String jwt, final String apiKey) {
 
         super();
         this.host = host;
@@ -228,11 +228,9 @@ public class HttpConnection implements Connection {
             if (jwt == null) {
                 addJWT();
             }
-            System.out.println("JWT Used");
             LOGGER.info("Using JWT for authentication.");
             httpRequest.addHeader("Authorization", "bearer " + jwt);
         }else if(apiKey != null){
-            System.out.println("API Key Used");
             LOGGER.info("Using API Key for authenication.");
             httpRequest.addHeader("Authorization", "apikey " + apiKey);
         } else {
