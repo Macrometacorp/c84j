@@ -225,14 +225,17 @@ public class HttpConnection implements Connection {
         }
         addHeader(request, httpRequest);
         if (jwtAuthEnabled) {
-            if (jwt == null) {
+            if (apiKey != null && jwt == null) {  //Use API key onlu if API Key is provided
+                LOGGER.info("Using API Key for authenication.");
+                httpRequest.addHeader("Authorization", "apikey " + apiKey);
+            } else if (jwt == null) { //Generate JWT using user credentials if jwt and apikey are absent
                 addJWT();
+                LOGGER.info("Using JWT for authentication.");
+                httpRequest.addHeader("Authorization", "bearer " + jwt);
+            } else { //Add Header when JWT is provided
+                LOGGER.info("Using JWT for authentication.");
+                httpRequest.addHeader("Authorization", "bearer " + jwt);
             }
-            LOGGER.info("Using JWT for authentication.");
-            httpRequest.addHeader("Authorization", "bearer " + jwt);
-        }else if(apiKey != null){
-            LOGGER.info("Using API Key for authenication.");
-            httpRequest.addHeader("Authorization", "apikey " + apiKey);
         } else {
             // basic auth instead
             LOGGER.info("Using Credentials for authenication.");
@@ -446,9 +449,6 @@ public class HttpConnection implements Connection {
 
         public Builder apiKey(final String apiKey) {
             this.apiKey = apiKey;
-            if(StringUtils.isEmpty(jwt) && StringUtils.isNotEmpty(apiKey)){
-                jwtAuthEnabled = false;
-            }
             return this;
         }
 
