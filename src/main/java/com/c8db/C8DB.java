@@ -614,7 +614,7 @@ public interface C8DB extends C8SerializationAccessor {
             final ConnectionFactory connectionFactory = (protocol == null || Protocol.VST == protocol)
                     ? new VstConnectionFactorySync(host, timeout, connectionTtl, useSsl, sslContext)
                     : new HttpConnectionFactory(timeout, user, password, email, jwtAuth, useSsl, sslContext, custom, protocol,
-                            connectionTtl, httpCookieSpec,jwtToken,apiKey);
+                            connectionTtl, httpCookieSpec, jwtToken, apiKey);
 
             final Collection<Host> hostList = createHostList(max, connectionFactory);
             final HostResolver hostResolver = createHostResolver(hostList, max, connectionFactory);

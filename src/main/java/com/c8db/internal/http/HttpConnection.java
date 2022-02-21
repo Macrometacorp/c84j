@@ -18,6 +18,7 @@ import com.c8db.util.C8Serializer.Options;
 import com.c8db.velocystream.Request;
 import com.c8db.velocystream.RequestType;
 import com.c8db.velocystream.Response;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.HeaderElement;
 import org.apache.http.HeaderElementIterator;
@@ -86,20 +87,19 @@ public class HttpConnection implements Connection {
     private final String password;
     private final String email;
     private final Boolean jwtAuthEnabled;
-    private Boolean apiKeyEnabled;
     private final C8Serialization util;
     private final Boolean useSsl;
     private final Protocol contentType;
     private final HostDescription host;
-    private static volatile String jwt;
-    private static volatile String apiKey;
+    private volatile String jwt;
+    private volatile String apiKey;
 
 
     private HttpConnection(final HostDescription host, final Integer timeout, final String user, final String password,
                            final String email, final Boolean jwtAuthEnabled, final Boolean useSsl,
                            final SSLContext sslContext, final C8Serialization util,
                            final Protocol contentType, final Long ttl, final String httpCookieSpec,
-                           String jwt,String apiKey,final Boolean apiKeyEnabled) {
+                           String jwt,String apiKey) {
 
         super();
         this.host = host;
@@ -107,7 +107,6 @@ public class HttpConnection implements Connection {
         this.password = password;
         this.email = email;
         this.jwtAuthEnabled = jwtAuthEnabled;
-        this.apiKeyEnabled = apiKeyEnabled;
         this.useSsl = useSsl;
         this.util = util;
         this.contentType = contentType;
@@ -225,13 +224,15 @@ public class HttpConnection implements Connection {
             httpRequest.setHeader("Accept", "application/x-velocypack");
         }
         addHeader(request, httpRequest);
-        if (jwtAuthEnabled && !apiKeyEnabled) {
+        if (jwtAuthEnabled) {
             if (jwt == null) {
                 addJWT();
             }
+            System.out.println("JWT Used");
             LOGGER.info("Using JWT for authentication.");
             httpRequest.addHeader("Authorization", "bearer " + jwt);
-        }else if(apiKeyEnabled && apiKey != null){
+        }else if(apiKey != null){
+            System.out.println("API Key Used");
             LOGGER.info("Using API Key for authenication.");
             httpRequest.addHeader("Authorization", "apikey " + apiKey);
         } else {
@@ -429,7 +430,6 @@ public class HttpConnection implements Connection {
         private Integer timeout;
         private String jwt;
         private String apiKey;
-        private Boolean apiKeyEnabled;
 
         public Builder user(final String user) {
             this.user = user;
@@ -443,15 +443,13 @@ public class HttpConnection implements Connection {
 
         public Builder jwt(final String jwt) {
             this.jwt = jwt;
-            HttpConnection.jwt = jwt;
             return this;
         }
 
         public Builder apiKey(final String apiKey) {
             this.apiKey = apiKey;
-            HttpConnection.apiKey = apiKey;
-            if(apiKey != null){
-                apiKeyEnabled = true;
+            if(StringUtils.isEmpty(jwt) && StringUtils.isNotEmpty(apiKey)){
+                jwtAuthEnabled = false;
             }
             return this;
         }
@@ -468,14 +466,6 @@ public class HttpConnection implements Connection {
 
         public Builder jwtAuthEnabled(final Boolean jwtAuth) {
             this.jwtAuthEnabled = jwtAuth;
-            if(jwtAuth){
-                apiKeyEnabled = false;
-            }
-            return this;
-        }
-
-        public Builder apiKeyEnabled(final Boolean apiKeyEnabled) {
-            this.apiKeyEnabled = apiKeyEnabled;
             return this;
         }
 
@@ -516,7 +506,7 @@ public class HttpConnection implements Connection {
 
         public HttpConnection build() {
             return new HttpConnection(host, timeout, user, password, email, jwtAuthEnabled, useSsl, sslContext, util,
-                    contentType, ttl, httpCookieSpec,jwt,apiKey,apiKeyEnabled);
+                    contentType, ttl, httpCookieSpec, jwt, apiKey);
         }
     }
 
