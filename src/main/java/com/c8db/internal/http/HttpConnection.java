@@ -225,7 +225,7 @@ public class HttpConnection implements Connection {
         }
         addHeader(request, httpRequest);
         if (jwtAuthEnabled) {
-            if (apiKey != null && jwt == null) {  //Use API key onlu if API Key is provided
+            if (StringUtils.isNotEmpty(apiKey) && jwt == null) {  //Use API key onlu if API Key is provided
                 LOGGER.info("Using API Key for authenication.");
                 httpRequest.addHeader("Authorization", "apikey " + apiKey);
             } else if (jwt == null) { //Generate JWT using user credentials if jwt and apikey are absent

@@ -141,9 +141,9 @@ public abstract class InternalC8DBBuilder {
         user = loadUser(properties, user);
         password = loadPassword(properties, password);
         email = loadEmail(properties, email);
-        jwtToken = loadJWTToken(properties,jwtToken);
+        jwtToken = loadJWTToken(properties, jwtToken);
         jwtAuth = loadJWTAuth(properties, jwtAuth);
-        apiKey = loadApiKey(properties,apiKey);
+        apiKey = loadApiKey(properties, apiKey);
         useSsl = loadUseSsl(properties, useSsl);
         httpCookieSpec = loadhttpCookieSpec(properties, httpCookieSpec);
         chunksize = loadChunkSize(properties, chunksize);
@@ -318,7 +318,7 @@ public abstract class InternalC8DBBuilder {
         return getProperty(properties, PROPERTY_KEY_EMAIL, currentValue, null);
     }
     
-    private static Boolean loadJWTAuth(final Properties properties, final Boolean currentValue) {
+    private static Boolean  loadJWTAuth(final Properties properties, final Boolean currentValue) {
         return Boolean
                 .parseBoolean(getProperty(properties, PROPERTY_KEY_JWT_AUTH, currentValue, C8Defaults.DEFAULT_JWT_AUTH));
     }

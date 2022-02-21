@@ -37,8 +37,7 @@ public class HttpConnectionFactory implements ConnectionFactory {
         super();
         builder = new HttpConnection.Builder().timeout(timeout).user(user).password(password).email(email)
                 .jwtAuthEnabled(jwtAuth).useSsl(useSsl).sslContext(sslContext).serializationUtil(util)
-                .contentType(protocol).ttl(connectionTtl).httpCookieSpec(httpCookieSpec).jwt(jwtToken)
-                .apiKey(apiKey);
+                .contentType(protocol).ttl(connectionTtl).httpCookieSpec(httpCookieSpec).jwt(jwtToken).apiKey(apiKey);
     }
 
     @Override
