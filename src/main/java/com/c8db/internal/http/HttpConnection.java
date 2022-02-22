@@ -18,6 +18,7 @@ import com.c8db.util.C8Serializer.Options;
 import com.c8db.velocystream.Request;
 import com.c8db.velocystream.RequestType;
 import com.c8db.velocystream.Response;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.HeaderElement;
 import org.apache.http.HeaderElementIterator;
@@ -91,11 +92,15 @@ public class HttpConnection implements Connection {
     private final Protocol contentType;
     private final HostDescription host;
     private volatile String jwt;
+    private volatile String apiKey;
+
 
     private HttpConnection(final HostDescription host, final Integer timeout, final String user, final String password,
                            final String email, final Boolean jwtAuthEnabled, final Boolean useSsl,
                            final SSLContext sslContext, final C8Serialization util,
-                           final Protocol contentType, final Long ttl, final String httpCookieSpec) {
+                           final Protocol contentType, final Long ttl, final String httpCookieSpec,
+                           final String jwt, final String apiKey) {
+
         super();
         this.host = host;
         this.user = user;
@@ -105,6 +110,8 @@ public class HttpConnection implements Connection {
         this.useSsl = useSsl;
         this.util = util;
         this.contentType = contentType;
+        this.jwt = jwt;
+        this.apiKey = apiKey;
         final RegistryBuilder<ConnectionSocketFactory> registryBuilder = RegistryBuilder
                 .create();
         if (Boolean.TRUE == useSsl) {
@@ -212,17 +219,26 @@ public class HttpConnection implements Connection {
         final String url = buildUrl(buildBaseUrl(host), request);
         final HttpRequestBase httpRequest = buildHttpRequestBase(request, url);
         httpRequest.setHeader("User-Agent", "Mozilla/5.0 (compatible; C8DB-JavaDriver/1.1; +http://mt.orz.at/)");
+
         if (contentType == Protocol.HTTP_VPACK) {
             httpRequest.setHeader("Accept", "application/x-velocypack");
         }
         addHeader(request, httpRequest);
         if (jwtAuthEnabled) {
-            if (jwt == null) {
+            if (StringUtils.isNotEmpty(apiKey) && jwt == null) {  //Use API key onlu if API Key is provided
+                LOGGER.info("Using API Key for authenication.");
+                httpRequest.addHeader("Authorization", "apikey " + apiKey);
+            } else if (jwt == null) { //Generate JWT using user credentials if jwt and apikey are absent
                 addJWT();
+                LOGGER.info("Using JWT for authentication.");
+                httpRequest.addHeader("Authorization", "bearer " + jwt);
+            } else { //Add Header when JWT is provided
+                LOGGER.info("Using JWT for authentication.");
+                httpRequest.addHeader("Authorization", "bearer " + jwt);
             }
-            httpRequest.addHeader("Authorization", "bearer " + jwt);
         } else {
             // basic auth instead
+            LOGGER.info("Using Credentials for authenication.");
             final Credentials credentials = addCredentials(httpRequest);
             if (LOGGER.isDebugEnabled()) {
                 CURLLogger.log(url, request, credentials, util);
@@ -283,6 +299,7 @@ public class HttpConnection implements Connection {
     private synchronized void addJWT() throws IOException {
         String authUrl = buildBaseUrl(host) + "/_open/auth/internal";
         Map<String, String> credentials = new HashMap<String, String>();
+
         credentials.put("username", user);
         credentials.put("password", password);
         credentials.put("email", email);
@@ -412,6 +429,8 @@ public class HttpConnection implements Connection {
         private Long ttl;
         private SSLContext sslContext;
         private Integer timeout;
+        private String jwt;
+        private String apiKey;
 
         public Builder user(final String user) {
             this.user = user;
@@ -420,6 +439,16 @@ public class HttpConnection implements Connection {
 
         public Builder password(final String password) {
             this.password = password;
+            return this;
+        }
+
+        public Builder jwt(final String jwt) {
+            this.jwt = jwt;
+            return this;
+        }
+
+        public Builder apiKey(final String apiKey) {
+            this.apiKey = apiKey;
             return this;
         }
 
@@ -475,7 +504,7 @@ public class HttpConnection implements Connection {
 
         public HttpConnection build() {
             return new HttpConnection(host, timeout, user, password, email, jwtAuthEnabled, useSsl, sslContext, util,
-                    contentType, ttl, httpCookieSpec);
+                    contentType, ttl, httpCookieSpec, jwt, apiKey);
         }
     }
 

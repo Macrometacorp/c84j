@@ -6,6 +6,7 @@ package com.c8db.internal;
 
 import com.arangodb.velocypack.Type;
 import com.c8db.C8Admin;
+import com.c8db.C8Alerts;
 import com.c8db.C8ApiKeys;
 import com.c8db.C8Collection;
 import com.c8db.C8Cursor;
@@ -436,5 +437,10 @@ public class C8DatabaseImpl extends InternalC8Database<C8DBImpl, C8ExecutorSync>
     @Override 
     public C8ApiKeys apiKeys() {
         return new C8ApiKeysImpl(this);
+    }
+
+    @Override
+    public C8Alerts alerts() {
+        return new C8AlertsImpl(this);
     }
 }

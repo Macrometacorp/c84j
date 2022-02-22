@@ -39,6 +39,7 @@ import com.c8db.internal.C8DBImpl;
 import com.c8db.internal.C8Defaults;
 import com.c8db.internal.InternalC8DBBuilder;
 import com.c8db.internal.http.HttpCommunication;
+import com.c8db.internal.http.HttpConnection;
 import com.c8db.internal.http.HttpConnectionFactory;
 import com.c8db.internal.net.ConnectionFactory;
 import com.c8db.internal.net.Host;
@@ -160,6 +161,16 @@ public interface C8DB extends C8SerializationAccessor {
 
         public Builder email(final String email) {
             setEmail(email);
+            return this;
+        }
+
+        public Builder jwtToken(final String jwt) {
+            setJwtToken(jwt);
+            return this;
+        }
+
+        public Builder apiKey(final String apiKey) {
+            setApiKey(apiKey);
             return this;
         }
 
@@ -583,6 +594,7 @@ public interface C8DB extends C8SerializationAccessor {
             if (hosts.isEmpty()) {
                 hosts.add(host);
             }
+
             final VPack vpacker = vpackBuilder.serializeNullValues(false).build();
             final VPack vpackerNull = vpackBuilder.serializeNullValues(true).build();
             final VPackParser vpackParser = vpackParserBuilder.build();
@@ -602,12 +614,11 @@ public interface C8DB extends C8SerializationAccessor {
             final ConnectionFactory connectionFactory = (protocol == null || Protocol.VST == protocol)
                     ? new VstConnectionFactorySync(host, timeout, connectionTtl, useSsl, sslContext)
                     : new HttpConnectionFactory(timeout, user, password, email, jwtAuth, useSsl, sslContext, custom, protocol,
-                            connectionTtl, httpCookieSpec);
+                            connectionTtl, httpCookieSpec, jwtToken, apiKey);
 
             final Collection<Host> hostList = createHostList(max, connectionFactory);
             final HostResolver hostResolver = createHostResolver(hostList, max, connectionFactory);
             final HostHandler hostHandler = createHostHandler(hostResolver);
-
             return new C8DBImpl(
                     new VstCommunicationSync.Builder(hostHandler).timeout(timeout).user(user).password(password)
                             .useSsl(useSsl).sslContext(sslContext).chunksize(chunksize).maxConnections(maxConnections)
