@@ -5,17 +5,7 @@
 package com.c8db.internal;
 
 import com.arangodb.velocypack.Type;
-import com.c8db.C8Admin;
-import com.c8db.C8Alerts;
-import com.c8db.C8ApiKeys;
-import com.c8db.C8Collection;
-import com.c8db.C8Cursor;
-import com.c8db.C8DBException;
-import com.c8db.C8Database;
-import com.c8db.C8Event;
-import com.c8db.C8Graph;
-import com.c8db.C8Stream;
-import com.c8db.Restql;
+import com.c8db.*;
 import com.c8db.entity.C8DBVersion;
 import com.c8db.entity.C8StreamEntity;
 import com.c8db.entity.C8qlExecutionExplainEntity;
@@ -442,5 +432,10 @@ public class C8DatabaseImpl extends InternalC8Database<C8DBImpl, C8ExecutorSync>
     @Override
     public C8Alerts alerts() {
         return new C8AlertsImpl(this);
+    }
+
+    @Override
+    public C8KeyValue kv(final String name) {
+        return new C8KeyValueImpl(this, name);
     }
 }

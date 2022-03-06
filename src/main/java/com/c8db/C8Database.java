@@ -682,4 +682,11 @@ public interface C8Database extends C8SerializationAccessor {
      * @return C8Alerts handler
      */
     C8Alerts alerts();
+
+    /**
+     * Returns a {@code C8KeyValue} instance.
+     * @param  name The name of the KV
+     * @return C8KeyValue handler
+     */
+    C8KeyValue kv(final String name);
 }
