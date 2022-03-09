@@ -677,6 +677,13 @@ public interface C8Database extends C8SerializationAccessor {
     C8ApiKeys apiKeys();
 
     /**
+     * Returns a {@code C8User} instance.
+     *
+     * @return C8User handler
+     */
+    C8User user();
+
+    /**
      * Returns a {@code C8Alerts} instance.
      *
      * @return C8Alerts handler

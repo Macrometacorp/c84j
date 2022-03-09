@@ -23,6 +23,7 @@ public abstract class InternalC8ApiKeys<A extends InternalC8DB<E>, D extends Int
         extends C8Executeable<E> {
 
     protected static final String PATH_API_KEY_VALIDATE = "/_api/key/validate";
+    protected static final String PATH_API_KEY = "/_api/key";
 
     private final D db;
 
@@ -48,4 +49,20 @@ public abstract class InternalC8ApiKeys<A extends InternalC8DB<E>, D extends Int
         return request;
     }
 
-}
+    protected ResponseDeserializer<String> streamAccessLevelResponseDeserializer() {
+        return new ResponseDeserializer<String>() {
+            @Override
+            public String deserialize(final Response response) throws VPackException {
+                final VPackSlice result = response.getBody().get(C8ResponseField.RESULT);
+                return util().deserialize(result,  new Type<String>(){}.getType());
+            }
+        };
+    }
+
+    protected Request streamAccessLevelRequest(final String keyId, final String stream) {
+        final Request request = request(db.tenant(), db.name(), RequestType.GET, PATH_API_KEY, keyId,
+            "database", db.name(), "stream", stream);
+        return request;
+    }
+
+    }

@@ -18,4 +18,9 @@ public class C8ApiKeysImpl extends InternalC8ApiKeys<C8DBImpl, C8DatabaseImpl, C
     public ApiKeyEntity validateApiKey(String apikey) {
 	    return executor.execute(validateApiKeyRequest(apikey), validateApiKeyResponseDeserializer());
     }
+
+    @Override
+    public String getStreamAccessLevel(String keyId, String stream) {
+        return executor.execute(streamAccessLevelRequest(keyId, stream), streamAccessLevelResponseDeserializer());
+    }
 }

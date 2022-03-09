@@ -15,6 +15,7 @@ import com.c8db.C8Database;
 import com.c8db.C8Event;
 import com.c8db.C8Graph;
 import com.c8db.C8Stream;
+import com.c8db.C8User;
 import com.c8db.Restql;
 import com.c8db.entity.C8DBVersion;
 import com.c8db.entity.C8StreamEntity;
@@ -437,6 +438,11 @@ public class C8DatabaseImpl extends InternalC8Database<C8DBImpl, C8ExecutorSync>
     @Override 
     public C8ApiKeys apiKeys() {
         return new C8ApiKeysImpl(this);
+    }
+
+    @Override
+    public C8User user() {
+        return new C8UserImpl(this);
     }
 
     @Override
