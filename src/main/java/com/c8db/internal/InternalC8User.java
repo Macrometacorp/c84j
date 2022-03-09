@@ -34,7 +34,7 @@ public abstract class InternalC8User<A extends InternalC8DB<E>, D extends Intern
             public StreamAccessLevel deserialize(final Response response) throws VPackException {
                 final VPackSlice result = response.getBody().get(C8ResponseField.RESULT);
                 String level = util().deserialize(result,  new Type<String>(){}.getType());
-                return StreamAccessLevel.fromLevel(level);
+                return StreamAccessLevel.fromLevelName(level);
             }
         };
     }

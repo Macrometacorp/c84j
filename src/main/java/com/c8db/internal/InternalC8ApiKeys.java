@@ -56,7 +56,7 @@ public abstract class InternalC8ApiKeys<A extends InternalC8DB<E>, D extends Int
             public StreamAccessLevel deserialize(final Response response) throws VPackException {
                 final VPackSlice result = response.getBody().get(C8ResponseField.RESULT);
                 String level = util().deserialize(result,  new Type<String>(){}.getType());
-                return StreamAccessLevel.fromLevel(level);
+                return StreamAccessLevel.fromLevelName(level);
             }
         };
     }
