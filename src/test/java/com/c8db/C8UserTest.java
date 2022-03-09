@@ -17,6 +17,7 @@
 package com.c8db;
 
 import com.c8db.C8DB.Builder;
+import com.c8db.entity.StreamAccessLevel;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -52,7 +53,7 @@ public class C8UserTest extends BaseTest {
 
     @Test
     public void getBacklog() {
-        String apiKeyStreamAccess = db.user().getStreamAccessLevel("key", STREAM_NAME);
+        StreamAccessLevel apiKeyStreamAccess = db.user().getStreamAccessLevel("key", STREAM_NAME);
         assertThat(apiKeyStreamAccess, is(notNullValue()));
     }
 

@@ -5,6 +5,7 @@
 package com.c8db.internal;
 
 import com.c8db.C8User;
+import com.c8db.entity.StreamAccessLevel;
 
 public class C8UserImpl extends InternalC8User<C8DBImpl, C8DatabaseImpl, C8ExecutorSync>
         implements C8User {
@@ -14,7 +15,7 @@ public class C8UserImpl extends InternalC8User<C8DBImpl, C8DatabaseImpl, C8Execu
     }
 
     @Override
-    public String getStreamAccessLevel(String keyId, String stream) {
+    public StreamAccessLevel getStreamAccessLevel(String keyId, String stream) {
         return executor.execute(streamAccessLevelRequest(keyId, stream), streamAccessLevelResponseDeserializer());
     }
 }

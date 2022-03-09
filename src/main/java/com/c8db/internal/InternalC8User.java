@@ -7,6 +7,7 @@ package com.c8db.internal;
 import com.arangodb.velocypack.Type;
 import com.arangodb.velocypack.VPackSlice;
 import com.arangodb.velocypack.exception.VPackException;
+import com.c8db.entity.StreamAccessLevel;
 import com.c8db.internal.C8Executor.ResponseDeserializer;
 import com.c8db.velocystream.Request;
 import com.c8db.velocystream.RequestType;
@@ -27,12 +28,13 @@ public abstract class InternalC8User<A extends InternalC8DB<E>, D extends Intern
         this.db = db;
     }
 
-    protected ResponseDeserializer<String> streamAccessLevelResponseDeserializer() {
-        return new ResponseDeserializer<String>() {
+    protected ResponseDeserializer<StreamAccessLevel> streamAccessLevelResponseDeserializer() {
+        return new ResponseDeserializer<StreamAccessLevel>() {
             @Override
-            public String deserialize(final Response response) throws VPackException {
+            public StreamAccessLevel deserialize(final Response response) throws VPackException {
                 final VPackSlice result = response.getBody().get(C8ResponseField.RESULT);
-                return util().deserialize(result,  new Type<String>(){}.getType());
+                String level = util().deserialize(result,  new Type<String>(){}.getType());
+                return StreamAccessLevel.fromLevel(level);
             }
         };
     }
@@ -43,4 +45,4 @@ public abstract class InternalC8User<A extends InternalC8DB<E>, D extends Intern
         return request;
     }
 
-    }
+}

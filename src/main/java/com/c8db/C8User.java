@@ -17,6 +17,8 @@
 
 package com.c8db;
 
+import com.c8db.entity.StreamAccessLevel;
+
 /**
  * Interface for operations on users level.
  *
@@ -29,7 +31,7 @@ public interface C8User extends C8SerializationAccessor {
      * @param stream stream name
      * @return result of access level. Possible results are `ro`, `rw`, `none`
      */
-    String getStreamAccessLevel(final String user, final String stream);
+    StreamAccessLevel getStreamAccessLevel(final String user, final String stream);
 
     // TODO: Implement other required user features.
 }

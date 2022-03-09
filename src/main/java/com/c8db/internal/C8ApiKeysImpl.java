@@ -6,6 +6,7 @@ package com.c8db.internal;
 
 import com.c8db.C8ApiKeys;
 import com.c8db.entity.ApiKeyEntity;
+import com.c8db.entity.StreamAccessLevel;
 
 public class C8ApiKeysImpl extends InternalC8ApiKeys<C8DBImpl, C8DatabaseImpl, C8ExecutorSync>
         implements C8ApiKeys {
@@ -20,7 +21,7 @@ public class C8ApiKeysImpl extends InternalC8ApiKeys<C8DBImpl, C8DatabaseImpl, C
     }
 
     @Override
-    public String getStreamAccessLevel(String keyId, String stream) {
+    public StreamAccessLevel getStreamAccessLevel(String keyId, String stream) {
         return executor.execute(streamAccessLevelRequest(keyId, stream), streamAccessLevelResponseDeserializer());
     }
 }
