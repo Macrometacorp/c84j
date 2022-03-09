@@ -8,13 +8,11 @@ public class C8KVPairReadOptions {
 
     private String offset;
     private String limit;
-    private String order;
 
     public C8KVPairReadOptions() {
         super();
         offset = String.valueOf(0);
         limit = String.valueOf(20);
-        order = "asc";
     }
 
     public String getOffset() {
@@ -40,21 +38,6 @@ public class C8KVPairReadOptions {
      */
     public C8KVPairReadOptions limit(final String limit) {
         this.limit = limit;
-        return this;
-    }
-
-
-    public String getOrder() {
-        return order;
-    }
-
-    /**
-     * @param order The order of returned KVs
-     *
-     * @return options
-     */
-    public C8KVPairReadOptions order(final String order) {
-        this.order = order;
         return this;
     }
 

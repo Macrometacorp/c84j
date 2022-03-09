@@ -55,7 +55,8 @@ public interface C8KeyValue {
      * @return information about the document
      * @throws C8DBException
      */
-    <T> MultiDocumentEntity<DocumentCreateEntity<T>> insertKVPairs(Collection<T> values, DocumentCreateOptions options)
+    MultiDocumentEntity<DocumentCreateEntity<BaseKeyValue>> insertKVPairs(Collection<BaseKeyValue> values,
+                                                                          DocumentCreateOptions options)
             throws C8DBException;
 
     /**
@@ -80,20 +81,17 @@ public interface C8KeyValue {
      * Retrieves the KV pair with the given {@code key} from the KV.
      *
      * @param key     The key of the pair
-     * @param type    The type of the document (POJO class, VPackSlice or String for
-     *                JSON)
      * @return the document identified by the key
      */
-    <T> T getKVPair(String key, Class<T> type) throws C8DBException;
+    BaseKeyValue getKVPair(String key) throws C8DBException;
 
     /**
      * Retrieves multiple pairs with the given {@code _key} from the KV.
      *
      * @param keys The keys of the pairs
-     * @param type The type of the documents (POJO class, VPackSlice or String for
-     *             JSON)
+     * @param options The read options - offset, limit, order
      * @return the documents and possible errors
      * @throws C8DBException
      */
-    <T> MultiDocumentEntity<T> getKVPairs(Collection<String> keys, Class<T> type) throws C8DBException;
+    MultiDocumentEntity<BaseKeyValue> getKVPairs(Collection<String> keys, C8KVPairReadOptions options) throws C8DBException;
 }

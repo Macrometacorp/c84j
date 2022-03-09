@@ -13,16 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
+ * Copyright (c) 2022 Macrometa Corp All rights reserved.
  */
 
 package com.c8db.entity;
 
-/**
- *
- */
 public enum CollectionType {
 
-    DOCUMENT(2), EDGES(3);
+    KV(1), DOCUMENT(2), EDGES(3), DYNAMO(4);
 
     private final int type;
 

@@ -8,6 +8,7 @@ public class C8KVCreateOptions {
 
     private String name;
     private Boolean stream;
+    private Boolean isLocal;
     private Boolean enableShards;
     private Boolean waitForSync;
     private String[] shardKeys;
@@ -59,6 +60,19 @@ public class C8KVCreateOptions {
      */
     public C8KVCreateOptions stream(final Boolean stream) {
         this.stream = stream;
+        return this;
+    }
+
+    public Boolean getLocal() {
+        return isLocal;
+    }
+
+    /**
+     * @param isLocal If true replication type of the collection will be set as local (default: false)
+     * @return {@link CollectionCreateOptions}
+     */
+    public C8KVCreateOptions isLocal(final Boolean isLocal) {
+        this.isLocal = isLocal;
         return this;
     }
 

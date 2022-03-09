@@ -5,11 +5,9 @@ package com.c8db.internal;
 
 import com.c8db.C8DBException;
 import com.c8db.C8KeyValue;
-import com.c8db.entity.DocumentCreateEntity;
-import com.c8db.entity.DocumentDeleteEntity;
-import com.c8db.entity.C8KVEntity;
-import com.c8db.entity.MultiDocumentEntity;
+import com.c8db.entity.*;
 import com.c8db.internal.util.DocumentUtil;
+import com.c8db.model.C8KVPairReadOptions;
 import com.c8db.model.DocumentCreateOptions;
 import com.c8db.model.DocumentDeleteOptions;
 import com.c8db.model.C8KVCreateOptions;
@@ -29,21 +27,22 @@ public class C8KeyValueImpl extends InternalC8KeyValue<C8DBImpl, C8DatabaseImpl,
 
     @Override
     public C8KVEntity create(C8KVCreateOptions options) throws C8DBException {
-        return executor.execute(createKVRequest(name, new C8KVCreateOptions()), C8KVEntity.class);
+        return executor.execute(createRequest(name, new C8KVCreateOptions()), C8KVEntity.class);
     }
 
     @Override
     public void drop() throws C8DBException {
-        executor.execute(null, Void.class);
+        executor.execute(dropRequest(), Void.class);
     }
 
     @Override
     public C8KVEntity truncate() throws C8DBException {
-        return executor.execute(null, C8KVEntity.class);
+        return executor.execute(truncateRequest(), Void.class);
     }
 
     @Override
-    public <T> MultiDocumentEntity<DocumentCreateEntity<T>> insertKVPairs(final Collection<T>  values, DocumentCreateOptions options)
+    public MultiDocumentEntity<DocumentCreateEntity<BaseKeyValue>> insertKVPairs(final Collection<BaseKeyValue>  values,
+                                                                                 DocumentCreateOptions options)
             throws C8DBException {
         return executor.execute(insertKVPairsRequest(values, options), insertKVPairsResponseDeserializer(values, options));
     }
@@ -61,10 +60,10 @@ public class C8KeyValueImpl extends InternalC8KeyValue<C8DBImpl, C8DatabaseImpl,
     }
 
     @Override
-    public <T> T getKVPair(String key, Class<T> type) throws C8DBException {
+    public BaseKeyValue getKVPair(String key) throws C8DBException {
         DocumentUtil.validateDocumentKey(key);
         try {
-            return executor.execute(getKVPairRequest(key), type);
+            return executor.execute(getKVPairRequest(key), BaseKeyValue.class);
         } catch (final C8DBException e) {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug(e.getMessage(), e);
@@ -84,7 +83,8 @@ public class C8KeyValueImpl extends InternalC8KeyValue<C8DBImpl, C8DatabaseImpl,
     }
 
     @Override
-    public <T> MultiDocumentEntity<T> getKVPairs(Collection<String> keys, Class<T> type) throws C8DBException {
-        return executor.execute(getKVPairsRequest(keys), getKVPairsResponseDeserializer(type));
+    public MultiDocumentEntity<BaseKeyValue> getKVPairs(final Collection<String> keys, final C8KVPairReadOptions options)
+            throws C8DBException {
+        return executor.execute(getKVPairsRequest(keys, options), getKVPairsResponseDeserializer());
     }
 }
