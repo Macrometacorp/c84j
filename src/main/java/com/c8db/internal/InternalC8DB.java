@@ -277,9 +277,25 @@ public abstract class InternalC8DB<E extends C8Executor> extends C8Executeable<E
                 "*").setBody(util().serialize(OptionsBuilder.build(new UserAccessOptions(), permissions)));
     }
 
+    protected Request getUserStreamAccessRequest(final String tenant, final String user, final String database, final String stream) {
+        return request(tenant, C8RequestParam.SYSTEM, RequestType.GET, PATH_API_USER, user,
+            C8RequestParam.DATABASE, database, C8RequestParam.STREAM, stream);
+    }
+
+    protected ResponseDeserializer<Permissions> streamAccessResponseDeserializer() {
+        return new ResponseDeserializer<Permissions>() {
+            @Override
+            public Permissions deserialize(final Response response) throws VPackException {
+                final VPackSlice result = response.getBody().get(C8ResponseField.RESULT);
+                String level = util().deserialize(result,  new Type<String>(){}.getType());
+                return Permissions.valueOf(level.toUpperCase());
+            }
+        };
+    }
+
     protected Request updateUserDefaultCollectionAccessRequest(final String user, final Permissions permissions) {
         return request(C8RequestParam.DEMO_TENANT, C8RequestParam.SYSTEM, RequestType.PUT, PATH_API_USER, user, C8RequestParam.DATABASE,
-                "*", "*").setBody(util().serialize(OptionsBuilder.build(new UserAccessOptions(), permissions)));
+            "*", "*").setBody(util().serialize(OptionsBuilder.build(new UserAccessOptions(), permissions)));
     }
 
     protected Request getLogsRequest(final LogOptions options) {

@@ -5,7 +5,7 @@
 package com.c8db;
 
 import com.c8db.entity.ApiKeyEntity;
-import com.c8db.entity.StreamAccessLevel;
+import com.c8db.entity.Permissions;
 
 /**
  * Interface for operations on administration level.
@@ -26,7 +26,7 @@ public interface C8ApiKeys extends C8SerializationAccessor {
      * @param stream stream name
      * @return result of access level. Possible results are `ro`, `rw`, `none`
      */
-    StreamAccessLevel getStreamAccessLevel(final String keyId, final String stream);
+    Permissions getStreamAccess(final String keyId, final String stream);
 
     // TODO: Implement other required apikeys features.
 

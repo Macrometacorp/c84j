@@ -39,7 +39,6 @@ import com.c8db.internal.C8DBImpl;
 import com.c8db.internal.C8Defaults;
 import com.c8db.internal.InternalC8DBBuilder;
 import com.c8db.internal.http.HttpCommunication;
-import com.c8db.internal.http.HttpConnection;
 import com.c8db.internal.http.HttpConnectionFactory;
 import com.c8db.internal.net.ConnectionFactory;
 import com.c8db.internal.net.Host;
@@ -967,6 +966,14 @@ public interface C8DB extends C8SerializationAccessor {
     void grantDefaultCollectionAccess(String user, Permissions permissions) throws C8DBException;
 
     /**
+     * Get the stream access level
+     * @param user user name
+     * @param stream stream name
+     * @return result of access level. Possible results are `ro`, `rw`, `none`
+     */
+    Permissions getStreamAccess(final String user, final String tenant, String fabric, final String stream);
+
+    /**
      * Generic Execute. Use this method to execute custom FOXX services.
      *
      * @param request VelocyStream request
@@ -1025,5 +1032,6 @@ public interface C8DB extends C8SerializationAccessor {
      * @return ArangoDB
      */
     C8DB _setCursorInitializer(C8CursorInitializer cursorInitializer);
+
 
 }

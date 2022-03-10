@@ -8,7 +8,7 @@ import com.arangodb.velocypack.Type;
 import com.arangodb.velocypack.VPackSlice;
 import com.arangodb.velocypack.exception.VPackException;
 import com.c8db.entity.ApiKeyEntity;
-import com.c8db.entity.StreamAccessLevel;
+import com.c8db.entity.Permissions;
 import com.c8db.internal.C8Executor.ResponseDeserializer;
 import com.c8db.internal.util.C8SerializationFactory;
 import com.c8db.model.ApiKeyOptions;
@@ -50,21 +50,22 @@ public abstract class InternalC8ApiKeys<A extends InternalC8DB<E>, D extends Int
         return request;
     }
 
-    protected ResponseDeserializer<StreamAccessLevel> streamAccessLevelResponseDeserializer() {
-        return new ResponseDeserializer<StreamAccessLevel>() {
+    protected Request streamAccessLevelRequest(final String keyId, final String stream) {
+        final Request request = request(db.tenant(), db.name(), RequestType.GET, PATH_API_KEY, keyId,
+            C8RequestParam.DATABASE, C8RequestParam.SYSTEM, C8RequestParam.STREAM, stream);
+        return request;
+    }
+
+    protected ResponseDeserializer<Permissions> streamAccessLevelResponseDeserializer() {
+        return new ResponseDeserializer<Permissions>() {
             @Override
-            public StreamAccessLevel deserialize(final Response response) throws VPackException {
+            public Permissions deserialize(final Response response) throws VPackException {
                 final VPackSlice result = response.getBody().get(C8ResponseField.RESULT);
                 String level = util().deserialize(result,  new Type<String>(){}.getType());
-                return StreamAccessLevel.fromLevelName(level);
+                return Permissions.valueOf(level.toUpperCase());
             }
         };
     }
 
-    protected Request streamAccessLevelRequest(final String keyId, final String stream) {
-        final Request request = request(db.tenant(), db.name(), RequestType.GET, PATH_API_KEY, keyId,
-            "database", db.name(), "stream", stream);
-        return request;
-    }
 
 }
