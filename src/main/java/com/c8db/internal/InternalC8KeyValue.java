@@ -27,7 +27,7 @@ public abstract class InternalC8KeyValue<A extends InternalC8DB<E>, D extends In
 
     private static final String OFFSET = "offset";
     private static final String LIMIT = "limit";
-    private static final String ORDER = "order";
+    private static final String EXPIRATION = "expiration";
 
     private static final String NEW = "new";
     private static final String OLD = "old";
@@ -49,7 +49,7 @@ public abstract class InternalC8KeyValue<A extends InternalC8DB<E>, D extends In
         return name;
     }
 
-    protected Request insertKVPairsRequest(final Collection<BaseKeyValue> values, final DocumentCreateOptions params) {
+    protected  <T> Request insertKVPairsRequest(final Collection<T> values, final DocumentCreateOptions params) {
         final Request request = request(db.tenant(), db.name(), RequestType.PUT, PATH_API_KV, name, "value");
         request.setBody(util(Serializer.CUSTOM).serialize(values,
                 new C8Serializer.Options().serializeNullValues(false).stringAsJson(true)));
@@ -57,17 +57,17 @@ public abstract class InternalC8KeyValue<A extends InternalC8DB<E>, D extends In
     }
 
     @SuppressWarnings("unchecked")
-    protected ResponseDeserializer<MultiDocumentEntity<DocumentCreateEntity<BaseKeyValue>>> insertKVPairsResponseDeserializer(
-            final Collection<BaseKeyValue> values, final DocumentCreateOptions params) {
+    protected  <T> ResponseDeserializer<MultiDocumentEntity<DocumentCreateEntity<T>>> insertKVPairsResponseDeserializer(
+            final Collection<T> values, final DocumentCreateOptions params) {
         return response -> {
-            Class<BaseKeyValue> type = null;
+            Class<T> type = null;
             if (Boolean.TRUE == params.getReturnNew()) {
                 if (!values.isEmpty()) {
-                    type = (Class<BaseKeyValue>) values.iterator().next().getClass();
+                    type = (Class<T>) values.iterator().next().getClass();
                 }
             }
-            final MultiDocumentEntity<DocumentCreateEntity<BaseKeyValue>> multiDocument = new MultiDocumentEntity<>();
-            final Collection<DocumentCreateEntity<BaseKeyValue>> docs = new ArrayList<>();
+            final MultiDocumentEntity<DocumentCreateEntity<T>> multiDocument = new MultiDocumentEntity<>();
+            final Collection<DocumentCreateEntity<T>> docs = new ArrayList<>();
             final Collection<ErrorEntity> errors = new ArrayList<>();
             final Collection<Object> documentsAndErrors = new ArrayList<>();
             final VPackSlice body = response.getBody();
@@ -79,14 +79,14 @@ public abstract class InternalC8KeyValue<A extends InternalC8DB<E>, D extends In
                         errors.add(error);
                         documentsAndErrors.add(error);
                     } else {
-                        final DocumentCreateEntity<BaseKeyValue> doc = util().deserialize(next, DocumentCreateEntity.class);
+                        final DocumentCreateEntity<T> doc = util().deserialize(next, DocumentCreateEntity.class);
                         final VPackSlice newDoc = next.get(NEW);
                         if (newDoc.isObject()) {
-                            doc.setNew((BaseKeyValue) util(Serializer.CUSTOM).deserialize(newDoc, type));
+                            doc.setNew((T) util(Serializer.CUSTOM).deserialize(newDoc, type));
                         }
                         final VPackSlice oldDoc = next.get(OLD);
                         if (oldDoc.isObject()) {
-                            doc.setOld((BaseKeyValue) util(Serializer.CUSTOM).deserialize(oldDoc, type));
+                            doc.setOld((T) util(Serializer.CUSTOM).deserialize(oldDoc, type));
                         }
                         docs.add(doc);
                         documentsAndErrors.add(doc);
@@ -115,10 +115,10 @@ public abstract class InternalC8KeyValue<A extends InternalC8DB<E>, D extends In
         return request;
     }
 
-    protected ResponseDeserializer<MultiDocumentEntity<BaseKeyValue>> getKVPairsResponseDeserializer() {
+    protected <T> ResponseDeserializer<MultiDocumentEntity<T>> getKVPairsResponseDeserializer() {
         return response -> {
-            final MultiDocumentEntity<BaseKeyValue> multiDocument = new MultiDocumentEntity<>();
-            final Collection<BaseKeyValue> docs = new ArrayList<>();
+            final MultiDocumentEntity<T> multiDocument = new MultiDocumentEntity<>();
+            final Collection<T> docs = new ArrayList<>();
             final Collection<ErrorEntity> errors = new ArrayList<>();
             final Collection<Object> documentsAndErrors = new ArrayList<>();
             final VPackSlice kvs = response.getBody().get("result");
@@ -129,7 +129,7 @@ public abstract class InternalC8KeyValue<A extends InternalC8DB<E>, D extends In
                     errors.add(error);
                     documentsAndErrors.add(error);
                 } else {
-                    final BaseKeyValue doc = util(Serializer.CUSTOM).deserialize(next, BaseKeyValue.class);
+                    final T doc = util(Serializer.CUSTOM).deserialize(next, BaseKeyValue.class);
                     docs.add(doc);
                     documentsAndErrors.add(doc);
                 }
@@ -199,12 +199,15 @@ public abstract class InternalC8KeyValue<A extends InternalC8DB<E>, D extends In
         };
     }
 
-    protected Request createRequest(final String name, final C8KVCreateOptions options) {
+    protected Request createRequest(final String name, final Boolean expiration, final CollectionCreateOptions options) {
 
         VPackSlice body = util()
-                .serialize(OptionsBuilder.build(options != null ? options : new C8KVCreateOptions(), name));
+                .serialize(OptionsBuilder.build(options != null ? options : new CollectionCreateOptions(), name));
 
-        return request(db.tenant(), db.name(), RequestType.POST, PATH_API_KV, name).setBody(body);
+        final Request request = request(db.tenant(), db.name(), RequestType.POST, PATH_API_KV, name);
+        request.putQueryParam(EXPIRATION, expiration);
+        request.setBody(body);
+        return request;
     }
 
     protected Request truncateRequest() {

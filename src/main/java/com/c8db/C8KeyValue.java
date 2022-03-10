@@ -21,11 +21,12 @@ public interface C8KeyValue {
      * Creates a KV with the given {@code options} for this KV's
      * name, then returns KV name from the server.
      *
-     * @param options Additional options, can be null
+     * @param expiration Flag for expiration of the values
+     * @param options Additional options, can be null*
      * @return The KV name
      * @throws C8DBException
      */
-    C8KVEntity create(C8KVCreateOptions options) throws C8DBException;
+    C8KVEntity create(final Boolean expiration, CollectionCreateOptions options) throws C8DBException;
 
 
     /**
@@ -55,8 +56,7 @@ public interface C8KeyValue {
      * @return information about the document
      * @throws C8DBException
      */
-    MultiDocumentEntity<DocumentCreateEntity<BaseKeyValue>> insertKVPairs(Collection<BaseKeyValue> values,
-                                                                          DocumentCreateOptions options)
+    <T> MultiDocumentEntity<DocumentCreateEntity<T>> insertKVPairs(Collection<T> values, DocumentCreateOptions options)
             throws C8DBException;
 
     /**
@@ -83,7 +83,7 @@ public interface C8KeyValue {
      * @param key     The key of the pair
      * @return the document identified by the key
      */
-    BaseKeyValue getKVPair(String key) throws C8DBException;
+    <T> T getKVPair(String key) throws C8DBException;
 
     /**
      * Retrieves multiple pairs with the given {@code _key} from the KV.
@@ -93,5 +93,5 @@ public interface C8KeyValue {
      * @return the documents and possible errors
      * @throws C8DBException
      */
-    MultiDocumentEntity<BaseKeyValue> getKVPairs(Collection<String> keys, C8KVPairReadOptions options) throws C8DBException;
+   <T> MultiDocumentEntity<T> getKVPairs(Collection<String> keys, C8KVPairReadOptions options) throws C8DBException;
 }
