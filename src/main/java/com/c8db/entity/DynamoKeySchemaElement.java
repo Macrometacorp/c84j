@@ -8,6 +8,6 @@ import lombok.Data;
 
 @Data
 public class DynamoKeySchemaElement {
-     private String attributeName;
-     private String keyType;
+     private String AttributeName;
+     private String KeyType;
 }

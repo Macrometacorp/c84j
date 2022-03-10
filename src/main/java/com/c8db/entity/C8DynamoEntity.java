@@ -10,11 +10,16 @@ import java.util.List;
 
 @Data
 public class C8DynamoEntity implements Entity {
-    private String tableName;
-    private String tableSizeBytes;
-    private String tableStatus;
-    private long creationDateTime;
-    private long itemCount;
-	private List<DynamoAttributeDefinition> attributeDefinitions;
-	private List<DynamoKeySchemaElement> keySchema;
+    C8DynamoTableDescription TableDescription;
+
+    @Data
+    public static class C8DynamoTableDescription{
+        private String TableName;
+        private long TableSizeBytes;
+        private String TableStatus;
+        private long CreationDateTime;
+        private long ItemCount;
+        private List<DynamoAttributeDefinition> AttributeDefinitions;
+        private List<DynamoKeySchemaElement> KeySchema;
+    }
 }

@@ -18,6 +18,7 @@ public class C8DynamoImpl extends InternalC8Dynamo<C8DBImpl, C8DatabaseImpl, C8E
 
     @Override
     public C8DynamoEntity create(C8DynamoCreateOptions options) throws C8DBException {
-        return executor.execute(createRequest(tableName, new C8DynamoCreateOptions()), C8DynamoEntity.class);
+        return executor.execute(createRequest(tableName, new C8DynamoCreateOptions(options)),
+                getC8DynamoTableResponseDeserializer());
     }
 }

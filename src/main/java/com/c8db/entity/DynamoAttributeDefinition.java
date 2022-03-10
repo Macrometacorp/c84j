@@ -8,6 +8,6 @@ import lombok.Data;
 
 @Data
 public class DynamoAttributeDefinition {
-    private String  attributeName;
-    private String  attributeType;
+    private String  AttributeName;
+    private String  AttributeType;
 }
