@@ -114,4 +114,8 @@ public class OptionsBuilder {
     public static ApiKeyOptions build(final ApiKeyOptions options, final String apiKey) {
         return options.apiKey(apiKey);
     }
+
+    public static C8DynamoCreateOptions build(final C8DynamoCreateOptions options, final String tableName) {
+        return options.tableName(tableName);
+    }
 }

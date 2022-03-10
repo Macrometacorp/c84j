@@ -682,4 +682,6 @@ public interface C8Database extends C8SerializationAccessor {
      * @return C8Alerts handler
      */
     C8Alerts alerts();
+
+    C8Dynamo dynamo(final String tableName);
 }
