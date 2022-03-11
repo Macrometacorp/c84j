@@ -2,7 +2,6 @@ package com.c8db.model;
 
 import com.c8db.entity.DynamoAttributeDefinition;
 import com.c8db.entity.DynamoKeySchemaElement;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.util.List;
 
@@ -10,7 +9,6 @@ public class C8DynamoCreateOptions {
     private List<DynamoAttributeDefinition> AttributeDefinitions;
     private String TableName;
     private List<DynamoKeySchemaElement> KeySchema;
-    //private ObjectNode provisionedThroughput;
 
     public List<DynamoAttributeDefinition> getAttributeDefinitionList() {
         return AttributeDefinitions;
@@ -24,17 +22,15 @@ public class C8DynamoCreateOptions {
         return KeySchema;
     }
 
-    /*public ObjectNode getProvisionedThroughput() {
-        return provisionedThroughput;
-    }*/
-
-
-
     public C8DynamoCreateOptions() {
         super();
     }
 
-    public C8DynamoCreateOptions(List<DynamoAttributeDefinition> attributeDefinitionList, String tableName, List<DynamoKeySchemaElement> keySchemaElementList, ObjectNode provisionedThroughput) {
+    public C8DynamoCreateOptions(String tableName) {
+        this.TableName = tableName;
+    }
+
+    public C8DynamoCreateOptions(List<DynamoAttributeDefinition> attributeDefinitionList, String tableName, List<DynamoKeySchemaElement> keySchemaElementList) {
         this.AttributeDefinitions = attributeDefinitionList;
         this.TableName = tableName;
         this.KeySchema = keySchemaElementList;
@@ -59,7 +55,6 @@ public class C8DynamoCreateOptions {
                 "attributeDefinitionList=" + AttributeDefinitions +
                 ", tableName='" + TableName + '\'' +
                 ", keySchemaElementList=" + KeySchema +
-                //", provisionedThroughput=" + provisionedThroughput +
                 '}';
     }
 }
