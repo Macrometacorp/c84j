@@ -16,12 +16,16 @@
 
 package com.c8db.internal.net;
 
+import com.c8db.Service;
+
 import java.io.IOException;
 
 /**
  *
  */
 public interface HostHandler {
+
+    void service(Service name);
 
     Host get(HostHandle hostHandle, AccessType accessType);
 

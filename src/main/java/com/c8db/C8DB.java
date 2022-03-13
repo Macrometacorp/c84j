@@ -120,7 +120,19 @@ public interface C8DB extends C8SerializationAccessor {
          * @return {@link C8DB.Builder}
          */
         public Builder host(final String host, final int port) {
-            setHost(host, port);
+            setHost(Service.C8DB, host, port);
+            return this;
+        }
+
+        /**
+         * Adds a streams admin host to connect to. Multiple hosts can be added to provide fallbacks.
+         *
+         * @param host address of the host
+         * @param port port of the host
+         * @return {@link C8DB.Builder}
+         */
+        public Builder serviceHost(Service service, final String host, final int port) {
+            setHost(service, host, port);
             return this;
         }
 
@@ -590,8 +602,11 @@ public interface C8DB extends C8SerializationAccessor {
          * @return {@link C8DB}
          */
         public synchronized C8DB build() {
-            if (hosts.isEmpty()) {
-                hosts.add(host);
+            if (hosts.get(Service.C8DB).isEmpty()) {
+                hosts.get(Service.C8DB).add(host);
+            }
+            if (hosts.get(Service.C8STREAMS).isEmpty()) {
+                hosts.get(Service.C8STREAMS).add(streamsAdminHost);
             }
 
             final VPack vpacker = vpackBuilder.serializeNullValues(false).build();
@@ -613,10 +628,10 @@ public interface C8DB extends C8SerializationAccessor {
             final ConnectionFactory connectionFactory = (protocol == null || Protocol.VST == protocol)
                     ? new VstConnectionFactorySync(host, timeout, connectionTtl, useSsl, sslContext)
                     : new HttpConnectionFactory(timeout, user, password, email, jwtAuth, useSsl, sslContext, custom, protocol,
-                            connectionTtl, httpCookieSpec, jwtToken, apiKey);
+                            connectionTtl, httpCookieSpec, jwtToken, apiKey, hosts.get(Service.C8DB).get(0));
 
-            final Collection<Host> hostList = createHostList(max, connectionFactory);
-            final HostResolver hostResolver = createHostResolver(hostList, max, connectionFactory);
+            final Map<Service, Collection<Host>> hostMatrix = createHostMatrix(max, connectionFactory);
+            final HostResolver hostResolver = createHostResolver(hostMatrix, max, connectionFactory);
             final HostHandler hostHandler = createHostHandler(hostResolver);
             return new C8DBImpl(
                     new VstCommunicationSync.Builder(hostHandler).timeout(timeout).user(user).password(password)

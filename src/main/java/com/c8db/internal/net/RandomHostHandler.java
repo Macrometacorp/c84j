@@ -16,6 +16,8 @@
 
 package com.c8db.internal.net;
 
+import com.c8db.Service;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -29,16 +31,28 @@ public class RandomHostHandler implements HostHandler {
     private final HostHandler fallback;
     private Host origin;
     private Host current;
+    private Service service;
+    private boolean initialized;
 
     public RandomHostHandler(final HostResolver resolver, final HostHandler fallback) {
         super();
         this.resolver = resolver;
         this.fallback = fallback;
-        origin = current = getRandomHost(true, false);
+    }
+
+    @Override
+    public void service(Service name) {
+        service = name;
+        if (!initialized) {
+            origin = current = getRandomHost(true, false);
+            initialized = true;
+        }
+        fallback.service(name);
     }
 
     @Override
     public Host get(final HostHandle hostHandle, AccessType accessType) {
+
         if (current == null) {
             origin = current = getRandomHost(false, true);
         }
@@ -58,7 +72,7 @@ public class RandomHostHandler implements HostHandler {
 
     private Host getRandomHost(final boolean initial, final boolean closeConnections) {
 
-        final ArrayList<Host> hosts = new ArrayList<Host>(resolver.resolve(initial, closeConnections).getHostsList());
+        final ArrayList<Host> hosts = new ArrayList<Host>(resolver.resolve(service, initial, closeConnections).getHostsList());
         Collections.shuffle(hosts);
         return hosts.get(0);
     }
@@ -74,7 +88,7 @@ public class RandomHostHandler implements HostHandler {
 
     @Override
     public void close() throws IOException {
-        final HostSet hosts = resolver.resolve(false, false);
+        final HostSet hosts = resolver.resolve(service, false, false);
         hosts.close();
     }
 

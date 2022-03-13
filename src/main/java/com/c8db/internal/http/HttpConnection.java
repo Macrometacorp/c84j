@@ -93,13 +93,14 @@ public class HttpConnection implements Connection {
     private final HostDescription host;
     private volatile String jwt;
     private volatile String apiKey;
+    private volatile HostDescription jwtHost;
 
 
     private HttpConnection(final HostDescription host, final Integer timeout, final String user, final String password,
                            final String email, final Boolean jwtAuthEnabled, final Boolean useSsl,
                            final SSLContext sslContext, final C8Serialization util,
                            final Protocol contentType, final Long ttl, final String httpCookieSpec,
-                           final String jwt, final String apiKey) {
+                           final String jwt, final String apiKey, final HostDescription jwtHost) {
 
         super();
         this.host = host;
@@ -112,6 +113,7 @@ public class HttpConnection implements Connection {
         this.contentType = contentType;
         this.jwt = jwt;
         this.apiKey = apiKey;
+        this.jwtHost = jwtHost;
         final RegistryBuilder<ConnectionSocketFactory> registryBuilder = RegistryBuilder
                 .create();
         if (Boolean.TRUE == useSsl) {
@@ -297,7 +299,7 @@ public class HttpConnection implements Connection {
     }
 
     private synchronized void addJWT() throws IOException {
-        String authUrl = buildBaseUrl(host) + "/_open/auth/internal";
+        String authUrl = buildBaseUrl(jwtHost) + "/_open/auth/internal";
         Map<String, String> credentials = new HashMap<String, String>();
 
         credentials.put("username", user);
@@ -431,6 +433,7 @@ public class HttpConnection implements Connection {
         private Integer timeout;
         private String jwt;
         private String apiKey;
+        private HostDescription jwtHost;
 
         public Builder user(final String user) {
             this.user = user;
@@ -502,9 +505,14 @@ public class HttpConnection implements Connection {
             return this;
         }
 
+        public Builder jwtHost(final HostDescription jwtHost) {
+            this.jwtHost = jwtHost;
+            return this;
+        }
+
         public HttpConnection build() {
             return new HttpConnection(host, timeout, user, password, email, jwtAuthEnabled, useSsl, sslContext, util,
-                    contentType, ttl, httpCookieSpec, jwt, apiKey);
+                    contentType, ttl, httpCookieSpec, jwt, apiKey, jwtHost);
         }
     }
 

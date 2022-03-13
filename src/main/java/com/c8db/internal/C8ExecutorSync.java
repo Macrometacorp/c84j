@@ -19,6 +19,7 @@ package com.c8db.internal;
 import java.io.IOException;
 import java.lang.reflect.Type;
 
+import com.c8db.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,13 +52,17 @@ public class C8ExecutorSync extends C8Executor {
     }
 
     public <T> T execute(final Request request, final Type type, final HostHandle hostHandle) throws C8DBException {
+        return execute(request, type, hostHandle, Service.C8DB);
+    }
+
+    public <T> T execute(final Request request, final Type type, final HostHandle hostHandle, Service service) throws C8DBException {
         return execute(request, new ResponseDeserializer<T>() {
             @Override
             public T deserialize(final Response response) throws VPackException {
                 T result = createResult(type, response);
                 return result;
             }
-        }, hostHandle);
+        }, hostHandle, service);
     }
 
     public <T> T execute(final Request request, final ResponseDeserializer<T> responseDeserializer)
@@ -66,11 +71,16 @@ public class C8ExecutorSync extends C8Executor {
     }
 
     public <T> T execute(final Request request, final ResponseDeserializer<T> responseDeserializer,
-            final HostHandle hostHandle) throws C8DBException {
+                         final HostHandle hostHandle) throws C8DBException {
+        return execute(request, responseDeserializer, hostHandle, Service.C8DB);
+    }
+
+    public <T> T execute(final Request request, final ResponseDeserializer<T> responseDeserializer,
+            final HostHandle hostHandle, Service service) throws C8DBException {
 
         try {
 
-            final Response response = protocol.execute(request, hostHandle);
+            final Response response = protocol.execute(request, hostHandle, service);
             T deserialize = responseDeserializer.deserialize(response);
 
             if (deserialize instanceof MetaAware) {

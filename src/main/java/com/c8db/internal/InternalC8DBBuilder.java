@@ -21,10 +21,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.net.ssl.SSLContext;
+
+import com.c8db.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,6 +63,7 @@ public abstract class InternalC8DBBuilder {
     private static final Logger LOG = LoggerFactory.getLogger(InternalC8DBBuilder.class);
 
     private static final String PROPERTY_KEY_HOSTS = "c8db.hosts";
+    private static final String PROPERTY_KEY_C8STREAMS_HOSTS = "c8streams.hosts";
     private static final String PROPERTY_KEY_HOST = "c8db.host";
     private static final String PROPERTY_KEY_PORT = "c8db.port";
     private static final String PROPERTY_KEY_TIMEOUT = "c8db.timeout";
@@ -77,8 +82,9 @@ public abstract class InternalC8DBBuilder {
     private static final String PROPERTY_KEY_LOAD_BALANCING_STRATEGY = "c8db.loadBalancingStrategy";
     private static final String DEFAULT_PROPERTY_FILE = "/c8db.properties";
 
-    protected final List<HostDescription> hosts;
+    protected final Map<Service, List<HostDescription>> hosts;
     protected HostDescription host;
+    protected HostDescription streamsAdminHost;
     protected Integer timeout;
     protected String user;
     protected String password;
@@ -108,7 +114,11 @@ public abstract class InternalC8DBBuilder {
         vpackBuilder.registerModule(new VPackDriverModule());
         vpackParserBuilder.registerModule(new VPackDriverModule());
         host = new HostDescription(C8Defaults.DEFAULT_HOST, C8Defaults.DEFAULT_PORT);
-        hosts = new ArrayList<HostDescription>();
+        streamsAdminHost = new HostDescription(C8Defaults.DEFAULT_HOST, C8Defaults.DEFAULT_STREAM_ADMIN_PORT);
+        hosts = new HashMap();
+        for (Service key : Service.values()) {
+            hosts.put(key, new ArrayList<>());
+        }
         user = C8Defaults.DEFAULT_USER;
         loadProperties(C8DB.class.getResourceAsStream(DEFAULT_PROPERTY_FILE));
     }
@@ -133,7 +143,8 @@ public abstract class InternalC8DBBuilder {
     }
 
     protected void loadProperties(final Properties properties) {
-        loadHosts(properties, this.hosts);
+        loadHosts(PROPERTY_KEY_HOSTS, Service.C8DB, properties, this.hosts);
+        //loadHosts(PROPERTY_KEY_C8STREAMS_HOSTS, Service.C8STREAMS, properties, this.hosts);
         final String host = loadHost(properties, this.host.getHost());
         final int port = loadPort(properties, this.host.getPort());
         this.host = new HostDescription(host, port);
@@ -154,8 +165,8 @@ public abstract class InternalC8DBBuilder {
         loadBalancingStrategy = loadLoadBalancingStrategy(properties, loadBalancingStrategy);
     }
 
-    protected void setHost(final String host, final int port) {
-        hosts.add(new HostDescription(host, port));
+    protected void setHost(final Service service, final String host, final int port) {
+        hosts.get(service).add(new HostDescription(host, port));
     }
 
     protected void setEmail(String email) {
@@ -252,22 +263,22 @@ public abstract class InternalC8DBBuilder {
         this.customSerializer = serializer;
     }
 
-    protected HostResolver createHostResolver(final Collection<Host> hosts, final int maxConnections,
-            final ConnectionFactory connectionFactory) {
+    protected HostResolver createHostResolver(final Map<Service, Collection<Host>> hostsMatrix, final int maxConnections,
+                                              final ConnectionFactory connectionFactory) {
 
         if (acquireHostList != null && acquireHostList) {
             LOG.debug("acquireHostList -> Use ExtendedHostResolver");
-            return new ExtendedHostResolver(new ArrayList<Host>(hosts), maxConnections, connectionFactory,
+            return new ExtendedHostResolver(HostUtils.cloneHostMatrix(hostsMatrix), maxConnections, connectionFactory,
                     acquireHostListInterval);
         } else {
             LOG.debug("Use SimpleHostResolver");
-            return new SimpleHostResolver(new ArrayList<Host>(hosts));
+            return new SimpleHostResolver(HostUtils.cloneHostMatrix(hostsMatrix));
         }
 
     }
 
-    private static void loadHosts(final Properties properties, final Collection<HostDescription> hosts) {
-        final String hostsProp = properties.getProperty(PROPERTY_KEY_HOSTS);
+    private static void loadHosts(final String propertyName, Service service, final Properties properties, final Map<Service, List<HostDescription>> hosts) {
+        final String hostsProp = properties.getProperty(propertyName);
         if (hostsProp != null) {
             final String[] hostsSplit = hostsProp.split(",");
             for (final String host : hostsSplit) {
@@ -277,7 +288,7 @@ public abstract class InternalC8DBBuilder {
                             "Could not load property-value c8db.hosts=%s. Expected format ip:port,ip:port,...",
                             hostsProp));
                 } else {
-                    hosts.add(new HostDescription(split[0], Integer.valueOf(split[1])));
+                    hosts.get(service).add(new HostDescription(split[0], Integer.valueOf(split[1])));
                 }
             }
         }
@@ -382,12 +393,19 @@ public abstract class InternalC8DBBuilder {
         return properties.getProperty(key, overrideDefaultValue);
     }
 
-    protected <C extends Connection> Collection<Host> createHostList(final int maxConnections,
-            final ConnectionFactory connectionFactory) {
-        final Collection<Host> hostList = new ArrayList<Host>();
-        for (final HostDescription host : hosts) {
-            hostList.add(HostUtils.createHost(host, maxConnections, connectionFactory));
+    protected <C extends Connection> Map<Service, Collection<Host>> createHostMatrix(final int maxConnections,
+                                                                     final ConnectionFactory connectionFactory) {
+        final Map matrix = new HashMap();
+
+        for (Service keys : Service.values()) {
+            final Collection<Host> hostList = new ArrayList<Host>();
+            for (final HostDescription host : hosts.get(keys)) {
+                hostList.add(HostUtils.createHost(host, maxConnections, connectionFactory));
+            }
+            matrix.put(keys, hostList);
         }
-        return hostList;
+
+        return matrix;
     }
+
 }

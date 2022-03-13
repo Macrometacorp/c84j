@@ -21,7 +21,10 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertThrows;
 
+import com.c8db.C8DBException;
+import com.c8db.Service;
 import org.junit.Test;
 
 import com.c8db.internal.net.FallbackHostHandler;
@@ -47,7 +50,7 @@ public class HostHandlerTest {
     private static final HostResolver SINGLE_HOST = new HostResolver() {
 
         @Override
-        public HostSet resolve(final boolean initial, final boolean closeConnections) {
+        public HostSet resolve(Service service, final boolean initial, final boolean closeConnections) {
 
             HostSet set = new HostSet();
             set.addHost(HOST_0);
@@ -64,7 +67,7 @@ public class HostHandlerTest {
     private static final HostResolver MULTIPLE_HOSTS = new HostResolver() {
 
         @Override
-        public HostSet resolve(final boolean initial, final boolean closeConnections) {
+        public HostSet resolve(Service service, final boolean initial, final boolean closeConnections) {
 
             HostSet set = new HostSet();
             set.addHost(HOST_0);
@@ -83,6 +86,7 @@ public class HostHandlerTest {
     @Test
     public void fallbachHostHandlerSingleHost() {
         final HostHandler handler = new FallbackHostHandler(SINGLE_HOST);
+        handler.service(Service.C8DB);
         assertThat(handler.get(null, null), is(HOST_0));
         handler.fail();
         assertThat(handler.get(null, null), is(HOST_0));
@@ -91,6 +95,7 @@ public class HostHandlerTest {
     @Test
     public void fallbackHostHandlerMultipleHosts() {
         final HostHandler handler = new FallbackHostHandler(MULTIPLE_HOSTS);
+        handler.service(Service.C8DB);
         for (int i = 0; i < 3; i++) {
             assertThat(handler.get(null, null), is(HOST_0));
             handler.fail();
@@ -102,7 +107,7 @@ public class HostHandlerTest {
                 assertThat(handler.get(null, null), is(HOST_0));
             } else {
                 handler.fail();
-                assertThat(handler.get(null, null), is(nullValue()));
+                assertThrows(C8DBException.class, () -> handler.get(null, null));
             }
         }
     }
@@ -110,6 +115,7 @@ public class HostHandlerTest {
     @Test
     public void randomHostHandlerSingleHost() {
         final HostHandler handler = new RandomHostHandler(SINGLE_HOST, new FallbackHostHandler(SINGLE_HOST));
+        handler.service(Service.C8DB);
         assertThat(handler.get(null, null), is(HOST_0));
         handler.fail();
         assertThat(handler.get(null, null), is(HOST_0));
@@ -118,6 +124,7 @@ public class HostHandlerTest {
     @Test
     public void randomHostHandlerMultipeHosts() {
         final HostHandler handler = new RandomHostHandler(MULTIPLE_HOSTS, new FallbackHostHandler(MULTIPLE_HOSTS));
+        handler.service(Service.C8DB);
         final Host pick0 = handler.get(null, null);
         assertThat(pick0, anyOf(is(HOST_0), is(HOST_1), is(HOST_2)));
         handler.fail();
@@ -129,6 +136,7 @@ public class HostHandlerTest {
     @Test
     public void roundRobinHostHandlerSingleHost() {
         final HostHandler handler = new RoundRobinHostHandler(SINGLE_HOST);
+        handler.service(Service.C8DB);
         assertThat(handler.get(null, null), is(HOST_0));
         handler.fail();
         assertThat(handler.get(null, null), is(HOST_0));
@@ -137,6 +145,7 @@ public class HostHandlerTest {
     @Test
     public void roundRobinHostHandlerMultipleHosts() {
         final HostHandler handler = new RoundRobinHostHandler(MULTIPLE_HOSTS);
+        handler.service(Service.C8DB);
         final Host pick0 = handler.get(null, null);
         assertThat(pick0, anyOf(is(HOST_0), is(HOST_1), is(HOST_2)));
         final Host pick1 = handler.get(null, null);

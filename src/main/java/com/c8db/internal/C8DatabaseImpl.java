@@ -16,6 +16,7 @@ import com.c8db.C8Event;
 import com.c8db.C8Graph;
 import com.c8db.C8Stream;
 import com.c8db.Restql;
+import com.c8db.Service;
 import com.c8db.entity.C8DBVersion;
 import com.c8db.entity.C8StreamEntity;
 import com.c8db.entity.C8qlExecutionExplainEntity;
@@ -362,7 +363,7 @@ public class C8DatabaseImpl extends InternalC8Database<C8DBImpl, C8ExecutorSync>
     public void createPersistentStream(final String name, final C8StreamCreateOptions options)
             throws C8DBException {
         try {
-            executor.execute(createC8PersistentStreamRequest(name, options), Void.class);
+            executor.execute(createC8PersistentStreamRequest(name, options), Void.class, null, Service.C8STREAMS);
         } catch (final C8DBException e) {
             if (!C8Errors.ERROR_STREAM_ALREADY_EXISTS.equals(e.getErrorNum())) {
                 throw e;
