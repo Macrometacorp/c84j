@@ -3,7 +3,7 @@
 
     <groupId>co.macrometa</groupId>
     <artifactId>c84j</artifactId>
-    <version>1.1.16-SNAPSHOT</version>
+    <version>1.1.17-SNAPSHOT</version>
     <inceptionYear>2019</inceptionYear>
     <packaging>jar</packaging>
 
