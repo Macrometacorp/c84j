@@ -67,4 +67,11 @@ public interface C8Dynamo {
      * @throws C8DBException
      */
     <T> MultiDocumentEntity<C8DynamoItemEntity> deleteItem(Collection<T> values) throws C8DBException;
+
+    /**
+     * This method returns an existing item from the dynamo like table
+     * @return The Dynamo entity
+     * @throws C8DBException
+     */
+    <T> MultiDocumentEntity<C8DynamoItemEntity> getItems(Collection<T> values) throws C8DBException;
 }

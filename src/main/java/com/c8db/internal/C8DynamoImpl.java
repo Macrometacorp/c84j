@@ -59,4 +59,10 @@ public class C8DynamoImpl extends InternalC8Dynamo<C8DBImpl, C8DatabaseImpl, C8E
         return executor.execute(deleteItemRequest(values),
                 itemsResponseDeserializer());
     }
+
+    @Override
+    public <T> MultiDocumentEntity<C8DynamoItemEntity> getItems(Collection<T> values) throws C8DBException {
+        return executor.execute(getItemsRequest(values),
+                itemsResponseDeserializer());
+    }
 }

@@ -148,6 +148,12 @@ public abstract class InternalC8Dynamo<A extends InternalC8DB<E>, D extends Inte
         return request;
     }
 
+    protected  <T> Request getItemsRequest(final Collection<T> values) {
+        final Request request= setRequestParams(values);
+        request.putHeaderParam("X-Amz-Target", "DynamoDB_20120810.Scan");
+        return request;
+    }
+
     private <T> Request setRequestParams(final Collection<T> values){
         final Request request = request(db.tenant(), db.name(), RequestType.POST, PATH_API_DYNAMO);
         Iterator<T> items = values.iterator();
