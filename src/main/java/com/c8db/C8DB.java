@@ -125,7 +125,8 @@ public interface C8DB extends C8SerializationAccessor {
         }
 
         /**
-         * Adds a streams admin host to connect to. Multiple hosts can be added to provide fallbacks.
+         * Adds a service host to connect to. Multiple hosts can be added to provide fallbacks.
+         * if service host is empty then it uses regular host from method `host(final String host, final int port)`
          *
          * @param host address of the host
          * @param port port of the host
@@ -605,8 +606,9 @@ public interface C8DB extends C8SerializationAccessor {
             if (hosts.get(Service.C8DB).isEmpty()) {
                 hosts.get(Service.C8DB).add(host);
             }
+            // if c8streams host is empty then it should use regular hosts
             if (hosts.get(Service.C8STREAMS).isEmpty()) {
-                hosts.get(Service.C8STREAMS).add(streamsAdminHost);
+                hosts.get(Service.C8STREAMS).addAll(hosts.get(Service.C8DB));
             }
 
             final VPack vpacker = vpackBuilder.serializeNullValues(false).build();
@@ -630,8 +632,8 @@ public interface C8DB extends C8SerializationAccessor {
                     : new HttpConnectionFactory(timeout, user, password, email, jwtAuth, useSsl, sslContext, custom, protocol,
                             connectionTtl, httpCookieSpec, jwtToken, apiKey, hosts.get(Service.C8DB).get(0));
 
-            final Map<Service, Collection<Host>> hostMatrix = createHostMatrix(max, connectionFactory);
-            final HostResolver hostResolver = createHostResolver(hostMatrix, max, connectionFactory);
+            final Map<Service, Collection<Host>> hostsMatrix = createHostMatrix(max, connectionFactory);
+            final HostResolver hostResolver = createHostResolver(hostsMatrix, max, connectionFactory);
             final HostHandler hostHandler = createHostHandler(hostResolver);
             return new C8DBImpl(
                     new VstCommunicationSync.Builder(hostHandler).timeout(timeout).user(user).password(password)

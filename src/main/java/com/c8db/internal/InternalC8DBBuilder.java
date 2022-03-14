@@ -84,7 +84,6 @@ public abstract class InternalC8DBBuilder {
 
     protected final Map<Service, List<HostDescription>> hosts;
     protected HostDescription host;
-    protected HostDescription streamsAdminHost;
     protected Integer timeout;
     protected String user;
     protected String password;
@@ -114,7 +113,6 @@ public abstract class InternalC8DBBuilder {
         vpackBuilder.registerModule(new VPackDriverModule());
         vpackParserBuilder.registerModule(new VPackDriverModule());
         host = new HostDescription(C8Defaults.DEFAULT_HOST, C8Defaults.DEFAULT_PORT);
-        streamsAdminHost = new HostDescription(C8Defaults.DEFAULT_HOST, C8Defaults.DEFAULT_STREAM_ADMIN_PORT);
         hosts = new HashMap();
         for (Service key : Service.values()) {
             hosts.put(key, new ArrayList<>());

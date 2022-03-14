@@ -374,27 +374,27 @@ public class C8DatabaseImpl extends InternalC8Database<C8DBImpl, C8ExecutorSync>
     @Override
     public Collection<C8StreamEntity> getPersistentStreams(final C8StreamCreateOptions options)
             throws C8DBException {
-        return executor.execute(getC8PersistentStreamsRequest(options), getC8StreamsResponseDeserializer());
+        return executor.execute(getC8PersistentStreamsRequest(options), getC8StreamsResponseDeserializer(), null, Service.C8STREAMS);
     }
 
     @Override
     public Collection<C8StreamEntity> getStreams() throws C8DBException {
-        return executor.execute(getC8StreamsRequest(), getC8StreamsResponseDeserializer());
+        return executor.execute(getC8StreamsRequest(), getC8StreamsResponseDeserializer(), null, Service.C8STREAMS);
     }
 
     @Override
     public void clearBacklog() {
-        executor.execute(clearC8StreamBacklogRequest(), Void.class);
+        executor.execute(clearC8StreamBacklogRequest(), Void.class, null, Service.C8STREAMS);
     }
 
     @Override
     public void clearBacklog(final String subscriptionName) {
-        executor.execute(clearC8StreamBacklogRequest(subscriptionName), Void.class);
+        executor.execute(clearC8StreamBacklogRequest(subscriptionName), Void.class, null, Service.C8STREAMS);
     }
 
     @Override
     public void unsubscribe(final String subscriptionName) {
-        executor.execute(unsubscribeRequest(subscriptionName), Void.class);
+        executor.execute(unsubscribeRequest(subscriptionName), Void.class, null, Service.C8STREAMS);
     }
 
     @Override
