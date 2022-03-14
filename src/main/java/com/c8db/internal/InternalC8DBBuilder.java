@@ -71,6 +71,7 @@ public abstract class InternalC8DBBuilder {
     private static final String PROPERTY_KEY_PASSWORD = "c8db.password";
     private static final String PROPERTY_KEY_EMAIL = "c8db.email";
     private static final String PROPERTY_KEY_JWT_AUTH = "c8db.jwt";
+    private static final String PROPERTY_KEY_JWT_USER = "c8db.jwtUser";
     private static final String PROPERTY_KEY_APIKEY = "c8db.apikey";
     private static final String PROPERTY_KEY_USE_SSL = "c8db.usessl";
     private static final String PROPERTY_KEY_COOKIE_SPEC = "c8db.httpCookieSpec";
@@ -89,6 +90,7 @@ public abstract class InternalC8DBBuilder {
     protected String password;
     protected String email;
     protected String jwtToken;
+    protected String jwtUser;
     protected Boolean jwtAuth;
     protected Boolean useSsl;
     protected String httpCookieSpec;
@@ -151,6 +153,7 @@ public abstract class InternalC8DBBuilder {
         password = loadPassword(properties, password);
         email = loadEmail(properties, email);
         jwtToken = loadJWTToken(properties, jwtToken);
+        jwtUser = loadJWTUser(properties, jwtUser);
         jwtAuth = loadJWTAuth(properties, jwtAuth);
         apiKey = loadApiKey(properties, apiKey);
         useSsl = loadUseSsl(properties, useSsl);
@@ -173,6 +176,10 @@ public abstract class InternalC8DBBuilder {
 
     protected void setJwtToken(String jwtToken) {
         this.jwtToken = jwtToken;
+    }
+
+    protected void setJwtUser(String jwtUser) {
+        this.jwtUser = jwtUser;
     }
 
     protected void setApiKey(String apiKey) {
@@ -317,6 +324,10 @@ public abstract class InternalC8DBBuilder {
 
     private static String loadJWTToken(final Properties properties, final String currentValue) {
         return getProperty(properties, PROPERTY_KEY_JWT_AUTH, currentValue, null);
+    }
+
+    private static String loadJWTUser(final Properties properties, final String currentValue) {
+        return getProperty(properties, PROPERTY_KEY_JWT_USER, currentValue, null);
     }
 
     private static String loadPassword(final Properties properties, final String currentValue) {

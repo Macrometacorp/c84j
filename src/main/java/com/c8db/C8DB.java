@@ -181,6 +181,18 @@ public interface C8DB extends C8SerializationAccessor {
             return this;
         }
 
+        /**
+         * Set user which JWT will be generated for calls
+         * If jwtToken is set then jwtUser will not be used
+         *
+         * @param user
+         * @return
+         */
+        public Builder jwtUser(final String user) {
+            setJwtUser(user);
+            return this;
+        }
+
         public Builder apiKey(final String apiKey) {
             setApiKey(apiKey);
             return this;
@@ -630,7 +642,7 @@ public interface C8DB extends C8SerializationAccessor {
             final ConnectionFactory connectionFactory = (protocol == null || Protocol.VST == protocol)
                     ? new VstConnectionFactorySync(host, timeout, connectionTtl, useSsl, sslContext)
                     : new HttpConnectionFactory(timeout, user, password, email, jwtAuth, useSsl, sslContext, custom, protocol,
-                            connectionTtl, httpCookieSpec, jwtToken, apiKey, hosts.get(Service.C8DB).get(0));
+                            connectionTtl, httpCookieSpec, jwtToken, apiKey, hosts.get(Service.C8DB).get(0), jwtUser, hosts.get(Service.C8STREAMS).get(0));
 
             final Map<Service, Collection<Host>> hostsMatrix = createHostMatrix(max, connectionFactory);
             final HostResolver hostResolver = createHostResolver(hostsMatrix, max, connectionFactory);
