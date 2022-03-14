@@ -1,12 +1,9 @@
 package com.c8db.entity;
 
-import lombok.Data;
-
 import java.util.List;
 import java.util.Map;
 
-@Data
-public class C8DynamoItemEntity {
+public class C8DynamoItemEntity extends DocumentEntity{
     Map<String,Object> ConsumedCapacity;
     Map<String,Object> Item;
 
@@ -15,5 +12,17 @@ public class C8DynamoItemEntity {
     Long ScannedCount;
     Long Count;
 
+    public C8DynamoItemEntity(){super();}
 
+    @Override
+    public String toString() {
+        return "C8DynamoItemEntity{" +
+                "ConsumedCapacity=" + ConsumedCapacity +
+                ", Item=" + Item +
+                ", Items=" + Items +
+                ", LastEvaluatedKey=" + LastEvaluatedKey +
+                ", ScannedCount=" + ScannedCount +
+                ", Count=" + Count +
+                '}';
+    }
 }
