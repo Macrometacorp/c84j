@@ -12,7 +12,6 @@ import com.c8db.util.C8Serializer;
 import com.c8db.velocystream.Request;
 import com.c8db.velocystream.RequestType;
 import com.c8db.velocystream.Response;
-import org.json.JSONObject;
 
 import java.util.*;
 
@@ -98,28 +97,16 @@ public abstract class InternalC8Dynamo<A extends InternalC8DB<E>, D extends Inte
     }*/
 
     protected  <T> Request createPutItemRequest(final Collection<T> values) {
-        final Request request = request(db.tenant(), db.name(), RequestType.POST, PATH_API_DYNAMO);
-
-        Iterator<T> items = values.iterator();
-        T value = items.next();
-        request.setBody(util(C8SerializationFactory.Serializer.CUSTOM).serialize(value,
-                new C8Serializer.Options().serializeNullValues(false).stringAsJson(true)));
+        final Request request = setRequestParams(values);
         request.putHeaderParam("X-Amz-Target", "DynamoDB_20120810.PutItem");
-        System.out.println("Request = " + request.getBody());
         return request;
     }
 
     @SuppressWarnings("unchecked")
-    protected  <T> C8Executor.ResponseDeserializer<MultiDocumentEntity<DocumentCreateEntity<T>>> insertItemsResponseDeserializer(
-            final Collection<T> values) {
+    protected  <T> C8Executor.ResponseDeserializer<MultiDocumentEntity<C8DynamoItemEntity>> itemsResponseDeserializer() {
         return response -> {
-            Class<T> type = null;
-            if (!values.isEmpty()) {
-                type = (Class<T>) values.iterator().next().getClass();
-            }
-
-            final MultiDocumentEntity<DocumentCreateEntity<T>> multiDocument = new MultiDocumentEntity<>();
-            final Collection<DocumentCreateEntity<T>> docs = new ArrayList<>();
+            final MultiDocumentEntity<C8DynamoItemEntity> multiDocument = new MultiDocumentEntity<>();
+            final Collection<C8DynamoItemEntity> docs = new ArrayList<>();
             final Collection<ErrorEntity> errors = new ArrayList<>();
             final Collection<Object> documentsAndErrors = new ArrayList<>();
             final VPackSlice body = response.getBody();
@@ -131,19 +118,16 @@ public abstract class InternalC8Dynamo<A extends InternalC8DB<E>, D extends Inte
                         errors.add(error);
                         documentsAndErrors.add(error);
                     } else {
-                        final DocumentCreateEntity<T> doc = util().deserialize(next, DocumentCreateEntity.class);
-                        final VPackSlice newDoc = next.get(NEW);
-                        if (newDoc.isObject()) {
-                            doc.setNew((T) util(C8SerializationFactory.Serializer.CUSTOM).deserialize(newDoc, type));
-                        }
-                        final VPackSlice oldDoc = next.get(OLD);
-                        if (oldDoc.isObject()) {
-                            doc.setOld((T) util(C8SerializationFactory.Serializer.CUSTOM).deserialize(oldDoc, type));
-                        }
+                        final C8DynamoItemEntity doc = util().deserialize(next, C8DynamoItemEntity.class);
                         docs.add(doc);
                         documentsAndErrors.add(doc);
                     }
                 }
+            }else{
+                final VPackSlice next = body;
+                final C8DynamoItemEntity doc = util().deserialize(next, C8DynamoItemEntity.class);
+                docs.add(doc);
+                documentsAndErrors.add(doc);
             }
             multiDocument.setDocuments(docs);
             multiDocument.setErrors(errors);
@@ -152,4 +136,24 @@ public abstract class InternalC8Dynamo<A extends InternalC8DB<E>, D extends Inte
         };
     }
 
+    protected  <T> Request getItemRequest(final Collection<T> values) {
+        final Request request= setRequestParams(values);
+        request.putHeaderParam("X-Amz-Target", "DynamoDB_20120810.GetItem");
+        return request;
+    }
+
+    protected  <T> Request deleteItemRequest(final Collection<T> values) {
+        final Request request = setRequestParams(values);
+        request.putHeaderParam("X-Amz-Target", "DynamoDB_20120810.DeleteItem");
+        return request;
+    }
+
+    private <T> Request setRequestParams(final Collection<T> values){
+        final Request request = request(db.tenant(), db.name(), RequestType.POST, PATH_API_DYNAMO);
+        Iterator<T> items = values.iterator();
+        T value = items.next();
+        request.setBody(util(C8SerializationFactory.Serializer.CUSTOM).serialize(value,
+                new C8Serializer.Options().serializeNullValues(false).stringAsJson(true)));
+        return request;
+    }
 }

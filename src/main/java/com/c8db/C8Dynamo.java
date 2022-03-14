@@ -22,7 +22,7 @@ public interface C8Dynamo {
      * @return The Dynamo entity
      * @throws C8DBException
      */
-    C8DynamoEntity create(C8DynamoCreateOptions options) throws C8DBException;
+    C8DynamoEntity createTable(C8DynamoCreateOptions options) throws C8DBException;
 
     /**
      * This method deletes a dynomo table
@@ -37,20 +37,34 @@ public interface C8Dynamo {
      * @return The Dynamo entity
      * @throws C8DBException
      */
-    C8DynamoDescribeEntity describe(C8DynamoCreateOptions options) throws C8DBException;
+    C8DynamoDescribeEntity describeTable(C8DynamoCreateOptions options) throws C8DBException;
 
     /**
-     * This method describes the schema of the dynamo table
+     * This method inserts an item in the dynamo like table
      * @return The Dynamo entity
      * @throws C8DBException
      */
     //JSONObject putItem(JSONObject options) throws C8DBException;
-    <T> MultiDocumentEntity<DocumentCreateEntity<T>> putItem(Collection<T> values) throws C8DBException;;
+    <T> MultiDocumentEntity<C8DynamoItemEntity> putItem(Collection<T> values) throws C8DBException;;
 
     /**
-     * This method describes the schema of the dynamo table
+     * This method updates an existing item in the dynamo like table
      * @return The Dynamo entity
      * @throws C8DBException
      */
-    <T> MultiDocumentEntity<DocumentCreateEntity<T>> updateItem(Collection<T> values) throws C8DBException;
+    <T> MultiDocumentEntity<C8DynamoItemEntity> updateItem(Collection<T> values) throws C8DBException;
+
+    /**
+     * This method returns an existing item from the dynamo like table
+     * @return The Dynamo entity
+     * @throws C8DBException
+     */
+    <T> MultiDocumentEntity<C8DynamoItemEntity> getItem(Collection<T> values) throws C8DBException;
+
+    /**
+     * This method returns an existing item from the dynamo like table
+     * @return The Dynamo entity
+     * @throws C8DBException
+     */
+    <T> MultiDocumentEntity<C8DynamoItemEntity> deleteItem(Collection<T> values) throws C8DBException;
 }

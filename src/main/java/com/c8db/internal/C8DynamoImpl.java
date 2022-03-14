@@ -19,7 +19,7 @@ public class C8DynamoImpl extends InternalC8Dynamo<C8DBImpl, C8DatabaseImpl, C8E
     }
 
     @Override
-    public C8DynamoEntity create(C8DynamoCreateOptions options) throws C8DBException {
+    public C8DynamoEntity createTable(C8DynamoCreateOptions options) throws C8DBException {
         return executor.execute(createRequest(tableName, new C8DynamoCreateOptions(options)),
                 getC8DynamoCreateTableResponseDeserializer());
     }
@@ -31,26 +31,32 @@ public class C8DynamoImpl extends InternalC8Dynamo<C8DBImpl, C8DatabaseImpl, C8E
     }
 
     @Override
-    public C8DynamoDescribeEntity describe(C8DynamoCreateOptions options) throws C8DBException {
+    public C8DynamoDescribeEntity describeTable(C8DynamoCreateOptions options) throws C8DBException {
         return executor.execute(createDescribeRequest(tableName,options),
                 getC8DynamoDescTableResponseDeserializer());
     }
 
     @Override
-    public <T> MultiDocumentEntity<DocumentCreateEntity<T>> putItem(Collection<T> values) throws C8DBException {
+    public <T> MultiDocumentEntity<C8DynamoItemEntity> putItem(Collection<T> values) throws C8DBException {
         return executor.execute(createPutItemRequest(values),
-                insertItemsResponseDeserializer(values));
+                itemsResponseDeserializer());
     }
 
-    //@Override
-    /*public JSONObject putItem(JSONObject options) throws C8DBException {
-        return executor.execute(createPutItemRequest(options), JSONObject.class);
-    }*/
-
+    @Override
+    public <T> MultiDocumentEntity<C8DynamoItemEntity> updateItem(Collection<T> values) throws C8DBException {
+        return executor.execute(createPutItemRequest(values),
+                itemsResponseDeserializer());
+    }
 
     @Override
-    public <T> MultiDocumentEntity<DocumentCreateEntity<T>> updateItem(Collection<T> values) throws C8DBException {
-        return executor.execute(createPutItemRequest(values),
-                insertItemsResponseDeserializer(values));
+    public <T> MultiDocumentEntity<C8DynamoItemEntity> getItem(Collection<T> values) throws C8DBException {
+        return executor.execute(getItemRequest(values),
+                itemsResponseDeserializer());
+    }
+
+    @Override
+    public <T> MultiDocumentEntity<C8DynamoItemEntity> deleteItem(Collection<T> values) throws C8DBException {
+        return executor.execute(deleteItemRequest(values),
+                itemsResponseDeserializer());
     }
 }
