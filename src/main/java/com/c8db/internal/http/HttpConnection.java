@@ -226,19 +226,19 @@ public class HttpConnection implements Connection {
         addHeader(request, httpRequest);
         if (jwtAuthEnabled) {
             if (StringUtils.isNotEmpty(apiKey) && jwt == null) {  //Use API key onlu if API Key is provided
-                LOGGER.info("Using API Key for authenication.");
+                LOGGER.debug("Using API Key for authenication.");
                 httpRequest.addHeader("Authorization", "apikey " + apiKey);
             } else if (jwt == null) { //Generate JWT using user credentials if jwt and apikey are absent
                 addJWT();
-                LOGGER.info("Using JWT for authentication.");
+                LOGGER.debug("Using JWT for authentication.");
                 httpRequest.addHeader("Authorization", "bearer " + jwt);
             } else { //Add Header when JWT is provided
-                LOGGER.info("Using JWT for authentication.");
+                LOGGER.debug("Using JWT for authentication.");
                 httpRequest.addHeader("Authorization", "bearer " + jwt);
             }
         } else {
             // basic auth instead
-            LOGGER.info("Using Credentials for authenication.");
+            LOGGER.debug("Using Credentials for authenication.");
             final Credentials credentials = addCredentials(httpRequest);
             if (LOGGER.isDebugEnabled()) {
                 CURLLogger.log(url, request, credentials, util);

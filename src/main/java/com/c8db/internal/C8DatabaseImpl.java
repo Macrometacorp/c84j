@@ -434,8 +434,12 @@ public class C8DatabaseImpl extends InternalC8Database<C8DBImpl, C8ExecutorSync>
         return new C8AlertsImpl(this);
     }
 
+    public C8KeyValue kv(final String name) {
+        return new C8KeyValueImpl(this, name);
+    }
+    
     @Override
     public C8Dynamo dynamo(String tableName) {
-        return new C8DynamoImpl(this,tableName);
+        return new C8DynamoImpl(this, tableName);
     }
 }
