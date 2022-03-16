@@ -21,6 +21,11 @@ public class C8ApiKeysImpl extends InternalC8ApiKeys<C8DBImpl, C8DatabaseImpl, C
     }
 
     @Override
+    public Permissions getGeoFabricAccess(String keyId) {
+        return executor.execute(geoFabricAccessLevelRequest(keyId), streamAccessLevelResponseDeserializer());
+    }
+
+    @Override
     public Permissions getStreamAccess(String keyId, String stream) {
         return executor.execute(streamAccessLevelRequest(keyId, stream), streamAccessLevelResponseDeserializer());
     }

@@ -282,7 +282,12 @@ public abstract class InternalC8DB<E extends C8Executor> extends C8Executeable<E
             C8RequestParam.DATABASE, database, C8RequestParam.STREAM, stream);
     }
 
-    protected ResponseDeserializer<Permissions> streamAccessResponseDeserializer() {
+    protected Request getUserAccessRequest(final String tenant, final String user, final String database) {
+        return request(tenant, C8RequestParam.SYSTEM, RequestType.GET, PATH_API_USER, user,
+            C8RequestParam.DATABASE, database);
+    }
+
+    protected ResponseDeserializer<Permissions> accessResponseDeserializer() {
         return new ResponseDeserializer<Permissions>() {
             @Override
             public Permissions deserialize(final Response response) throws VPackException {

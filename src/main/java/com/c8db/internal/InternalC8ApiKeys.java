@@ -50,6 +50,12 @@ public abstract class InternalC8ApiKeys<A extends InternalC8DB<E>, D extends Int
         return request;
     }
 
+    protected Request geoFabricAccessLevelRequest(final String keyId) {
+        final Request request = request(db.tenant(), db.name(), RequestType.GET, PATH_API_KEY, keyId,
+            C8RequestParam.DATABASE, C8RequestParam.SYSTEM);
+        return request;
+    }
+
     protected Request streamAccessLevelRequest(final String keyId, final String stream) {
         final Request request = request(db.tenant(), db.name(), RequestType.GET, PATH_API_KEY, keyId,
             C8RequestParam.DATABASE, C8RequestParam.SYSTEM, C8RequestParam.STREAM, stream);

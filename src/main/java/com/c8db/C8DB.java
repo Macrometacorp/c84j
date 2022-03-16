@@ -1003,6 +1003,13 @@ public interface C8DB extends C8SerializationAccessor {
     Permissions getStreamAccess(final String user, final String tenant, String fabric, final String stream);
 
     /**
+     * Get the GeoFabric access level
+     * @param user user name
+     * @return result of access level. Possible results are `ro`, `rw`, `none`
+     */
+    Permissions getGeoFabricAccess(final String user, final String tenant, String fabric);
+
+    /**
      * Generic Execute. Use this method to execute custom FOXX services.
      *
      * @param request VelocyStream request

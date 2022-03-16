@@ -254,7 +254,13 @@ public class C8DBImpl extends InternalC8DB<C8ExecutorSync> implements C8DB {
     @Override
     public Permissions getStreamAccess(final String user, final String tenant, final String fabric, final String stream)
         throws C8DBException {
-        return executor.execute(getUserStreamAccessRequest(tenant, user, fabric, stream), streamAccessResponseDeserializer());
+        return executor.execute(getUserStreamAccessRequest(tenant, user, fabric, stream), accessResponseDeserializer());
+    }
+
+    @Override
+    public Permissions getGeoFabricAccess(final String user, final String tenant, final String fabric)
+        throws C8DBException {
+        return executor.execute(getUserAccessRequest(tenant, user, fabric), accessResponseDeserializer());
     }
 
     @Override

@@ -21,6 +21,13 @@ public interface C8ApiKeys extends C8SerializationAccessor {
     ApiKeyEntity validateApiKey(final String apikey);
 
     /**
+     * Get the GeoFabric access level
+     * @param keyId key id of a stream. ApiKey has the next structure: tenant.keyId.hash
+     * @return result of access level. Possible results are `ro`, `rw`, `none`
+     */
+    Permissions getGeoFabricAccess(final String keyId);
+
+    /**
      * Get the stream access level
      * @param keyId key id of a stream. ApiKey has the next structure: tenant.keyId.hash
      * @param stream stream name
