@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
+import java.util.List;
 
 public class C8DynamoImpl extends InternalC8Dynamo<C8DBImpl, C8DatabaseImpl, C8ExecutorSync>
         implements C8Dynamo {
@@ -19,8 +20,10 @@ public class C8DynamoImpl extends InternalC8Dynamo<C8DBImpl, C8DatabaseImpl, C8E
     }
 
     @Override
-    public C8DynamoEntity createTable(C8DynamoCreateOptions options) throws C8DBException {
-        return executor.execute(createRequest(tableName, new C8DynamoCreateOptions(options)),
+    public C8DynamoEntity createTable(String tableName, List<DynamoAttributeDefinition> attributeDefinitionList,
+                                      List<DynamoKeySchemaElement> keySchema) throws C8DBException {
+        return executor.execute(createRequest(tableName, new C8DynamoCreateOptions(attributeDefinitionList,
+                        tableName,keySchema)),
                 getC8DynamoCreateTableResponseDeserializer());
     }
 

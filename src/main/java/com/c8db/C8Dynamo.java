@@ -7,6 +7,7 @@ import com.c8db.entity.*;
 import com.c8db.model.C8DynamoCreateOptions;
 
 import java.util.Collection;
+import java.util.List;
 
 public interface C8Dynamo {
 
@@ -22,7 +23,8 @@ public interface C8Dynamo {
      * @return The Dynamo entity
      * @throws C8DBException
      */
-    C8DynamoEntity createTable(C8DynamoCreateOptions options) throws C8DBException;
+    C8DynamoEntity createTable(String tableName, List<DynamoAttributeDefinition> attributeDefinitionList,
+                               List<DynamoKeySchemaElement> keySchema) throws C8DBException;
 
     /**
      * This method deletes a dynomo table
