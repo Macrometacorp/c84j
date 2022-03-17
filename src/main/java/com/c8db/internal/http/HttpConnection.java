@@ -92,14 +92,18 @@ public class HttpConnection implements Connection {
     private final Protocol contentType;
     private final HostDescription host;
     private volatile String jwt;
+    private volatile boolean jwtIsEmpty;
+    private volatile String jwtUser;
     private volatile String apiKey;
-
+    private volatile HostDescription jwtHost;
+    private volatile HostDescription jwtUserHost;
 
     private HttpConnection(final HostDescription host, final Integer timeout, final String user, final String password,
                            final String email, final Boolean jwtAuthEnabled, final Boolean useSsl,
                            final SSLContext sslContext, final C8Serialization util,
                            final Protocol contentType, final Long ttl, final String httpCookieSpec,
-                           final String jwt, final String apiKey) {
+                           final String jwt, final String apiKey, final HostDescription jwtHost, final String jwtUser,
+                           final HostDescription jwtUserHost) {
 
         super();
         this.host = host;
@@ -111,7 +115,11 @@ public class HttpConnection implements Connection {
         this.util = util;
         this.contentType = contentType;
         this.jwt = jwt;
+        this.jwtIsEmpty = StringUtils.isEmpty(jwt);
+        this.jwtUser = jwtUser;
         this.apiKey = apiKey;
+        this.jwtHost = jwtHost;
+        this.jwtUserHost = jwtUserHost;
         final RegistryBuilder<ConnectionSocketFactory> registryBuilder = RegistryBuilder
                 .create();
         if (Boolean.TRUE == useSsl) {
@@ -229,7 +237,7 @@ public class HttpConnection implements Connection {
                 LOGGER.info("Using API Key for authenication.");
                 httpRequest.addHeader("Authorization", "apikey " + apiKey);
             } else if (jwt == null) { //Generate JWT using user credentials if jwt and apikey are absent
-                addJWT();
+                addJWT(request);
                 LOGGER.info("Using JWT for authentication.");
                 httpRequest.addHeader("Authorization", "bearer " + jwt);
             } else { //Add Header when JWT is provided
@@ -251,13 +259,13 @@ public class HttpConnection implements Connection {
         } catch (C8DBException ex) {
             if (ex.getResponseCode().equals(401)) {
                 // jwt might has expired refresh it
-                addJWT();
+                addJWT(request);
                 httpRequest.removeHeaders("Authorization");
                 httpRequest.addHeader("Authorization", "bearer " + jwt);
                 response = buildResponse(client.execute(httpRequest));
                 checkError(response);
             } else if (ex.getResponseCode() >= 500) {
-                response = retryRequest(httpRequest);
+                response = retryRequest(request, httpRequest);
             } else if (ex.getResponseCode() >= 400) {
                 // Handle HTTP Error messages.
                 checkError(response);
@@ -265,12 +273,12 @@ public class HttpConnection implements Connection {
                 checkError(response);
             }
         } catch (UnknownHostException | NoHttpResponseException ex) {
-            response = retryRequest(httpRequest);
+            response = retryRequest(request, httpRequest);
         }
         return response;
     }
 
-    private Response retryRequest(HttpRequestBase httpRequest) throws IOException {
+    private Response retryRequest(final Request request, HttpRequestBase httpRequest) throws IOException {
         Response response = null;
 
         for (int currentWaitTime = INITIAL_SLEEP_TIME_SEC; currentWaitTime <= MAX_SLEEP_TIME_SEC; currentWaitTime *= SLEEP_TIME_MULTIPLIER) {
@@ -285,7 +293,7 @@ public class HttpConnection implements Connection {
             } catch (Exception e) {
                 if (e instanceof C8DBException && ((C8DBException) e).getResponseCode().equals(401)) {
                     // jwt might has expired refresh it
-                    addJWT();
+                    addJWT(request);
                     httpRequest.removeHeaders("Authorization");
                     httpRequest.addHeader("Authorization", "bearer " + jwt);
                 }
@@ -296,17 +304,24 @@ public class HttpConnection implements Connection {
         return response;
     }
 
-    private synchronized void addJWT() throws IOException {
-        String authUrl = buildBaseUrl(host) + "/_open/auth/internal";
+    private synchronized void addJWT(final Request request) throws IOException {
+        addServiceJWT();
+        if(jwtIsEmpty && StringUtils.isNotEmpty(jwtUser)) {
+            addUserJWT(request.getTenant(), jwtUser);
+        }
+    }
+
+    private synchronized void addServiceJWT() throws IOException {
+        String authUrl = buildBaseUrl(jwtHost) + "/_open/auth/internal";
         Map<String, String> credentials = new HashMap<String, String>();
 
         credentials.put("username", user);
         credentials.put("password", password);
         credentials.put("email", email);
         final HttpRequestBase authHttpRequest = buildHttpRequestBase(
-                new Request("_mm", C8RequestParam.SYSTEM, RequestType.POST, authUrl)
-                        .setBody(util.serialize(credentials)),
-                authUrl);
+            new Request("_mm", C8RequestParam.SYSTEM, RequestType.POST, authUrl)
+                .setBody(util.serialize(credentials)),
+            authUrl);
         authHttpRequest.setHeader("User-Agent", "Mozilla/5.0 (compatible; C8DB-JavaDriver/1.1; +http://mt.orz.at/)");
         if (contentType == Protocol.HTTP_VPACK) {
             authHttpRequest.setHeader("Accept", "application/x-velocypack");
@@ -314,6 +329,23 @@ public class HttpConnection implements Connection {
         Response authResponse = buildResponse(client.execute(authHttpRequest));
         checkError(authResponse);
         setJwt(authResponse.getBody().get("jwt").getAsString());
+    }
+
+    private synchronized void addUserJWT(String tenant, String user) throws IOException {
+        String authUrl =
+            buildBaseUrl(jwtUserHost) + "/_tenant/" + tenant + "/_fabric/" + C8RequestParam.SYSTEM + "/_api/streams/user/" + user + "/jwt";
+
+        final HttpRequestBase authHttpRequest = buildHttpRequestBase(
+            new Request(tenant, C8RequestParam.SYSTEM, RequestType.POST, authUrl),
+            authUrl);
+        authHttpRequest.setHeader("User-Agent", "Mozilla/5.0 (compatible; C8DB-JavaDriver/1.1; +http://mt.orz.at/)");
+        authHttpRequest.setHeader("Authorization", "bearer " + jwt);
+        if (contentType == Protocol.HTTP_VPACK) {
+            authHttpRequest.setHeader("Accept", "application/x-velocypack");
+        }
+        Response authResponse = buildResponse(client.execute(authHttpRequest));
+        checkError(authResponse);
+        setJwt(authResponse.getBody().get("result").getAsString());
     }
 
     private HttpRequestBase buildHttpRequestBase(final Request request, final String url) {
@@ -430,7 +462,10 @@ public class HttpConnection implements Connection {
         private SSLContext sslContext;
         private Integer timeout;
         private String jwt;
+        private String jwtUser;
         private String apiKey;
+        private HostDescription jwtHost;
+        private HostDescription jwtUserHost;
 
         public Builder user(final String user) {
             this.user = user;
@@ -444,6 +479,11 @@ public class HttpConnection implements Connection {
 
         public Builder jwt(final String jwt) {
             this.jwt = jwt;
+            return this;
+        }
+
+        public Builder jwtUser(final String jwtUser) {
+            this.jwtUser = jwtUser;
             return this;
         }
 
@@ -502,9 +542,19 @@ public class HttpConnection implements Connection {
             return this;
         }
 
+        public Builder jwtHost(final HostDescription jwtHost) {
+            this.jwtHost = jwtHost;
+            return this;
+        }
+
+        public Builder jwtUserHost(final HostDescription jwtUserHost) {
+            this.jwtUserHost = jwtUserHost;
+            return this;
+        }
+
         public HttpConnection build() {
             return new HttpConnection(host, timeout, user, password, email, jwtAuthEnabled, useSsl, sslContext, util,
-                    contentType, ttl, httpCookieSpec, jwt, apiKey);
+                    contentType, ttl, httpCookieSpec, jwt, apiKey, jwtHost, jwtUser, jwtUserHost);
         }
     }
 

@@ -16,6 +16,8 @@
 
 package com.c8db.internal.net;
 
+import com.c8db.Service;
+
 import java.io.IOException;
 
 /**
@@ -28,19 +30,25 @@ public class RoundRobinHostHandler implements HostHandler {
     private int current;
     private int fails;
     private Host currentHost;
+    private Service service;
 
     public RoundRobinHostHandler(final HostResolver resolver) {
         super();
         this.resolver = resolver;
-        resolver.resolve(true, false);
+        resolver.resolve(Service.C8DB, true, false);
         current = 0;
         fails = 0;
     }
 
     @Override
+    public void service(Service name) {
+        service = name;
+    }
+
+    @Override
     public Host get(final HostHandle hostHandle, AccessType accessType) {
 
-        final HostSet hosts = resolver.resolve(false, false);
+        final HostSet hosts = resolver.resolve(service, false, false);
         final int size = hosts.getHostsList().size();
 
         if (fails > size) {
@@ -87,7 +95,7 @@ public class RoundRobinHostHandler implements HostHandler {
 
     @Override
     public void close() throws IOException {
-        final HostSet hosts = resolver.resolve(false, false);
+        final HostSet hosts = resolver.resolve(service, false, false);
         hosts.close();
     }
 

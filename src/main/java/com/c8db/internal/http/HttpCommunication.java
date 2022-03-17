@@ -20,6 +20,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.net.SocketException;
 
+import com.c8db.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,8 +74,9 @@ public class HttpCommunication implements Closeable {
         hostHandler.close();
     }
 
-    public Response execute(final Request request, final HostHandle hostHandle) throws C8DBException, IOException {
+    public Response execute(final Request request, final HostHandle hostHandle, Service service) throws C8DBException, IOException {
         final AccessType accessType = RequestUtils.determineAccessType(request);
+        hostHandler.service(service);
         Host host = hostHandler.get(hostHandle, accessType);
         try {
             while (true) {
@@ -105,7 +107,7 @@ public class HttpCommunication implements Closeable {
                 final HostDescription redirectHost = HostUtils.createFromLocation(location);
                 hostHandler.closeCurrentOnError();
                 hostHandler.fail();
-                return execute(request, new HostHandle().setHost(redirectHost));
+                return execute(request, new HostHandle().setHost(redirectHost), service);
             } else {
                 throw e;
             }

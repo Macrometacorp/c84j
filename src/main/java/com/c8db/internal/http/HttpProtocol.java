@@ -18,6 +18,7 @@ package com.c8db.internal.http;
 
 import java.io.IOException;
 
+import com.c8db.Service;
 import org.apache.http.client.ClientProtocolException;
 
 import com.c8db.C8DBException;
@@ -39,9 +40,9 @@ public class HttpProtocol implements CommunicationProtocol {
     }
 
     @Override
-    public Response execute(final Request request, final HostHandle hostHandle) throws C8DBException {
+    public Response execute(final Request request, final HostHandle hostHandle, Service service) throws C8DBException {
         try {
-            return httpCommunitaction.execute(request, hostHandle);
+            return httpCommunitaction.execute(request, hostHandle, service);
         } catch (final ClientProtocolException e) {
             throw new C8DBException(e);
         } catch (final IOException e) {

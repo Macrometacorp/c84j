@@ -19,6 +19,7 @@ package com.c8db.internal.net;
 import java.io.Closeable;
 
 import com.c8db.C8DBException;
+import com.c8db.Service;
 import com.c8db.velocystream.Request;
 import com.c8db.velocystream.Response;
 
@@ -27,6 +28,6 @@ import com.c8db.velocystream.Response;
  */
 public interface CommunicationProtocol extends Closeable {
 
-    Response execute(final Request request, HostHandle hostHandle) throws C8DBException;
+    Response execute(final Request request, HostHandle hostHandle, Service service) throws C8DBException;
 
 }

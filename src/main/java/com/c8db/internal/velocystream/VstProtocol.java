@@ -19,6 +19,7 @@ package com.c8db.internal.velocystream;
 import java.io.IOException;
 
 import com.c8db.C8DBException;
+import com.c8db.Service;
 import com.c8db.internal.net.CommunicationProtocol;
 import com.c8db.internal.net.HostHandle;
 import com.c8db.internal.velocystream.internal.VstConnectionSync;
@@ -38,8 +39,8 @@ public class VstProtocol implements CommunicationProtocol {
     }
 
     @Override
-    public Response execute(final Request request, final HostHandle hostHandle) throws C8DBException {
-        return communication.execute(request, hostHandle);
+    public Response execute(final Request request, final HostHandle hostHandle, Service service) throws C8DBException {
+        return communication.execute(request, hostHandle, service);
     }
 
     @Override

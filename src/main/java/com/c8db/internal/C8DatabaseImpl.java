@@ -16,6 +16,7 @@ import com.c8db.C8Event;
 import com.c8db.C8Graph;
 import com.c8db.C8Stream;
 import com.c8db.Restql;
+import com.c8db.Service;
 import com.c8db.entity.C8DBVersion;
 import com.c8db.entity.C8StreamEntity;
 import com.c8db.entity.C8qlExecutionExplainEntity;
@@ -362,7 +363,7 @@ public class C8DatabaseImpl extends InternalC8Database<C8DBImpl, C8ExecutorSync>
     public void createPersistentStream(final String name, final C8StreamCreateOptions options)
             throws C8DBException {
         try {
-            executor.execute(createC8PersistentStreamRequest(name, options), Void.class);
+            executor.execute(createC8PersistentStreamRequest(name, options), Void.class, null, Service.C8STREAMS);
         } catch (final C8DBException e) {
             if (!C8Errors.ERROR_STREAM_ALREADY_EXISTS.equals(e.getErrorNum())) {
                 throw e;
@@ -373,27 +374,27 @@ public class C8DatabaseImpl extends InternalC8Database<C8DBImpl, C8ExecutorSync>
     @Override
     public Collection<C8StreamEntity> getPersistentStreams(final C8StreamCreateOptions options)
             throws C8DBException {
-        return executor.execute(getC8PersistentStreamsRequest(options), getC8StreamsResponseDeserializer());
+        return executor.execute(getC8PersistentStreamsRequest(options), getC8StreamsResponseDeserializer(), null, Service.C8STREAMS);
     }
 
     @Override
     public Collection<C8StreamEntity> getStreams() throws C8DBException {
-        return executor.execute(getC8StreamsRequest(), getC8StreamsResponseDeserializer());
+        return executor.execute(getC8StreamsRequest(), getC8StreamsResponseDeserializer(), null, Service.C8STREAMS);
     }
 
     @Override
     public void clearBacklog() {
-        executor.execute(clearC8StreamBacklogRequest(), Void.class);
+        executor.execute(clearC8StreamBacklogRequest(), Void.class, null, Service.C8STREAMS);
     }
 
     @Override
     public void clearBacklog(final String subscriptionName) {
-        executor.execute(clearC8StreamBacklogRequest(subscriptionName), Void.class);
+        executor.execute(clearC8StreamBacklogRequest(subscriptionName), Void.class, null, Service.C8STREAMS);
     }
 
     @Override
     public void unsubscribe(final String subscriptionName) {
-        executor.execute(unsubscribeRequest(subscriptionName), Void.class);
+        executor.execute(unsubscribeRequest(subscriptionName), Void.class, null, Service.C8STREAMS);
     }
 
     @Override

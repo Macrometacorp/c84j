@@ -17,7 +17,9 @@
 package com.c8db.internal.net;
 
 import java.util.List;
+import java.util.Map;
 
+import com.c8db.Service;
 import com.c8db.internal.C8ExecutorSync;
 import com.c8db.util.C8Serialization;
 
@@ -26,11 +28,11 @@ import com.c8db.util.C8Serialization;
  */
 public class SimpleHostResolver implements HostResolver {
 
-    private final List<Host> hosts;
+    private final Map<Service, List<Host>> hostMatrix;
 
-    public SimpleHostResolver(final List<Host> hosts) {
+    public SimpleHostResolver(final Map<Service, List<Host>> hostMatrix) {
         super();
-        this.hosts = hosts;
+        this.hostMatrix = hostMatrix;
     }
 
     @Override
@@ -39,8 +41,8 @@ public class SimpleHostResolver implements HostResolver {
     }
 
     @Override
-    public HostSet resolve(final boolean initial, final boolean closeConnections) {
-        return new HostSet(hosts);
+    public HostSet resolve(final Service service, final boolean initial, final boolean closeConnections) {
+        return new HostSet(hostMatrix.get(service));
     }
 
 }
