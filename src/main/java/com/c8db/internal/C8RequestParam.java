@@ -28,6 +28,7 @@ public final class C8RequestParam {
     public static final String SYSTEM = "_system";
     public static final String DEMO_TENANT = "demo";
     public static final String DATABASE = "database";
+    public static final String STREAM = "stream";
     public static final String WAIT_FOR_SYNC = "waitForSync";
     public static final String IF_NONE_MATCH = "If-None-Match";
     public static final String IF_MATCH = "If-Match";

@@ -16,6 +16,7 @@
 
 package com.c8db.internal.net;
 
+import com.c8db.Service;
 import com.c8db.internal.C8ExecutorSync;
 import com.c8db.util.C8Serialization;
 
@@ -26,6 +27,6 @@ public interface HostResolver {
 
     void init(C8ExecutorSync executorSync, C8Serialization arangoSerialization);
 
-    HostSet resolve(boolean initial, boolean closeConnections);
+    HostSet resolve(Service service, boolean initial, boolean closeConnections);
 
 }

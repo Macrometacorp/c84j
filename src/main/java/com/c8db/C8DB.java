@@ -39,7 +39,6 @@ import com.c8db.internal.C8DBImpl;
 import com.c8db.internal.C8Defaults;
 import com.c8db.internal.InternalC8DBBuilder;
 import com.c8db.internal.http.HttpCommunication;
-import com.c8db.internal.http.HttpConnection;
 import com.c8db.internal.http.HttpConnectionFactory;
 import com.c8db.internal.net.ConnectionFactory;
 import com.c8db.internal.net.Host;
@@ -121,7 +120,20 @@ public interface C8DB extends C8SerializationAccessor {
          * @return {@link C8DB.Builder}
          */
         public Builder host(final String host, final int port) {
-            setHost(host, port);
+            setHost(Service.C8DB, host, port);
+            return this;
+        }
+
+        /**
+         * Adds a service host to connect to. Multiple hosts can be added to provide fallbacks.
+         * if service host is empty then it uses regular host from method `host(final String host, final int port)`
+         *
+         * @param host address of the host
+         * @param port port of the host
+         * @return {@link C8DB.Builder}
+         */
+        public Builder serviceHost(Service service, final String host, final int port) {
+            setHost(service, host, port);
             return this;
         }
 
@@ -166,6 +178,18 @@ public interface C8DB extends C8SerializationAccessor {
 
         public Builder jwtToken(final String jwt) {
             setJwtToken(jwt);
+            return this;
+        }
+
+        /**
+         * Set user which JWT will be generated for calls
+         * If jwtToken is set then jwtUser will not be used
+         *
+         * @param user
+         * @return
+         */
+        public Builder jwtUser(final String user) {
+            setJwtUser(user);
             return this;
         }
 
@@ -591,8 +615,12 @@ public interface C8DB extends C8SerializationAccessor {
          * @return {@link C8DB}
          */
         public synchronized C8DB build() {
-            if (hosts.isEmpty()) {
-                hosts.add(host);
+            if (hosts.get(Service.C8DB).isEmpty()) {
+                hosts.get(Service.C8DB).add(host);
+            }
+            // if c8streams host is empty then it should use regular hosts
+            if (hosts.get(Service.C8STREAMS).isEmpty()) {
+                hosts.get(Service.C8STREAMS).addAll(hosts.get(Service.C8DB));
             }
 
             final VPack vpacker = vpackBuilder.serializeNullValues(false).build();
@@ -614,10 +642,10 @@ public interface C8DB extends C8SerializationAccessor {
             final ConnectionFactory connectionFactory = (protocol == null || Protocol.VST == protocol)
                     ? new VstConnectionFactorySync(host, timeout, connectionTtl, useSsl, sslContext)
                     : new HttpConnectionFactory(timeout, user, password, email, jwtAuth, useSsl, sslContext, custom, protocol,
-                            connectionTtl, httpCookieSpec, jwtToken, apiKey);
+                            connectionTtl, httpCookieSpec, jwtToken, apiKey, hosts.get(Service.C8DB).get(0), jwtUser, hosts.get(Service.C8STREAMS).get(0));
 
-            final Collection<Host> hostList = createHostList(max, connectionFactory);
-            final HostResolver hostResolver = createHostResolver(hostList, max, connectionFactory);
+            final Map<Service, Collection<Host>> hostsMatrix = createHostMatrix(max, connectionFactory);
+            final HostResolver hostResolver = createHostResolver(hostsMatrix, max, connectionFactory);
             final HostHandler hostHandler = createHostHandler(hostResolver);
             return new C8DBImpl(
                     new VstCommunicationSync.Builder(hostHandler).timeout(timeout).user(user).password(password)
@@ -967,6 +995,21 @@ public interface C8DB extends C8SerializationAccessor {
     void grantDefaultCollectionAccess(String user, Permissions permissions) throws C8DBException;
 
     /**
+     * Get the stream access level
+     * @param user user name
+     * @param stream stream name
+     * @return result of access level. Possible results are `ro`, `rw`, `none`
+     */
+    Permissions getStreamAccess(final String user, final String tenant, String fabric, final String stream);
+
+    /**
+     * Get the GeoFabric access level
+     * @param user user name
+     * @return result of access level. Possible results are `ro`, `rw`, `none`
+     */
+    Permissions getGeoFabricAccess(final String user, final String tenant, String fabric);
+
+    /**
      * Generic Execute. Use this method to execute custom FOXX services.
      *
      * @param request VelocyStream request
@@ -1025,5 +1068,6 @@ public interface C8DB extends C8SerializationAccessor {
      * @return ArangoDB
      */
     C8DB _setCursorInitializer(C8CursorInitializer cursorInitializer);
+
 
 }

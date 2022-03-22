@@ -17,6 +17,7 @@
 package com.c8db.internal.net;
 
 import com.c8db.C8DBException;
+import com.c8db.Service;
 
 import java.io.IOException;
 import java.util.List;
@@ -30,13 +31,23 @@ public class FallbackHostHandler implements HostHandler {
     private Host lastSuccess;
     private int iterations;
     private final HostResolver resolver;
+    private Service service;
     private boolean firstOpened;
+    private boolean initialized;
 
     public FallbackHostHandler(final HostResolver resolver) {
         this.resolver = resolver;
         iterations = 0;
-        current = lastSuccess = resolver.resolve(true, false).getHostsList().get(0);
         firstOpened = true;
+    }
+
+    @Override
+    public void service(Service name) {
+        service = name;
+        if (!initialized) {
+            current = lastSuccess = resolver.resolve(name,true, false).getHostsList().get(0);
+            initialized = true;
+        }
     }
 
     @Override
@@ -56,7 +67,7 @@ public class FallbackHostHandler implements HostHandler {
 
     @Override
     public void fail() {
-        final List<Host> hosts = resolver.resolve(false, false).getHostsList();
+        final List<Host> hosts = resolver.resolve(service, false, false).getHostsList();
         final int index = hosts.indexOf(current) + 1;
         final boolean inBound = index < hosts.size();
         current = hosts.get(inBound ? index : 0);
@@ -74,14 +85,14 @@ public class FallbackHostHandler implements HostHandler {
     public void confirm() {
         if (firstOpened) {
             // after first successful established connection, update host list
-            resolver.resolve(false, false);
+            resolver.resolve(service, false, false);
             firstOpened = false;
         }
     }
 
     @Override
     public void close() throws IOException {
-        final HostSet hosts = resolver.resolve(false, false);
+        final HostSet hosts = resolver.resolve(service, false, false);
         hosts.close();
     }
 

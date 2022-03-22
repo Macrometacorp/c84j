@@ -8,6 +8,7 @@ import com.arangodb.velocypack.Type;
 import com.arangodb.velocypack.VPackSlice;
 import com.arangodb.velocypack.exception.VPackException;
 import com.c8db.entity.ApiKeyEntity;
+import com.c8db.entity.Permissions;
 import com.c8db.internal.C8Executor.ResponseDeserializer;
 import com.c8db.internal.util.C8SerializationFactory;
 import com.c8db.model.ApiKeyOptions;
@@ -23,6 +24,7 @@ public abstract class InternalC8ApiKeys<A extends InternalC8DB<E>, D extends Int
         extends C8Executeable<E> {
 
     protected static final String PATH_API_KEY_VALIDATE = "/_api/key/validate";
+    protected static final String PATH_API_KEY = "/_api/key";
 
     private final D db;
 
@@ -47,5 +49,29 @@ public abstract class InternalC8ApiKeys<A extends InternalC8DB<E>, D extends Int
                 OptionsBuilder.build(new ApiKeyOptions(), apikey)));
         return request;
     }
+
+    protected Request geoFabricAccessLevelRequest(final String keyId) {
+        final Request request = request(db.tenant(), db.name(), RequestType.GET, PATH_API_KEY, keyId,
+            C8RequestParam.DATABASE, C8RequestParam.SYSTEM);
+        return request;
+    }
+
+    protected Request streamAccessLevelRequest(final String keyId, final String stream) {
+        final Request request = request(db.tenant(), db.name(), RequestType.GET, PATH_API_KEY, keyId,
+            C8RequestParam.DATABASE, C8RequestParam.SYSTEM, C8RequestParam.STREAM, stream);
+        return request;
+    }
+
+    protected ResponseDeserializer<Permissions> streamAccessLevelResponseDeserializer() {
+        return new ResponseDeserializer<Permissions>() {
+            @Override
+            public Permissions deserialize(final Response response) throws VPackException {
+                final VPackSlice result = response.getBody().get(C8ResponseField.RESULT);
+                String level = util().deserialize(result,  new Type<String>(){}.getType());
+                return Permissions.valueOf(level.toUpperCase());
+            }
+        };
+    }
+
 
 }

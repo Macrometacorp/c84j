@@ -16,11 +16,18 @@
 
 package com.c8db.internal.util;
 
+import com.c8db.Service;
 import com.c8db.internal.net.ConnectionFactory;
 import com.c8db.internal.net.ConnectionPoolImpl;
 import com.c8db.internal.net.Host;
 import com.c8db.internal.net.HostDescription;
 import com.c8db.internal.net.HostImpl;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -45,5 +52,13 @@ public final class HostUtils {
     public static Host createHost(final HostDescription description, final int maxConnections,
             final ConnectionFactory factory) {
         return new HostImpl(new ConnectionPoolImpl(description, maxConnections, factory), description);
+    }
+
+    public static Map<Service, List<Host>> cloneHostMatrix(final Map<Service, Collection<Host>> hostsMatrix) {
+        final Map map = new HashMap();
+        for (Service key : hostsMatrix.keySet()) {
+            map.put(key, new ArrayList<Host>(hostsMatrix.get(key)));
+        }
+        return map;
     }
 }

@@ -73,9 +73,7 @@ public abstract class InternalC8Database<A extends InternalC8DB<E>, E extends C8
     protected static final String PATH_API_TENANT = "/_tenant";
     protected static final String PATH_API_USER = "/_admin/user";
     protected static final String PATH_API_VERSION = "/_admin/version";
-    protected static final String PATH_API_STREAMS = "/streams";
-    protected static final String PATH_API_PERSISTENT = "persistent";
-    protected static final String PATH_API_STREAM = "stream";
+    protected static final String PATH_API_STREAMS = "/_api/streams";
     protected static final String PATH_API_TRANSACTION = "/transaction";
     protected static final String PATH_API_CURSOR = "/cursor";
     protected static final String PATH_API_QUERY = "/query";
@@ -450,14 +448,13 @@ public abstract class InternalC8Database<A extends InternalC8DB<E>, E extends C8
     }
 
     protected Request createC8PersistentStreamRequest(final String name, final C8StreamCreateOptions options) {
-        Request request = request(tenant(), name(), RequestType.POST, PATH_API_STREAMS, PATH_API_PERSISTENT,
-                PATH_API_STREAM, name);
+        Request request = request(tenant(), name(), RequestType.POST, PATH_API_STREAMS, name);
         request.putQueryParam("local", options != null ? options.getIsLocal() : false);
         return request;
     }
 
     protected Request getC8PersistentStreamsRequest(final C8StreamCreateOptions options) {
-        Request request = request(tenant(), name(), RequestType.GET, PATH_API_STREAMS, PATH_API_PERSISTENT);
+        Request request = request(tenant(), name(), RequestType.GET, PATH_API_STREAMS);
         request.putQueryParam("local", options != null ? options.getIsLocal() : false);
         return request;
     }
