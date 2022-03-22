@@ -34,15 +34,12 @@ public class C8DynamoCreateOptions extends CollectionCreateOptions{
         this.AttributeDefinitions = attributeDefinitionList;
         this.TableName = tableName;
         this.KeySchema = keySchemaElementList;
-        //this.provisionedThroughput = provisionedThroughput;
     }
 
     public C8DynamoCreateOptions(C8DynamoCreateOptions options) {
         this.AttributeDefinitions = options.getAttributeDefinitionList();
         this.TableName = options.getTableName();
         this.KeySchema = options.getKeySchemaElementList();
-        //this.provisionedThroughput = options.getProvisionedThroughput();
-        //System.out.println("Set provisionedThroughput = " + provisionedThroughput);
     }
     protected C8DynamoCreateOptions tableName(final String tableName) {
         this.TableName = tableName;

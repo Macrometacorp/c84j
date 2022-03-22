@@ -3,7 +3,13 @@
  */
 package com.c8db;
 
-import com.c8db.entity.*;
+import com.c8db.entity.C8DynamoEntity;
+import com.c8db.entity.C8DynamoItemEntity;
+import com.c8db.entity.DynamoAttributeDefinition;
+import com.c8db.entity.DynamoKeySchemaElement;
+import com.c8db.entity.MultiDocumentEntity;
+import com.c8db.entity.C8DynamoDescribeEntity;
+import com.c8db.entity.C8DynamoDeleteEntity;
 import com.c8db.model.C8DynamoCreateOptions;
 
 import java.util.Collection;

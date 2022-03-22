@@ -87,15 +87,6 @@ public abstract class InternalC8Dynamo<A extends InternalC8DB<E>, D extends Inte
         };
     }
 
-    /*protected Request createPutItemRequest(final JSONObject options) {
-        VPackSlice body = util().serialize(options.toString());
-        Request request = request(db.tenant(), db.name(), RequestType.POST, PATH_API_DYNAMO);
-            request.putHeaderParam("X-Amz-Target", "DynamoDB_20120810.PutItem");
-        request.setBody(body);
-        System.out.println("Request : " + request.getBody());
-        return request;
-    }*/
-
     protected  <T> Request createPutItemRequest(final Collection<T> values) {
         final Request request = setRequestParams(values);
         request.putHeaderParam("X-Amz-Target", "DynamoDB_20120810.PutItem");
