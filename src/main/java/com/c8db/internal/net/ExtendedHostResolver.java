@@ -21,9 +21,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.c8db.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +48,7 @@ public class ExtendedHostResolver implements HostResolver {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ExtendedHostResolver.class);
 
-    private HostSet hosts;
+    private Map<Service, HostSet> hostMatrix;
 
     private final Integer maxConnections;
     private final ConnectionFactory connectionFactory;
@@ -57,15 +59,24 @@ public class ExtendedHostResolver implements HostResolver {
     private C8ExecutorSync executor;
     private C8Serialization arangoSerialization;
 
-    public ExtendedHostResolver(final List<Host> hosts, final Integer maxConnections,
-            final ConnectionFactory connectionFactory, Integer acquireHostListInterval) {
+    public ExtendedHostResolver(final Map<Service, List<Host>> hostMatrix, final Integer maxConnections,
+                                final ConnectionFactory connectionFactory, Integer acquireHostListInterval) {
 
         this.acquireHostListInterval = acquireHostListInterval;
-        this.hosts = new HostSet(hosts);
+
+        this.hostMatrix = toHostSetsMap(hostMatrix);
         this.maxConnections = maxConnections;
         this.connectionFactory = connectionFactory;
 
         lastUpdate = 0;
+    }
+
+    private Map<Service, HostSet> toHostSetsMap(Map<Service, List<Host>> hostMatrix) {
+        final Map map = new HashMap();
+        for (Service key: hostMatrix.keySet()) {
+            map.put(key, new HostSet(hostMatrix.get(key)));
+        }
+        return map;
     }
 
     @Override
@@ -75,11 +86,9 @@ public class ExtendedHostResolver implements HostResolver {
     }
 
     @Override
-
-    public HostSet resolve(boolean initial, boolean closeConnections) {
-
+    public HostSet resolve(Service service, boolean initial, boolean closeConnections) {
         if (!initial && isExpired()) {
-
+            HostSet hosts = hostMatrix.get(Service.C8DB);
             lastUpdate = System.currentTimeMillis();
 
             final Collection<String> endpoints = resolveFromServer();
@@ -122,6 +131,7 @@ public class ExtendedHostResolver implements HostResolver {
 
         }
 
+        HostSet hosts = hostMatrix.get(service);
         return hosts;
     }
 

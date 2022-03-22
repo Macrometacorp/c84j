@@ -24,6 +24,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import javax.net.ssl.SSLContext;
 
+import com.c8db.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,7 +76,8 @@ public abstract class VstCommunication<R, C extends VstConnection> implements Cl
     }
 
     @SuppressWarnings("unchecked")
-    protected synchronized C connect(final HostHandle hostHandle, final AccessType accessType) {
+    protected synchronized C connect(final HostHandle hostHandle, final AccessType accessType, Service service) {
+        hostHandler.service(service);
         Host host = hostHandler.get(hostHandle, accessType);
         while (true) {
             if (host == null) {
@@ -121,9 +123,9 @@ public abstract class VstCommunication<R, C extends VstConnection> implements Cl
         hostHandler.close();
     }
 
-    public R execute(final Request request, final HostHandle hostHandle) throws C8DBException {
+    public R execute(final Request request, final HostHandle hostHandle, Service service) throws C8DBException {
         try {
-            final C connection = connect(hostHandle, RequestUtils.determineAccessType(request));
+            final C connection = connect(hostHandle, RequestUtils.determineAccessType(request), service);
             return execute(request, connection);
         } catch (final C8DBException e) {
             if (e instanceof C8DBRedirectException) {
@@ -131,7 +133,7 @@ public abstract class VstCommunication<R, C extends VstConnection> implements Cl
                 final HostDescription redirectHost = HostUtils.createFromLocation(location);
                 hostHandler.closeCurrentOnError();
                 hostHandler.fail();
-                return execute(request, new HostHandle().setHost(redirectHost));
+                return execute(request, new HostHandle().setHost(redirectHost), service);
             } else {
                 throw e;
             }

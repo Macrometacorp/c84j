@@ -16,6 +16,8 @@
 
 package com.c8db.internal.net;
 
+import com.c8db.Service;
+
 import java.io.IOException;
 
 /**
@@ -40,6 +42,12 @@ public class DirtyReadHostHandler implements HostHandler {
         default:
             return master;
         }
+    }
+
+    @Override
+    public void service(Service name) {
+        follower.service(name);
+        master.service(name);
     }
 
     @Override
