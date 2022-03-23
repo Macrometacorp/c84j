@@ -5,6 +5,9 @@
 package com.c8db.internal;
 
 import com.arangodb.velocypack.Type;
+import com.c8db.C8Admin;
+import com.c8db.C8Alerts;
+import com.c8db.C8ApiKeys;
 import com.c8db.C8Collection;
 import com.c8db.C8Cursor;
 import com.c8db.C8Database;
@@ -16,9 +19,6 @@ import com.c8db.entity.C8DBVersion;
 import com.c8db.C8Stream;
 import com.c8db.Restql;
 import com.c8db.Service;
-import com.c8db.C8Admin;
-import com.c8db.C8ApiKeys;
-import com.c8db.C8Alerts;
 import com.c8db.C8Event;
 import com.c8db.entity.C8StreamEntity;
 import com.c8db.entity.C8qlExecutionExplainEntity;
