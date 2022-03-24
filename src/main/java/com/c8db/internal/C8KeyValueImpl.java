@@ -11,7 +11,10 @@ import com.c8db.entity.C8KVEntity;
 import com.c8db.entity.DocumentCreateEntity;
 import com.c8db.entity.DocumentDeleteEntity;
 import com.c8db.internal.util.DocumentUtil;
-import com.c8db.model.*;
+import com.c8db.model.C8KVPairReadOptions;
+import com.c8db.model.CollectionCreateOptions;
+import com.c8db.model.DocumentCreateOptions;
+import com.c8db.model.DocumentDeleteOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
