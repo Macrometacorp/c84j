@@ -5,7 +5,11 @@ package com.c8db.internal;
 
 import com.c8db.C8DBException;
 import com.c8db.C8KeyValue;
-import com.c8db.entity.*;
+import com.c8db.entity.MultiDocumentEntity;
+import com.c8db.entity.BaseKeyValue;
+import com.c8db.entity.C8KVEntity;
+import com.c8db.entity.DocumentCreateEntity;
+import com.c8db.entity.DocumentDeleteEntity;
 import com.c8db.internal.util.DocumentUtil;
 import com.c8db.model.*;
 import org.slf4j.Logger;
@@ -16,7 +20,7 @@ import java.util.Collection;
 public class C8KeyValueImpl extends InternalC8KeyValue<C8DBImpl, C8DatabaseImpl, C8ExecutorSync>
         implements C8KeyValue {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(C8KeyValue.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(C8KeyValueImpl.class);
 
     protected C8KeyValueImpl(final C8DatabaseImpl db, final String name) {
         super(db, name);

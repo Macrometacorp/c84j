@@ -8,6 +8,7 @@ import com.c8db.entity.C8DynamoItemEntity;
 import com.c8db.entity.DynamoAttributeDefinition;
 import com.c8db.entity.DynamoKeySchemaElement;
 import com.c8db.entity.MultiDocumentEntity;
+import com.c8db.entity.DocumentCreateEntity;
 import com.c8db.entity.C8DynamoDescribeEntity;
 import com.c8db.entity.C8DynamoDeleteEntity;
 import com.c8db.model.C8DynamoCreateOptions;
@@ -26,6 +27,9 @@ public interface C8Dynamo {
 
     /**
      * Creates a DynamoDb table with the given {@code options}
+     * @param tableName The name of Dynamo like collection
+     * @param attributeDefinitionList List containing schema
+     * @param keySchema The schema for the primary and composite key
      * @return The Dynamo entity
      * @throws C8DBException
      */
@@ -49,37 +53,41 @@ public interface C8Dynamo {
 
     /**
      * This method inserts an item in the dynamo like table
+     * @param values The request params
      * @return The Dynamo entity
      * @throws C8DBException
      */
-    //JSONObject putItem(JSONObject options) throws C8DBException;
-    <T> MultiDocumentEntity<C8DynamoItemEntity> putItem(Collection<T> values) throws C8DBException;;
+    <T> MultiDocumentEntity<DocumentCreateEntity<T>> putItem(Collection<T> values) throws C8DBException;;
 
     /**
      * This method updates an existing item in the dynamo like table
+     * @param values The request params
      * @return The Dynamo entity
      * @throws C8DBException
      */
-    <T> MultiDocumentEntity<C8DynamoItemEntity> updateItem(Collection<T> values) throws C8DBException;
+    <T> MultiDocumentEntity<DocumentCreateEntity<T>> updateItem(Collection<T> values) throws C8DBException;
 
     /**
      * This method returns an existing item from the dynamo like table
+     * @param values The request params
      * @return The Dynamo entity
      * @throws C8DBException
      */
-    <T> MultiDocumentEntity<C8DynamoItemEntity> getItem(Collection<T> values) throws C8DBException;
+    <T> MultiDocumentEntity<DocumentCreateEntity<T>> getItem(Collection<T> values) throws C8DBException;
 
     /**
      * This method returns an existing item from the dynamo like table
+     * @param values The request params
      * @return The Dynamo entity
      * @throws C8DBException
      */
-    <T> MultiDocumentEntity<C8DynamoItemEntity> deleteItem(Collection<T> values) throws C8DBException;
+    <T> MultiDocumentEntity<DocumentCreateEntity<T>> deleteItem(Collection<T> values) throws C8DBException;
 
     /**
      * This method returns an existing item from the dynamo like table
+     * @param values The request params
      * @return The Dynamo entity
      * @throws C8DBException
      */
-    <T> MultiDocumentEntity<C8DynamoItemEntity> getItems(Collection<T> values) throws C8DBException;
+    <T> MultiDocumentEntity<DocumentCreateEntity<T>> getItems(Collection<T> values) throws C8DBException;
 }

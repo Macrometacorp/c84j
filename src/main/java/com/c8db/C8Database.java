@@ -690,6 +690,11 @@ public interface C8Database extends C8SerializationAccessor {
      */
     C8KeyValue kv(final String name);
 
+    /**
+     * Returns a {@code C8Dynamo} instance.
+     * @param tableName The name of the Dynamo collection
+     * @return C8Dynamo handler
+     */
     C8Dynamo dynamo(final String tableName);
 
 }

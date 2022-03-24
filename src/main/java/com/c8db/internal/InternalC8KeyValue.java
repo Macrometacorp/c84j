@@ -6,7 +6,11 @@ package com.c8db.internal;
 
 import com.arangodb.velocypack.VPackSlice;
 import com.arangodb.velocypack.exception.VPackException;
-import com.c8db.entity.*;
+import com.c8db.entity.ErrorEntity;
+import com.c8db.entity.DocumentCreateEntity;
+import com.c8db.entity.MultiDocumentEntity;
+import com.c8db.entity.BaseKeyValue;
+import com.c8db.entity.DocumentDeleteEntity;
 import com.c8db.internal.C8Executor.ResponseDeserializer;
 import com.c8db.internal.util.C8SerializationFactory.Serializer;
 import com.c8db.internal.util.DocumentUtil;

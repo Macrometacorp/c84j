@@ -53,6 +53,4 @@ public class BaseKeyValue extends BaseDocument {
             this.expireAt = (Long) tmpExpireAt;
         }
     }
-
-
 }

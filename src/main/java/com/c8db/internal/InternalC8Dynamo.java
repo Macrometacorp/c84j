@@ -1,5 +1,9 @@
+/*
+ *
+ *  * Copyright (c) 2022 Macrometa Corp All rights reserved
+ *
+ */
 package com.c8db.internal;
-
 
 import com.arangodb.velocypack.Type;
 import com.arangodb.velocypack.VPackSlice;
@@ -8,6 +12,7 @@ import com.c8db.entity.*;
 import com.c8db.internal.util.C8SerializationFactory;
 import com.c8db.model.C8DynamoCreateOptions;
 import com.c8db.model.OptionsBuilder;
+import com.c8db.util.C8Constants;
 import com.c8db.util.C8Serializer;
 import com.c8db.velocystream.Request;
 import com.c8db.velocystream.RequestType;
@@ -21,8 +26,6 @@ public abstract class InternalC8Dynamo<A extends InternalC8DB<E>, D extends Inte
     private final D db;
     protected volatile String tableName;
 
-    private static final String NEW = "new";
-    private static final String OLD = "old";
     public D db() {
         return db;
     }
@@ -37,7 +40,7 @@ public abstract class InternalC8Dynamo<A extends InternalC8DB<E>, D extends Inte
         VPackSlice body = util()
                 .serialize(OptionsBuilder.build(options != null ? options : new C8DynamoCreateOptions(), tableName));
         Request request = request(db.tenant(), db.name(), RequestType.POST, PATH_API_DYNAMO, tableName).setBody(body);
-        request.putHeaderParam("X-Amz-Target","DynamoDB_20120810.CreateTable");
+        request.putHeaderParam(C8Constants.C8_DYNAMO_HEADER_KEY,C8Constants.C8_DYNAMO_CREATE_TABLE_VAL);
         return request;
     }
 
@@ -51,11 +54,11 @@ public abstract class InternalC8Dynamo<A extends InternalC8DB<E>, D extends Inte
         };
     }
 
-    protected Request createDeleteRequest(final String tableName,final C8DynamoCreateOptions options) {
+    protected Request createDeleteRequest(final String tableName, final C8DynamoCreateOptions options) {
         VPackSlice body = util()
                 .serialize(OptionsBuilder.build(options != null ? options : new C8DynamoCreateOptions(), tableName));
         Request request = request(db.tenant(), db.name(), RequestType.POST, PATH_API_DYNAMO).setBody(body);
-        request.putHeaderParam("X-Amz-Target","DynamoDB_20120810.DeleteTable");
+        request.putHeaderParam(C8Constants.C8_DYNAMO_HEADER_KEY,C8Constants.C8_DYNAMO_DELETE_TABLE_VAL);
         return request;
     }
 
@@ -73,7 +76,7 @@ public abstract class InternalC8Dynamo<A extends InternalC8DB<E>, D extends Inte
         VPackSlice body = util()
                 .serialize(OptionsBuilder.build(options != null ? options : new C8DynamoCreateOptions(), tableName));
         Request request = request(db.tenant(), db.name(), RequestType.POST, PATH_API_DYNAMO).setBody(body);
-        request.putHeaderParam("X-Amz-Target","DynamoDB_20120810.DescribeTable");
+        request.putHeaderParam(C8Constants.C8_DYNAMO_HEADER_KEY,C8Constants.C8_DYNAMO_DESCRIBE_TABLE_VAL);
         return request;
     }
 
@@ -89,15 +92,16 @@ public abstract class InternalC8Dynamo<A extends InternalC8DB<E>, D extends Inte
 
     protected  <T> Request createPutItemRequest(final Collection<T> values) {
         final Request request = setRequestParams(values);
-        request.putHeaderParam("X-Amz-Target", "DynamoDB_20120810.PutItem");
+        request.putHeaderParam(C8Constants.C8_DYNAMO_HEADER_KEY, C8Constants.C8_DYNAMO_PUT_ITEM_VAL);
+        System.out.println("Request : " + request.getBody());
         return request;
     }
 
     @SuppressWarnings("unchecked")
-    protected  <T> C8Executor.ResponseDeserializer<MultiDocumentEntity<C8DynamoItemEntity>> itemsResponseDeserializer() {
+    protected  <T> C8Executor.ResponseDeserializer<MultiDocumentEntity<DocumentCreateEntity<T>>> itemsResponseDeserializer() {
         return response -> {
-            final MultiDocumentEntity<C8DynamoItemEntity> multiDocument = new MultiDocumentEntity<>();
-            final Collection<C8DynamoItemEntity> docs = new ArrayList<>();
+            final MultiDocumentEntity<DocumentCreateEntity<T>> multiDocument = new MultiDocumentEntity<>();
+            final Collection<DocumentCreateEntity<T>> docs = new ArrayList<>();
             final Collection<ErrorEntity> errors = new ArrayList<>();
             final Collection<Object> documentsAndErrors = new ArrayList<>();
             final VPackSlice body = response.getBody();
@@ -109,14 +113,14 @@ public abstract class InternalC8Dynamo<A extends InternalC8DB<E>, D extends Inte
                         errors.add(error);
                         documentsAndErrors.add(error);
                     } else {
-                        final C8DynamoItemEntity doc = util().deserialize(next, C8DynamoItemEntity.class);
+                        final DocumentCreateEntity<T> doc = util().deserialize(next, DocumentCreateEntity.class);
                         docs.add(doc);
                         documentsAndErrors.add(doc);
                     }
                 }
             }else{
                 final VPackSlice next = body;
-                final C8DynamoItemEntity doc = util().deserialize(next, C8DynamoItemEntity.class);
+                final DocumentCreateEntity<T> doc = util().deserialize(next, DocumentCreateEntity.class);
                 docs.add(doc);
                 documentsAndErrors.add(doc);
             }
@@ -129,19 +133,19 @@ public abstract class InternalC8Dynamo<A extends InternalC8DB<E>, D extends Inte
 
     protected  <T> Request getItemRequest(final Collection<T> values) {
         final Request request= setRequestParams(values);
-        request.putHeaderParam("X-Amz-Target", "DynamoDB_20120810.GetItem");
+        request.putHeaderParam(C8Constants.C8_DYNAMO_HEADER_KEY, C8Constants.C8_DYNAMO_GET_ITEM_VAL);
         return request;
     }
 
     protected  <T> Request deleteItemRequest(final Collection<T> values) {
         final Request request = setRequestParams(values);
-        request.putHeaderParam("X-Amz-Target", "DynamoDB_20120810.DeleteItem");
+        request.putHeaderParam(C8Constants.C8_DYNAMO_HEADER_KEY, C8Constants.C8_DYNAMO_DELETE_ITEM_VAL);
         return request;
     }
 
     protected  <T> Request getItemsRequest(final Collection<T> values) {
         final Request request= setRequestParams(values);
-        request.putHeaderParam("X-Amz-Target", "DynamoDB_20120810.Scan");
+        request.putHeaderParam(C8Constants.C8_DYNAMO_HEADER_KEY, C8Constants.C8_DYNAMO_GET_ITEMS_VAL);
         return request;
     }
 
