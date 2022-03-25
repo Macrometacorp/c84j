@@ -10,7 +10,7 @@ import com.c8db.entity.DynamoKeySchemaElement;
 
 import java.util.List;
 
-public class C8DynamoCreateOptions extends CollectionCreateOptions{
+public class C8DynamoCreateOptions extends CollectionCreateOptions {
     private List<DynamoAttributeDefinition> AttributeDefinitions;
     private String TableName;
     private List<DynamoKeySchemaElement> KeySchema;

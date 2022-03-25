@@ -1,6 +1,6 @@
 /*
  *
- *  * Copyright (c) 2022 Macrometa Corp All rights reserved
+ * Copyright (c) 2022 Macrometa Corp All rights reserved
  *
  */
 package com.c8db.internal;
@@ -12,7 +12,6 @@ import com.c8db.entity.*;
 import com.c8db.internal.util.C8SerializationFactory;
 import com.c8db.model.C8DynamoCreateOptions;
 import com.c8db.model.OptionsBuilder;
-import com.c8db.util.C8Constants;
 import com.c8db.util.C8Serializer;
 import com.c8db.velocystream.Request;
 import com.c8db.velocystream.RequestType;
@@ -23,6 +22,14 @@ import java.util.*;
 public abstract class InternalC8Dynamo<A extends InternalC8DB<E>, D extends InternalC8Database<A, E>, E extends C8Executor>
         extends C8Executeable<E> {
     protected static final String PATH_API_DYNAMO = "/_api/dynamo";
+    public static final String C8_DYNAMO_HEADER_KEY = "X-Amz-Target";
+    public static final String C8_DYNAMO_CREATE_TABLE_VAL = "DynamoDB_20120810.CreateTable";
+    public static final String C8_DYNAMO_DELETE_TABLE_VAL = "DynamoDB_20120810.DeleteTable";
+    public static final String C8_DYNAMO_DESCRIBE_TABLE_VAL = "DynamoDB_20120810.DescribeTable";
+    public static final String C8_DYNAMO_GET_ITEM_VAL = "DynamoDB_20120810.GetItem";
+    public static final String C8_DYNAMO_PUT_ITEM_VAL = "DynamoDB_20120810.PutItem";
+    public static final String C8_DYNAMO_DELETE_ITEM_VAL = "DynamoDB_20120810.DeleteItem";
+    public static final String C8_DYNAMO_GET_ITEMS_VAL = "DynamoDB_20120810.Scan";
     private final D db;
     protected volatile String tableName;
 
@@ -40,7 +47,7 @@ public abstract class InternalC8Dynamo<A extends InternalC8DB<E>, D extends Inte
         VPackSlice body = util()
                 .serialize(OptionsBuilder.build(options != null ? options : new C8DynamoCreateOptions(), tableName));
         Request request = request(db.tenant(), db.name(), RequestType.POST, PATH_API_DYNAMO, tableName).setBody(body);
-        request.putHeaderParam(C8Constants.C8_DYNAMO_HEADER_KEY,C8Constants.C8_DYNAMO_CREATE_TABLE_VAL);
+        request.putHeaderParam(C8_DYNAMO_HEADER_KEY, C8_DYNAMO_CREATE_TABLE_VAL);
         return request;
     }
 
@@ -58,7 +65,7 @@ public abstract class InternalC8Dynamo<A extends InternalC8DB<E>, D extends Inte
         VPackSlice body = util()
                 .serialize(OptionsBuilder.build(options != null ? options : new C8DynamoCreateOptions(), tableName));
         Request request = request(db.tenant(), db.name(), RequestType.POST, PATH_API_DYNAMO).setBody(body);
-        request.putHeaderParam(C8Constants.C8_DYNAMO_HEADER_KEY,C8Constants.C8_DYNAMO_DELETE_TABLE_VAL);
+        request.putHeaderParam(C8_DYNAMO_HEADER_KEY, C8_DYNAMO_DELETE_TABLE_VAL);
         return request;
     }
 
@@ -76,7 +83,7 @@ public abstract class InternalC8Dynamo<A extends InternalC8DB<E>, D extends Inte
         VPackSlice body = util()
                 .serialize(OptionsBuilder.build(options != null ? options : new C8DynamoCreateOptions(), tableName));
         Request request = request(db.tenant(), db.name(), RequestType.POST, PATH_API_DYNAMO).setBody(body);
-        request.putHeaderParam(C8Constants.C8_DYNAMO_HEADER_KEY,C8Constants.C8_DYNAMO_DESCRIBE_TABLE_VAL);
+        request.putHeaderParam(C8_DYNAMO_HEADER_KEY, C8_DYNAMO_DESCRIBE_TABLE_VAL);
         return request;
     }
 
@@ -92,8 +99,7 @@ public abstract class InternalC8Dynamo<A extends InternalC8DB<E>, D extends Inte
 
     protected  <T> Request createPutItemRequest(final Collection<T> values) {
         final Request request = setRequestParams(values);
-        request.putHeaderParam(C8Constants.C8_DYNAMO_HEADER_KEY, C8Constants.C8_DYNAMO_PUT_ITEM_VAL);
-        System.out.println("Request : " + request.getBody());
+        request.putHeaderParam(C8_DYNAMO_HEADER_KEY, C8_DYNAMO_PUT_ITEM_VAL);
         return request;
     }
 
@@ -133,28 +139,30 @@ public abstract class InternalC8Dynamo<A extends InternalC8DB<E>, D extends Inte
 
     protected  <T> Request getItemRequest(final Collection<T> values) {
         final Request request= setRequestParams(values);
-        request.putHeaderParam(C8Constants.C8_DYNAMO_HEADER_KEY, C8Constants.C8_DYNAMO_GET_ITEM_VAL);
+        request.putHeaderParam(C8_DYNAMO_HEADER_KEY, C8_DYNAMO_GET_ITEM_VAL);
         return request;
     }
 
     protected  <T> Request deleteItemRequest(final Collection<T> values) {
         final Request request = setRequestParams(values);
-        request.putHeaderParam(C8Constants.C8_DYNAMO_HEADER_KEY, C8Constants.C8_DYNAMO_DELETE_ITEM_VAL);
+        request.putHeaderParam(C8_DYNAMO_HEADER_KEY, C8_DYNAMO_DELETE_ITEM_VAL);
         return request;
     }
 
     protected  <T> Request getItemsRequest(final Collection<T> values) {
         final Request request= setRequestParams(values);
-        request.putHeaderParam(C8Constants.C8_DYNAMO_HEADER_KEY, C8Constants.C8_DYNAMO_GET_ITEMS_VAL);
+        request.putHeaderParam(C8_DYNAMO_HEADER_KEY, C8_DYNAMO_GET_ITEMS_VAL);
         return request;
     }
 
-    private <T> Request setRequestParams(final Collection<T> values){
+    private <T> Request setRequestParams(final Collection<T> values) {
         final Request request = request(db.tenant(), db.name(), RequestType.POST, PATH_API_DYNAMO);
         Iterator<T> items = values.iterator();
-        T value = items.next();
-        request.setBody(util(C8SerializationFactory.Serializer.CUSTOM).serialize(value,
-                new C8Serializer.Options().serializeNullValues(false).stringAsJson(true)));
+        while (items.hasNext()) {
+            T value = items.next();
+            request.setBody(util(C8SerializationFactory.Serializer.CUSTOM).serialize(value,
+                    new C8Serializer.Options().serializeNullValues(false).stringAsJson(true)));
+        }
         return request;
     }
 }
