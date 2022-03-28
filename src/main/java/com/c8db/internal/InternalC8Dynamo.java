@@ -30,6 +30,7 @@ public abstract class InternalC8Dynamo<A extends InternalC8DB<E>, D extends Inte
     public static final String C8_DYNAMO_PUT_ITEM_VAL = "DynamoDB_20120810.PutItem";
     public static final String C8_DYNAMO_DELETE_ITEM_VAL = "DynamoDB_20120810.DeleteItem";
     public static final String C8_DYNAMO_GET_ITEMS_VAL = "DynamoDB_20120810.Scan";
+    public static final String C8_DYNAMO_BATCH_WRITE_ITEM_VAL = "DynamoDB_20120810.BatchWriteItem";
     private final D db;
     protected volatile String tableName;
 
@@ -160,9 +161,14 @@ public abstract class InternalC8Dynamo<A extends InternalC8DB<E>, D extends Inte
         Iterator<T> items = values.iterator();
         while (items.hasNext()) {
             T value = items.next();
-            request.setBody(util(C8SerializationFactory.Serializer.CUSTOM).serialize(value,
-                    new C8Serializer.Options().serializeNullValues(false).stringAsJson(true)));
+            request.setBody(util(C8SerializationFactory.Serializer.CUSTOM).serialize(value, new C8Serializer.Options().serializeNullValues(false).stringAsJson(true)));
         }
+        return request;
+    }
+
+    protected  <T> Request batchWriteItemRequest(final Collection<T> values) {
+        final Request request = setRequestParams(values);
+        request.putHeaderParam(C8_DYNAMO_HEADER_KEY, C8_DYNAMO_BATCH_WRITE_ITEM_VAL);
         return request;
     }
 }

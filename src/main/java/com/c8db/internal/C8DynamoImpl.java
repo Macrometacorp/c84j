@@ -72,4 +72,9 @@ public class C8DynamoImpl extends InternalC8Dynamo<C8DBImpl, C8DatabaseImpl, C8E
     public <T> MultiDocumentEntity<DocumentCreateEntity<T>> getItems(Collection<T> values) throws C8DBException {
         return executor.execute(getItemsRequest(values), itemsResponseDeserializer());
     }
+
+    @Override
+    public <T> MultiDocumentEntity<DocumentCreateEntity<T>> batchWriteItem(Collection<T> values) throws C8DBException {
+        return executor.execute(batchWriteItemRequest(values), itemsResponseDeserializer());
+    }
 }

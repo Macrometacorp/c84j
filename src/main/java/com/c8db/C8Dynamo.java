@@ -57,7 +57,7 @@ public interface C8Dynamo {
      * @return The Dynamo entity
      * @throws C8DBException
      */
-    <T> MultiDocumentEntity<DocumentCreateEntity<T>> putItem(Collection<T> values) throws C8DBException;;
+    <T> MultiDocumentEntity<DocumentCreateEntity<T>> putItem(Collection<T> values) throws C8DBException;
 
     /**
      * This method updates an existing item in the dynamo like table
@@ -86,8 +86,16 @@ public interface C8Dynamo {
     /**
      * This method returns an existing item from the dynamo like table
      * @param values The request params
-     * @return The Dynamo entity
+     * @return The Dynamo entity with response parameters
      * @throws C8DBException
      */
     <T> MultiDocumentEntity<DocumentCreateEntity<T>> getItems(Collection<T> values) throws C8DBException;
+
+    /**
+     * This method writes multiple items (or records) to the dynamo-like collection.
+     * @param values List of items to be written in dynamo collection
+     * @return The Dynamo entity with response parameters
+     * @throws C8DBException
+     */
+    <T> MultiDocumentEntity<DocumentCreateEntity<T>> batchWriteItem(Collection<T> values) throws C8DBException;;
 }
