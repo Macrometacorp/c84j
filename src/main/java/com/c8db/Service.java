@@ -1,8 +1,9 @@
-package com.c8db;
-
 /**
  * Copyright (c) 2022 Macrometa Corp All rights reserved.
  */
+
+package com.c8db;
+
 public enum Service {
 
     C8DB,

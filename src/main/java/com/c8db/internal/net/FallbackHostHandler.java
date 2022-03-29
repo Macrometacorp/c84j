@@ -12,6 +12,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ *  Modifications copyright (c) 2022 Macrometa Corp All rights reserved.
+ *
  */
 
 package com.c8db.internal.net;
@@ -22,9 +25,7 @@ import com.c8db.Service;
 import java.io.IOException;
 import java.util.List;
 
-/**
- *
- */
+
 public class FallbackHostHandler implements HostHandler {
 
     private Host current;
@@ -42,10 +43,10 @@ public class FallbackHostHandler implements HostHandler {
     }
 
     @Override
-    public void service(Service name) {
-        service = name;
-        if (!initialized) {
-            current = lastSuccess = resolver.resolve(name,true, false).getHostsList().get(0);
+    public void applyService(Service service) {
+        if (!initialized || this.service != service) {
+            this.service = service;
+            current = lastSuccess = resolver.resolve(service,true, false).getHostsList().get(0);
             initialized = true;
         }
     }

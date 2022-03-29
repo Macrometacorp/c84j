@@ -12,6 +12,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ *  Modifications copyright (c) 2022 Macrometa Corp All rights reserved.
+ *
  */
 
 package com.c8db.internal.net;
@@ -22,9 +25,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 
-/**
- *
- */
 public class RandomHostHandler implements HostHandler {
 
     private final HostResolver resolver;
@@ -41,13 +41,13 @@ public class RandomHostHandler implements HostHandler {
     }
 
     @Override
-    public void service(Service name) {
-        service = name;
-        if (!initialized) {
+    public void applyService(Service service) {
+        if (!initialized || this.service != service) {
+            this.service = service;
             origin = current = getRandomHost(true, false);
             initialized = true;
         }
-        fallback.service(name);
+        fallback.applyService(service);
     }
 
     @Override
