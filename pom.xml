@@ -23,7 +23,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <slf4j-api.version>1.7.32</slf4j-api.version>
         <arangodb.velocypack.version>1.4.3</arangodb.velocypack.version>
-        <jackson.version>2.13.1</jackson.version>
+        <jackson.version>2.13.2.1</jackson.version>
         <!-- provided -->
         <httpclient.version>4.5.13</httpclient.version>
 
@@ -33,7 +33,7 @@
         <junit.version>4.13.1</junit.version>
 
         <!-- javadoc -->
-        <javadoc.opts />
+        <javadoc.opts/>
     </properties>
 
     <developers>
@@ -275,7 +275,7 @@
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk-dynamodb</artifactId>
-            <version>1.11.774</version>
+            <version>1.12.189</version>
         </dependency>
         <dependency>
             <groupId>org.json</groupId>
