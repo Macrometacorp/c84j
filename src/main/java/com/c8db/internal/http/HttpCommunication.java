@@ -76,7 +76,7 @@ public class HttpCommunication implements Closeable {
 
     public Response execute(final Request request, final HostHandle hostHandle, Service service) throws C8DBException, IOException {
         final AccessType accessType = RequestUtils.determineAccessType(request);
-        hostHandler.service(service);
+        hostHandler.applyService(service);
         Host host = hostHandler.get(hostHandle, accessType);
         try {
             while (true) {

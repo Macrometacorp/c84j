@@ -77,7 +77,7 @@ public abstract class VstCommunication<R, C extends VstConnection> implements Cl
 
     @SuppressWarnings("unchecked")
     protected synchronized C connect(final HostHandle hostHandle, final AccessType accessType, Service service) {
-        hostHandler.service(service);
+        hostHandler.applyService(service);
         Host host = hostHandler.get(hostHandle, accessType);
         while (true) {
             if (host == null) {

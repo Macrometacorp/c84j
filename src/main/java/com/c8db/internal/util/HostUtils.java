@@ -12,6 +12,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * Modifications copyright (c) 2022 Macrometa Corp All rights reserved.
  */
 
 package com.c8db.internal.util;
@@ -29,9 +31,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- *
- */
 public final class HostUtils {
 
     private HostUtils() {
@@ -57,7 +56,7 @@ public final class HostUtils {
     public static Map<Service, List<Host>> cloneHostMatrix(final Map<Service, Collection<Host>> hostsMatrix) {
         final Map map = new HashMap();
         for (Service key : hostsMatrix.keySet()) {
-            map.put(key, new ArrayList<Host>(hostsMatrix.get(key)));
+            map.put(key, new ArrayList<>(hostsMatrix.get(key)));
         }
         return map;
     }

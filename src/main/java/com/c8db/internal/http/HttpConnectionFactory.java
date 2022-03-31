@@ -12,6 +12,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * Modifications copyright (c) 2022 Macrometa Corp All rights reserved.
+ *
  */
 
 package com.c8db.internal.http;
@@ -24,9 +27,6 @@ import com.c8db.internal.net.ConnectionFactory;
 import com.c8db.internal.net.HostDescription;
 import com.c8db.util.C8Serialization;
 
-/**
- *
- */
 public class HttpConnectionFactory implements ConnectionFactory {
 
     private final HttpConnection.Builder builder;
@@ -34,12 +34,12 @@ public class HttpConnectionFactory implements ConnectionFactory {
     public HttpConnectionFactory(final Integer timeout, final String user, final String password, final String email,
             final Boolean jwtAuth, final Boolean useSsl, final SSLContext sslContext, final C8Serialization util,
             final Protocol protocol, final Long connectionTtl, String httpCookieSpec, final String jwtToken, final String apiKey,
-                                 final HostDescription jwtHost, final String jwtUser, final HostDescription jwtUserHost) {
+                                 final HostDescription auxiliaryHost) {
         super();
         builder = new HttpConnection.Builder().timeout(timeout).user(user).password(password).email(email)
                 .jwtAuthEnabled(jwtAuth).useSsl(useSsl).sslContext(sslContext).serializationUtil(util)
                 .contentType(protocol).ttl(connectionTtl).httpCookieSpec(httpCookieSpec).jwt(jwtToken)
-                .jwtUser(jwtUser).apiKey(apiKey).jwtHost(jwtHost).jwtUserHost(jwtUserHost);
+                .apiKey(apiKey).auxHost(auxiliaryHost);
     }
 
     @Override

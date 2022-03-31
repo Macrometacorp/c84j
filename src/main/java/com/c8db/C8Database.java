@@ -682,4 +682,19 @@ public interface C8Database extends C8SerializationAccessor {
      * @return C8Alerts handler
      */
     C8Alerts alerts();
+
+    /**
+     * Returns a {@code C8KeyValue} instance.
+     * @param  name The name of the KV
+     * @return C8KeyValue handler
+     */
+    C8KeyValue kv(final String name);
+
+    /**
+     * Returns a {@code C8Dynamo} instance.
+     * @param tableName The name of the Dynamo collection
+     * @return C8Dynamo handler
+     */
+    C8Dynamo dynamo(final String tableName);
+
 }

@@ -12,6 +12,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ *  Modifications copyright (c) 2022 Macrometa Corp All rights reserved.
+ *
  */
 
 package com.c8db.internal.net;
@@ -23,9 +26,6 @@ import com.c8db.Service;
 import com.c8db.internal.C8ExecutorSync;
 import com.c8db.util.C8Serialization;
 
-/**
- *
- */
 public class SimpleHostResolver implements HostResolver {
 
     private final Map<Service, List<Host>> hostMatrix;

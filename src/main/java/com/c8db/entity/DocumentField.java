@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
+ * Modifications copyright (c) 2022 Macrometa Corp All rights reserved.
  */
 
 package com.c8db.entity;
@@ -22,15 +23,16 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-/**
- *
- */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.FIELD })
 public @interface DocumentField {
 
     public static enum Type {
-        ID("_id"), KEY("_key"), REV("_rev"), FROM("_from"), TO("_to");
+        ID("_id"),
+        KEY("_key"),
+        REV("_rev"),
+        FROM("_from"), TO("_to"),
+        VALUE("value"), EXPIRE_AT("expireAt");
 
         private final String serializeName;
 

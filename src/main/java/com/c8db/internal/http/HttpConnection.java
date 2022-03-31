@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Macrometa Corp All rights reserved
+ * Copyright (c) 2021-2022 Macrometa Corp All rights reserved
  */
 
 package com.c8db.internal.http;
@@ -92,18 +92,14 @@ public class HttpConnection implements Connection {
     private final Protocol contentType;
     private final HostDescription host;
     private volatile String jwt;
-    private volatile boolean jwtIsEmpty;
-    private volatile String jwtUser;
-    private volatile String apiKey;
-    private volatile HostDescription jwtHost;
-    private volatile HostDescription jwtUserHost;
+    private final String apiKey;
+    private final HostDescription auxHost;
 
     private HttpConnection(final HostDescription host, final Integer timeout, final String user, final String password,
                            final String email, final Boolean jwtAuthEnabled, final Boolean useSsl,
                            final SSLContext sslContext, final C8Serialization util,
                            final Protocol contentType, final Long ttl, final String httpCookieSpec,
-                           final String jwt, final String apiKey, final HostDescription jwtHost, final String jwtUser,
-                           final HostDescription jwtUserHost) {
+                           final String jwt, final String apiKey, final HostDescription auxHost) {
 
         super();
         this.host = host;
@@ -115,11 +111,8 @@ public class HttpConnection implements Connection {
         this.util = util;
         this.contentType = contentType;
         this.jwt = jwt;
-        this.jwtIsEmpty = StringUtils.isEmpty(jwt);
-        this.jwtUser = jwtUser;
         this.apiKey = apiKey;
-        this.jwtHost = jwtHost;
-        this.jwtUserHost = jwtUserHost;
+        this.auxHost = auxHost;
         final RegistryBuilder<ConnectionSocketFactory> registryBuilder = RegistryBuilder
                 .create();
         if (Boolean.TRUE == useSsl) {
@@ -234,19 +227,19 @@ public class HttpConnection implements Connection {
         addHeader(request, httpRequest);
         if (jwtAuthEnabled) {
             if (StringUtils.isNotEmpty(apiKey) && jwt == null) {  //Use API key onlu if API Key is provided
-                LOGGER.info("Using API Key for authenication.");
+                LOGGER.debug("Using API Key for authenication.");
                 httpRequest.addHeader("Authorization", "apikey " + apiKey);
             } else if (jwt == null) { //Generate JWT using user credentials if jwt and apikey are absent
                 addJWT(request);
-                LOGGER.info("Using JWT for authentication.");
+                LOGGER.debug("Using JWT for authentication.");
                 httpRequest.addHeader("Authorization", "bearer " + jwt);
             } else { //Add Header when JWT is provided
-                LOGGER.info("Using JWT for authentication.");
+                LOGGER.debug("Using JWT for authentication.");
                 httpRequest.addHeader("Authorization", "bearer " + jwt);
             }
         } else {
             // basic auth instead
-            LOGGER.info("Using Credentials for authenication.");
+            LOGGER.debug("Using Credentials for authenication.");
             final Credentials credentials = addCredentials(httpRequest);
             if (LOGGER.isDebugEnabled()) {
                 CURLLogger.log(url, request, credentials, util);
@@ -306,13 +299,13 @@ public class HttpConnection implements Connection {
 
     private synchronized void addJWT(final Request request) throws IOException {
         addServiceJWT();
-        if(jwtIsEmpty && StringUtils.isNotEmpty(jwtUser)) {
-            addUserJWT(request.getTenant(), jwtUser);
+        if(StringUtils.isNotEmpty(user) && !host.getHost().equals(auxHost.getHost())) {
+            addUserJWT(request.getTenant(), user);
         }
     }
 
     private synchronized void addServiceJWT() throws IOException {
-        String authUrl = buildBaseUrl(jwtHost) + "/_open/auth/internal";
+        String authUrl = buildBaseUrl(auxHost) + "/_open/auth/internal";
         Map<String, String> credentials = new HashMap<String, String>();
 
         credentials.put("username", user);
@@ -332,8 +325,11 @@ public class HttpConnection implements Connection {
     }
 
     private synchronized void addUserJWT(String tenant, String user) throws IOException {
-        String authUrl =
-            buildBaseUrl(jwtUserHost) + "/_tenant/" + tenant + "/_fabric/" + C8RequestParam.SYSTEM + "/_api/streams/user/" + user + "/jwt";
+        String authUrl = new StringBuilder(buildBaseUrl(host))
+                .append("/_tenant/").append(tenant)
+                .append("/_fabric/").append(C8RequestParam.SYSTEM)
+                .append("/_api/streams/user/").append(user)
+                .append("/jwt").toString();
 
         final HttpRequestBase authHttpRequest = buildHttpRequestBase(
             new Request(tenant, C8RequestParam.SYSTEM, RequestType.POST, authUrl),
@@ -462,10 +458,8 @@ public class HttpConnection implements Connection {
         private SSLContext sslContext;
         private Integer timeout;
         private String jwt;
-        private String jwtUser;
         private String apiKey;
-        private HostDescription jwtHost;
-        private HostDescription jwtUserHost;
+        private HostDescription auxHost;
 
         public Builder user(final String user) {
             this.user = user;
@@ -482,8 +476,8 @@ public class HttpConnection implements Connection {
             return this;
         }
 
-        public Builder jwtUser(final String jwtUser) {
-            this.jwtUser = jwtUser;
+        public Builder auxHost(final HostDescription auxHost) {
+            this.auxHost = auxHost;
             return this;
         }
 
@@ -542,19 +536,9 @@ public class HttpConnection implements Connection {
             return this;
         }
 
-        public Builder jwtHost(final HostDescription jwtHost) {
-            this.jwtHost = jwtHost;
-            return this;
-        }
-
-        public Builder jwtUserHost(final HostDescription jwtUserHost) {
-            this.jwtUserHost = jwtUserHost;
-            return this;
-        }
-
         public HttpConnection build() {
             return new HttpConnection(host, timeout, user, password, email, jwtAuthEnabled, useSsl, sslContext, util,
-                    contentType, ttl, httpCookieSpec, jwt, apiKey, jwtHost, jwtUser, jwtUserHost);
+                    contentType, ttl, httpCookieSpec, jwt, apiKey, auxHost);
         }
     }
 

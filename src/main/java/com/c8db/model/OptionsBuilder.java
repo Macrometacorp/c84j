@@ -54,6 +54,10 @@ public class OptionsBuilder {
         return options.name(name);
     }
 
+    public static C8KVCreateOptions build(final C8KVCreateOptions options, final String name) {
+        return options.name(name);
+    }
+
     public static C8qlQueryOptions build(final C8qlQueryOptions options, final String query, final VPackSlice bindVars) {
         return options.query(query).bindVars(bindVars);
     }
@@ -113,5 +117,9 @@ public class OptionsBuilder {
 
     public static ApiKeyOptions build(final ApiKeyOptions options, final String apiKey) {
         return options.apiKey(apiKey);
+    }
+
+    public static C8DynamoCreateOptions build(final C8DynamoCreateOptions options, final String tableName) {
+        return options.tableName(tableName);
     }
 }

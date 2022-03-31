@@ -12,33 +12,18 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  * Modifications copyright (c) 2022 Macrometa Corp All rights reserved.
  */
 
 package com.c8db.internal;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-
-import javax.net.ssl.SSLContext;
-
-import com.c8db.Service;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.arangodb.velocypack.VPack;
 import com.arangodb.velocypack.VPackParser;
-import com.c8db.util.C8Serialization;
 import com.c8db.C8DB;
 import com.c8db.C8DBException;
+import com.c8db.Service;
 import com.c8db.entity.LoadBalancingStrategy;
-import com.c8db.internal.net.Connection;
 import com.c8db.internal.net.ConnectionFactory;
 import com.c8db.internal.net.DirtyReadHostHandler;
 import com.c8db.internal.net.ExtendedHostResolver;
@@ -53,7 +38,20 @@ import com.c8db.internal.net.SimpleHostResolver;
 import com.c8db.internal.util.HostUtils;
 import com.c8db.internal.velocypack.VPackDriverModule;
 import com.c8db.util.C8Deserializer;
+import com.c8db.util.C8Serialization;
 import com.c8db.util.C8Serializer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.net.ssl.SSLContext;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
 /**
  *
@@ -90,7 +88,6 @@ public abstract class InternalC8DBBuilder {
     protected String password;
     protected String email;
     protected String jwtToken;
-    protected String jwtUser;
     protected Boolean jwtAuth;
     protected Boolean useSsl;
     protected String httpCookieSpec;
@@ -153,7 +150,6 @@ public abstract class InternalC8DBBuilder {
         password = loadPassword(properties, password);
         email = loadEmail(properties, email);
         jwtToken = loadJWTToken(properties, jwtToken);
-        jwtUser = loadJWTUser(properties, jwtUser);
         jwtAuth = loadJWTAuth(properties, jwtAuth);
         apiKey = loadApiKey(properties, apiKey);
         useSsl = loadUseSsl(properties, useSsl);
@@ -176,10 +172,6 @@ public abstract class InternalC8DBBuilder {
 
     protected void setJwtToken(String jwtToken) {
         this.jwtToken = jwtToken;
-    }
-
-    protected void setJwtUser(String jwtUser) {
-        this.jwtUser = jwtUser;
     }
 
     protected void setApiKey(String apiKey) {
@@ -402,12 +394,12 @@ public abstract class InternalC8DBBuilder {
         return properties.getProperty(key, overrideDefaultValue);
     }
 
-    protected <C extends Connection> Map<Service, Collection<Host>> createHostMatrix(final int maxConnections,
-                                                                     final ConnectionFactory connectionFactory) {
+    protected Map<Service, Collection<Host>> createHostMatrix(final int maxConnections,
+                                                              final ConnectionFactory connectionFactory) {
         final Map matrix = new HashMap();
 
         for (Service keys : Service.values()) {
-            final Collection<Host> hostList = new ArrayList<Host>();
+            final Collection<Host> hostList = new ArrayList<>();
             for (final HostDescription host : hosts.get(keys)) {
                 hostList.add(HostUtils.createHost(host, maxConnections, connectionFactory));
             }
