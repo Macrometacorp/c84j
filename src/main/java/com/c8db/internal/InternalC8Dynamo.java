@@ -158,8 +158,6 @@ public abstract class InternalC8Dynamo<A extends InternalC8DB<E>, D extends Inte
 
     private <T> Request setRequestParams(final Collection<T> values) {
         final Request request = request(db.tenant(), db.name(), RequestType.POST, PATH_API_DYNAMO);
-        /*request.setBody(util(C8SerializationFactory.Serializer.CUSTOM).serialize(values,
-                new C8Serializer.Options().serializeNullValues(false).stringAsJson(true)));*/
         Iterator<T> iterator = values.iterator();
         while (iterator.hasNext()) {
             T value = iterator.next();
