@@ -8,6 +8,8 @@ import com.c8db.C8ApiKeys;
 import com.c8db.entity.ApiKeyEntity;
 import com.c8db.entity.Permissions;
 
+import java.util.Map;
+
 public class C8ApiKeysImpl extends InternalC8ApiKeys<C8DBImpl, C8DatabaseImpl, C8ExecutorSync>
         implements C8ApiKeys {
 
@@ -23,6 +25,11 @@ public class C8ApiKeysImpl extends InternalC8ApiKeys<C8DBImpl, C8DatabaseImpl, C
     @Override
     public Permissions getGeoFabricAccess(String keyId) {
         return executor.execute(geoFabricAccessLevelRequest(keyId), streamAccessLevelResponseDeserializer());
+    }
+
+    @Override
+    public Map<String, Permissions> getStreamsAccess(String keyId, boolean full) {
+        return executor.execute(streamsAccessLevelRequest(keyId, full), listAccessesResponseDeserializer());
     }
 
     @Override

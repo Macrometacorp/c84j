@@ -983,17 +983,25 @@ public interface C8DB extends C8SerializationAccessor {
     void grantDefaultCollectionAccess(String user, Permissions permissions) throws C8DBException;
 
     /**
+     * Get access level for streams
+     * @param user user name
+     * @param full Return the full set of access levels for all streams. If set to false, return the read-only streams.
+     * @return result map of streams with access levels.
+     */
+    Map<String, Permissions> getStreamsAccess(final String user, final String tenant, final String fabric, final boolean full);
+
+    /**
      * Get the stream access level
      * @param user user name
      * @param stream stream name
-     * @return result of access level. Possible results are `ro`, `rw`, `none`
+     * @return result of access level.
      */
-    Permissions getStreamAccess(final String user, final String tenant, String fabric, final String stream);
+    Permissions getStreamAccess(final String user, final String tenant, final String fabric, final String stream);
 
     /**
      * Get the GeoFabric access level
      * @param user user name
-     * @return result of access level. Possible results are `ro`, `rw`, `none`
+     * @return result of access level.
      */
     Permissions getGeoFabricAccess(final String user, final String tenant, String fabric);
 
