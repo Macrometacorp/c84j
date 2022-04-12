@@ -17,6 +17,10 @@ import com.c8db.velocystream.Request;
 import com.c8db.velocystream.RequestType;
 import com.c8db.velocystream.Response;
 
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
 /**
  * Internal request/response related functions.
  */
@@ -52,13 +56,22 @@ public abstract class InternalC8ApiKeys<A extends InternalC8DB<E>, D extends Int
 
     protected Request geoFabricAccessLevelRequest(final String keyId) {
         final Request request = request(db.tenant(), db.name(), RequestType.GET, PATH_API_KEY, keyId,
-            C8RequestParam.DATABASE, C8RequestParam.SYSTEM);
+            C8RequestParam.DATABASE, db.name());
+        return request;
+    }
+
+    protected Request streamsAccessLevelRequest(final String keyId, final boolean full) {
+        final Request request = request(db.tenant(), db.name(), RequestType.GET, PATH_API_KEY, keyId,
+            C8RequestParam.DATABASE, db.name(), C8RequestParam.STREAM);
+        if (full) {
+            request.putQueryParam("full", true);
+        }
         return request;
     }
 
     protected Request streamAccessLevelRequest(final String keyId, final String stream) {
         final Request request = request(db.tenant(), db.name(), RequestType.GET, PATH_API_KEY, keyId,
-            C8RequestParam.DATABASE, C8RequestParam.SYSTEM, C8RequestParam.STREAM, stream);
+            C8RequestParam.DATABASE, db.name(), C8RequestParam.STREAM, stream);
         return request;
     }
 
@@ -73,5 +86,26 @@ public abstract class InternalC8ApiKeys<A extends InternalC8DB<E>, D extends Int
         };
     }
 
+    protected ResponseDeserializer<Map<String, Permissions>> listAccessesResponseDeserializer() {
+        return new ResponseDeserializer<Map<String, Permissions>>() {
+            @Override
+            public Map<String, Permissions> deserialize(final Response response) throws VPackException {
+                final VPackSlice result = response.getBody().get(C8ResponseField.RESULT);
+                Map<String, Permissions> permissions = new HashMap<>();
+                for (Iterator<Map.Entry<String, VPackSlice>> it = result.objectIterator(); it.hasNext();) {
+                    Map.Entry<String, VPackSlice> next = it.next();
+                    String level = util().deserialize(next.getValue(),  new Type<String>(){}.getType());
+                    Permissions permission = null;
+                    try {
+                        permission = Permissions.valueOf(level.toUpperCase());
+                    } catch (Exception e) {
+                        // has level "undefined"
+                    }
+                    permissions.put(next.getKey(), permission);
+                }
+                return permissions;
+            }
+        };
+    }
 
 }

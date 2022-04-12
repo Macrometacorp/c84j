@@ -6,9 +6,12 @@ package com.c8db.internal;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import com.arangodb.velocypack.Type;
 import com.arangodb.velocypack.VPackSlice;
@@ -37,6 +40,7 @@ import com.c8db.velocystream.Response;
 public abstract class InternalC8DB<E extends C8Executor> extends C8Executeable<E> {
 
     protected static final String PATH_API_USER = "/_admin/user";
+    protected static final String PATH_API_USER_NEW = "/_api/user";
     private static final String PATH_API_ADMIN_LOG = "/_admin/log";
     private static final String PATH_API_ADMIN_LOG_LEVEL = "/_admin/log/level";
     private static final String PATH_API_ROLE = "/_admin/server/role";
@@ -277,6 +281,15 @@ public abstract class InternalC8DB<E extends C8Executor> extends C8Executeable<E
                 "*").setBody(util().serialize(OptionsBuilder.build(new UserAccessOptions(), permissions)));
     }
 
+    protected Request getUserStreamsAccessRequest(final String tenant, final String user, final String database, boolean full) {
+        Request request = request(tenant, C8RequestParam.SYSTEM, RequestType.GET, PATH_API_USER, user,
+            C8RequestParam.DATABASE, database, C8RequestParam.STREAM);
+        if (full) {
+            request.putQueryParam("full", true);
+        }
+        return request;
+    }
+
     protected Request getUserStreamAccessRequest(final String tenant, final String user, final String database, final String stream) {
         return request(tenant, C8RequestParam.SYSTEM, RequestType.GET, PATH_API_USER, user,
             C8RequestParam.DATABASE, database, C8RequestParam.STREAM, stream);
@@ -285,6 +298,28 @@ public abstract class InternalC8DB<E extends C8Executor> extends C8Executeable<E
     protected Request getUserAccessRequest(final String tenant, final String user, final String database) {
         return request(tenant, C8RequestParam.SYSTEM, RequestType.GET, PATH_API_USER, user,
             C8RequestParam.DATABASE, database);
+    }
+
+    protected ResponseDeserializer<Map<String, Permissions>> listAccessesResponseDeserializer() {
+        return new ResponseDeserializer<Map<String, Permissions>>() {
+            @Override
+            public Map<String, Permissions> deserialize(final Response response) throws VPackException {
+                final VPackSlice result = response.getBody().get(C8ResponseField.RESULT);
+                Map<String, Permissions> permissions = new HashMap<>();
+                for (Iterator<Map.Entry<String, VPackSlice>> it = result.objectIterator(); it.hasNext();) {
+                    Map.Entry<String, VPackSlice> next = it.next();
+                    String level = util().deserialize(next.getValue(),  new Type<String>(){}.getType());
+                    Permissions permission = null;
+                    try {
+                        permission = Permissions.valueOf(level.toUpperCase());
+                    } catch (Exception e) {
+                        // has level "undefined"
+                    }
+                    permissions.put(next.getKey(), permission);
+                }
+                return permissions;
+            }
+        };
     }
 
     protected ResponseDeserializer<Permissions> accessResponseDeserializer() {
