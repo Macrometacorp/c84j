@@ -21,9 +21,10 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <slf4j-api.version>1.7.32</slf4j-api.version>
+        <slf4j-api.version>1.7.36</slf4j-api.version>
         <arangodb.velocypack.version>1.4.3</arangodb.velocypack.version>
-        <jackson.version>2.13.1</jackson.version>
+        <jackson.databind.version>2.13.2.2</jackson.databind.version>
+        <jackson.version>2.13.2</jackson.version>
         <!-- provided -->
         <httpclient.version>4.5.13</httpclient.version>
 
@@ -33,7 +34,7 @@
         <junit.version>4.13.1</junit.version>
 
         <!-- javadoc -->
-        <javadoc.opts />
+        <javadoc.opts/>
     </properties>
 
     <developers>
@@ -254,7 +255,7 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>${jackson.version}</version>
+            <version>${jackson.databind.version}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
@@ -275,7 +276,7 @@
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk-dynamodb</artifactId>
-            <version>1.11.774</version>
+            <version>1.12.202</version>
         </dependency>
         <dependency>
             <groupId>org.json</groupId>
