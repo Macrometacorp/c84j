@@ -749,6 +749,19 @@ public interface C8DB extends C8SerializationAccessor {
     Collection<String> getAccessibleGeoFabricsFor(String user) throws C8DBException;
 
     /**
+     * List available database to the specified user
+     *
+     * @see <a href=
+     *      "https://docs.arangodb.com/current/HTTP/UserManagement/index.html#list-the-databases-available-to-a-user">API
+     *      Documentation</a>
+     * @param tenant Name of the tenant
+     * @param user The name of the user for which you want to query the databases
+     * @return list of database names which are available for the specified user
+     * @throws C8DBException
+     */
+    Collection<String> getAccessibleGeoFabricsFor(String tenant, String user) throws C8DBException;
+
+    /**
      * Updated the data centers for the specified database
      * 
      * @param tenant Name of the tenant
@@ -857,10 +870,11 @@ public interface C8DB extends C8SerializationAccessor {
      *      Documentation</a>
      * @param user   The name of the user
      * @param passwd The user password
+     * @param email  The user email
      * @return information about the user
      * @throws C8DBException
      */
-    UserEntity createUser(String user, String passwd) throws C8DBException;
+    UserEntity createUser(String user, String passwd, String email) throws C8DBException;
 
     /**
      * Create a new user. This user will not have access to any database. You need
@@ -871,11 +885,12 @@ public interface C8DB extends C8SerializationAccessor {
      *      Documentation</a>
      * @param user    The name of the user
      * @param passwd  The user password
+     * @param email  The user email
      * @param options Additional options, can be null
      * @return information about the user
      * @throws C8DBException
      */
-    UserEntity createUser(String user, String passwd, UserCreateOptions options) throws C8DBException;
+    UserEntity createUser(String user, String passwd, String email, UserCreateOptions options) throws C8DBException;
 
     /**
      * Removes an existing user, identified by user. You need access to the _system
@@ -964,27 +979,31 @@ public interface C8DB extends C8SerializationAccessor {
      * Sets the default access level for databases for the user {@code user}. You
      * need permission to the _system database in order to execute this call.
      *
+     * @param tenant      The tenant of the user
      * @param user        The name of the user
      * @param permissions The permissions the user grant
      * @since ArangoDB 3.2.0
      * @throws C8DBException
      */
-    void grantDefaultDatabaseAccess(String user, Permissions permissions) throws C8DBException;
+    void grantDefaultDatabaseAccess(final String tenant, String user, Permissions permissions) throws C8DBException;
 
     /**
      * Sets the default access level for collections for the user {@code user}. You
      * need permission to the _system database in order to execute this call.
      *
+     * @param tenant      The tenant of the user
      * @param user        The name of the user
      * @param permissions The permissions the user grant
      * @since ArangoDB 3.2.0
      * @throws C8DBException
      */
-    void grantDefaultCollectionAccess(String user, Permissions permissions) throws C8DBException;
+    void grantDefaultCollectionAccess(final String tenant, String user, Permissions permissions) throws C8DBException;
 
     /**
      * Get access level for streams
-     * @param user user name
+     *
+     * @param user        The name of the user
+     * @param tenant      The tenant of the user
      * @param full Return the full set of access levels for all streams. If set to false, return the read-only streams.
      * @return result map of streams with access levels.
      */
@@ -992,15 +1011,20 @@ public interface C8DB extends C8SerializationAccessor {
 
     /**
      * Get the stream access level
-     * @param user user name
-     * @param stream stream name
+     *
+     * @param user        The name of the user
+     * @param stream      The stream name
+     * @param tenant      The tenant of the user
      * @return result of access level.
      */
     Permissions getStreamAccess(final String user, final String tenant, final String fabric, final String stream);
 
     /**
      * Get the GeoFabric access level
-     * @param user user name
+     *
+     * @param user        The name of the user
+     * @param tenant      The tenant of the user
+     * @param fabric      The fabric of the user
      * @return result of access level.
      */
     Permissions getGeoFabricAccess(final String user, final String tenant, String fabric);

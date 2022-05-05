@@ -26,6 +26,8 @@ public class UserCreateOptions {
     private String user;
     private String passwd;
     private Boolean active;
+    private String email;
+
     private Map<String, Object> extra;
 
     public UserCreateOptions() {
@@ -69,6 +71,19 @@ public class UserCreateOptions {
      */
     public UserCreateOptions active(final Boolean active) {
         this.active = active;
+        return this;
+    }
+
+    protected String getEmail() {
+        return email;
+    }
+
+    /**
+     * @param email The user email
+     * @return options
+     */
+    protected UserCreateOptions email(final String email) {
+        this.email = email;
         return this;
     }
 
