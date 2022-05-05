@@ -564,7 +564,7 @@ public interface C8Database extends C8SerializationAccessor {
     /**
      * Returns a {@code C8Stream} instance for the given stream name.
      *
-     * @param name Name of the stream
+     * @param name Name of the stream with either `c8locals.`, `c8globals.` or without prefix for collections' streams.
      * @return stream handler
      */
     C8Stream stream(String name);
@@ -572,11 +572,12 @@ public interface C8Database extends C8SerializationAccessor {
     /**
      * Create asynchronously a persistent stream for a given fabric.
      *
-     * @param name    of the stream
+     * @param name    of the stream without `c8locals.` or `c8globals.` prefix.
      * @param options C8StreamCreateOptions
      * @throws C8DBException
+     * @return return full name of stream.
      */
-    void createPersistentStream(final String name, final C8StreamCreateOptions options) throws C8DBException;
+    String createPersistentStream(final String name, final C8StreamCreateOptions options) throws C8DBException;
 
     /**
      * Get list of persistent streams under the given stream db. Returns either a
@@ -598,22 +599,38 @@ public interface C8Database extends C8SerializationAccessor {
 
     /**
      * Clear backlog for all streams on a stream db.
+     * @param isLocal Operate on a local namespace instead of a global one. Default value: false
      */
-    void clearBacklog();
+    void clearBacklog(final boolean isLocal);
+
+    /**
+     * Get TTL for all streams on a stream db.
+     * @param isLocal Operate on a local namespace instead of a global one. Default value: false
+     */
+    int getTtlMessages(final boolean isLocal);
+
+    /**
+     * Set TTL for all streams on a stream db.
+     * @param ttl set time to live for messages
+     * @param isLocal Operate on a local namespace instead of a global one. Default value: false
+     */
+    void ttlMessages(final int ttl, final boolean isLocal);
 
     /**
      * Clear backlog for given subscription.
      *
      * @param subscriptionName Name of the subscription
+     * @param isLocal Operate on a local namespace instead of a global one. Default value: false
      */
-    void clearBacklog(final String subscriptionName);
+    void clearBacklog(final String subscriptionName, final boolean isLocal);
 
     /**
      * Unsubscribes the given subscription on all streams on a stream db.
      *
      * @param subscriptionName Identifying name of the subscripton.
+     * @param isLocal Operate on a local namespace instead of a global one. Default value: false
      */
-    void unsubscribe(final String subscriptionName);
+    void unsubscribe(final String subscriptionName, final boolean isLocal);
 
     /**
      * Creates user query as the current user
