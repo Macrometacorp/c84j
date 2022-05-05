@@ -146,6 +146,12 @@ public class C8DBImpl extends InternalC8DB<C8ExecutorSync> implements C8DB {
     }
 
     @Override
+    public Collection<String> getAccessibleGeoFabricsFor(final String tenant, final String user) throws C8DBException {
+        return executor.execute(getAccessibleGeoFabricsForRequest(tenant, db().name(), user),
+            getAccessibleGeoFabricsForResponseDeserializer());
+    }
+
+    @Override
     public Boolean updateDataCentersForGeoFabric(final String tenant, final String name, final String dcList) throws C8DBException {
         return executor.execute(updateDCListRequest(tenant, name, dcList), updateDCListResponseDeserializer());
     }
@@ -199,15 +205,15 @@ public class C8DBImpl extends InternalC8DB<C8ExecutorSync> implements C8DB {
 
     //TODO: probably delete this
     @Override
-    public UserEntity createUser(final String user, final String passwd) throws C8DBException {
-        return executor.execute(createUserRequest(db().tenant(), C8RequestParam.SYSTEM, user, passwd, new UserCreateOptions()),
+    public UserEntity createUser(final String user, final String passwd, final String email) throws C8DBException {
+        return executor.execute(createUserRequest(db().tenant(), C8RequestParam.SYSTEM, user, passwd, email, new UserCreateOptions()),
                 UserEntity.class);
     }
 
     @Override
-    public UserEntity createUser(final String user, final String passwd, final UserCreateOptions options)
+    public UserEntity createUser(final String user, final String passwd, final String email, final UserCreateOptions options)
             throws C8DBException {
-        return executor.execute(createUserRequest(db().tenant(), C8RequestParam.SYSTEM, user, passwd, options), UserEntity.class);
+        return executor.execute(createUserRequest(db().tenant(), C8RequestParam.SYSTEM, user, passwd, email, options), UserEntity.class);
     }
 
     @Override
@@ -241,14 +247,14 @@ public class C8DBImpl extends InternalC8DB<C8ExecutorSync> implements C8DB {
     }
 
     @Override
-    public void grantDefaultDatabaseAccess(final String user, final Permissions permissions) throws C8DBException {
-        executor.execute(updateUserDefaultDatabaseAccessRequest(user, permissions), Void.class);
+    public void grantDefaultDatabaseAccess(final String tenant, final String user, final Permissions permissions) throws C8DBException {
+        executor.execute(updateUserDefaultDatabaseAccessRequest(tenant, user, permissions), Void.class);
     }
 
     @Override
-    public void grantDefaultCollectionAccess(final String user, final Permissions permissions)
+    public void grantDefaultCollectionAccess(final String tenant, final String user, final Permissions permissions)
             throws C8DBException {
-        executor.execute(updateUserDefaultCollectionAccessRequest(user, permissions), Void.class);
+        executor.execute(updateUserDefaultCollectionAccessRequest(tenant, user, permissions), Void.class);
     }
 
     @Override

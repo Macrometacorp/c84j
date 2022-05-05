@@ -22,8 +22,8 @@ public class OptionsBuilder {
         super();
     }
 
-    public static UserCreateOptions build(final UserCreateOptions options, final String user, final String passwd) {
-        return options.user(user).passwd(passwd);
+    public static UserCreateOptions build(final UserCreateOptions options, final String user, final String passwd, final String email) {
+        return options.user(user).passwd(passwd).email(email);
     }
 
     public static HashIndexOptions build(final HashIndexOptions options, final Iterable<String> fields) {

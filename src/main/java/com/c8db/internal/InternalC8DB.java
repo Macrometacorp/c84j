@@ -39,8 +39,7 @@ import com.c8db.velocystream.Response;
 
 public abstract class InternalC8DB<E extends C8Executor> extends C8Executeable<E> {
 
-    protected static final String PATH_API_USER = "/_admin/user";
-    protected static final String PATH_API_USER_NEW = "/_api/user";
+    protected static final String PATH_API_USER = "/_api/user";
     private static final String PATH_API_ADMIN_LOG = "/_admin/log";
     private static final String PATH_API_ADMIN_LOG_LEVEL = "/_admin/log/level";
     private static final String PATH_API_ROLE = "/_admin/server/role";
@@ -93,7 +92,7 @@ public abstract class InternalC8DB<E extends C8Executor> extends C8Executeable<E
     }
 
     protected Request getAccessibleGeoFabricsForRequest(final String tenant, final String database, final String user) {
-        return request(tenant, database, RequestType.GET, PATH_API_USER);
+        return request(tenant, database, RequestType.GET, PATH_API_USER, user, C8RequestParam.DATABASE);
     }
 
     protected ResponseDeserializer<Collection<String>> getAccessibleGeoFabricsForResponseDeserializer() {
@@ -102,15 +101,9 @@ public abstract class InternalC8DB<E extends C8Executor> extends C8Executeable<E
             public Collection<String> deserialize(final Response response) throws VPackException {
                 final VPackSlice result = response.getBody().get(C8ResponseField.RESULT);
                 final Collection<String> dbs = new ArrayList<String>();
-                for (Iterator<VPackSlice> iterator = result.arrayIterator(); iterator
-                        .hasNext();) {
-                    for (Iterator<Entry<String, VPackSlice>> elements = iterator.next().objectIterator();elements.hasNext();) {
-                        Entry<String, VPackSlice> element = elements.next();
-                        if (element.getKey().equals("name")) {
-                            dbs.add(element.getValue().getAsString());
-                            break;
-                        }
-                    }
+                for (Iterator<Map.Entry<String, VPackSlice>> it = result.objectIterator(); it.hasNext();) {
+                    Map.Entry<String, VPackSlice> next = it.next();
+                    dbs.add(next.getKey());
                 }
                 return dbs;
             }
@@ -229,11 +222,11 @@ public abstract class InternalC8DB<E extends C8Executor> extends C8Executeable<E
     }
 
     protected Request createUserRequest(final String tenant, final String database, final String user,
-            final String passwd, final UserCreateOptions options) {
+            final String passwd, final String email, final UserCreateOptions options) {
         final Request request;
         request = request(tenant, database, RequestType.POST, PATH_API_USER);
         request.setBody(util()
-                .serialize(OptionsBuilder.build(options != null ? options : new UserCreateOptions(), user, passwd)));
+                .serialize(OptionsBuilder.build(options != null ? options : new UserCreateOptions(), user, passwd, email)));
         return request;
     }
 
@@ -276,8 +269,8 @@ public abstract class InternalC8DB<E extends C8Executor> extends C8Executeable<E
         return request;
     }
 
-    protected Request updateUserDefaultDatabaseAccessRequest(final String user, final Permissions permissions) {
-        return request(C8RequestParam.DEMO_TENANT, C8RequestParam.SYSTEM, RequestType.PUT, PATH_API_USER, user, C8RequestParam.DATABASE,
+    protected Request updateUserDefaultDatabaseAccessRequest(final String tenant, final String user, final Permissions permissions) {
+        return request(tenant, C8RequestParam.SYSTEM, RequestType.PUT, PATH_API_USER, user, C8RequestParam.DATABASE,
                 "*").setBody(util().serialize(OptionsBuilder.build(new UserAccessOptions(), permissions)));
     }
 
@@ -333,8 +326,8 @@ public abstract class InternalC8DB<E extends C8Executor> extends C8Executeable<E
         };
     }
 
-    protected Request updateUserDefaultCollectionAccessRequest(final String user, final Permissions permissions) {
-        return request(C8RequestParam.DEMO_TENANT, C8RequestParam.SYSTEM, RequestType.PUT, PATH_API_USER, user, C8RequestParam.DATABASE,
+    protected Request updateUserDefaultCollectionAccessRequest(final String tenant, final String user, final Permissions permissions) {
+        return request(tenant, C8RequestParam.SYSTEM, RequestType.PUT, PATH_API_USER, user, C8RequestParam.DATABASE,
             "*", "*").setBody(util().serialize(OptionsBuilder.build(new UserAccessOptions(), permissions)));
     }
 
