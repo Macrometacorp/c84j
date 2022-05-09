@@ -749,19 +749,6 @@ public interface C8DB extends C8SerializationAccessor {
     Collection<String> getAccessibleGeoFabricsFor(String user) throws C8DBException;
 
     /**
-     * List available database to the specified user
-     *
-     * @see <a href=
-     *      "https://docs.arangodb.com/current/HTTP/UserManagement/index.html#list-the-databases-available-to-a-user">API
-     *      Documentation</a>
-     * @param tenant Name of the tenant
-     * @param user The name of the user for which you want to query the databases
-     * @return list of database names which are available for the specified user
-     * @throws C8DBException
-     */
-    Collection<String> getAccessibleGeoFabricsFor(String tenant, String user) throws C8DBException;
-
-    /**
      * Updated the data centers for the specified database
      * 
      * @param tenant Name of the tenant
@@ -919,21 +906,6 @@ public interface C8DB extends C8SerializationAccessor {
     UserEntity getUser(String user) throws C8DBException;
 
     /**
-     * Fetches data about the specified user for a given tenant. You can fetch information about
-     * yourself or you need permission to the _system database in order to execute
-     * this call.
-     *
-     * @see <a href=
-     *      "https://docs.arangodb.com/current/HTTP/UserManagement/index.html#fetch-user">API
-     *      Documentation</a>
-     * @param user The name of the user
-     * @param tenant The tenant of the user
-     * @return information about the user
-     * @throws C8DBException
-     */
-    UserEntity getUser(final String user, final String tenant) throws C8DBException;
-
-    /**
      * Fetches data about all users. You can only execute this call if you have
      * access to the _system database.
      *
@@ -979,55 +951,50 @@ public interface C8DB extends C8SerializationAccessor {
      * Sets the default access level for databases for the user {@code user}. You
      * need permission to the _system database in order to execute this call.
      *
-     * @param tenant      The tenant of the user
      * @param user        The name of the user
      * @param permissions The permissions the user grant
      * @since ArangoDB 3.2.0
      * @throws C8DBException
      */
-    void grantDefaultDatabaseAccess(final String tenant, String user, Permissions permissions) throws C8DBException;
+    void grantDefaultDatabaseAccess(String user, Permissions permissions) throws C8DBException;
 
     /**
      * Sets the default access level for collections for the user {@code user}. You
      * need permission to the _system database in order to execute this call.
      *
-     * @param tenant      The tenant of the user
      * @param user        The name of the user
      * @param permissions The permissions the user grant
      * @since ArangoDB 3.2.0
      * @throws C8DBException
      */
-    void grantDefaultCollectionAccess(final String tenant, String user, Permissions permissions) throws C8DBException;
+    void grantDefaultCollectionAccess(String user, Permissions permissions) throws C8DBException;
 
     /**
      * Get access level for streams
      *
      * @param user        The name of the user
-     * @param tenant      The tenant of the user
      * @param full Return the full set of access levels for all streams. If set to false, return the read-only streams.
      * @return result map of streams with access levels.
      */
-    Map<String, Permissions> getStreamsAccess(final String user, final String tenant, final String fabric, final boolean full);
+    Map<String, Permissions> getStreamsAccess(final String user, final String fabric, final boolean full);
 
     /**
      * Get the stream access level
      *
      * @param user        The name of the user
      * @param stream      The stream name
-     * @param tenant      The tenant of the user
      * @return result of access level.
      */
-    Permissions getStreamAccess(final String user, final String tenant, final String fabric, final String stream);
+    Permissions getStreamAccess(final String user, final String fabric, final String stream);
 
     /**
      * Get the GeoFabric access level
      *
      * @param user        The name of the user
-     * @param tenant      The tenant of the user
      * @param fabric      The fabric of the user
      * @return result of access level.
      */
-    Permissions getGeoFabricAccess(final String user, final String tenant, String fabric);
+    Permissions getGeoFabricAccess(final String user, String fabric);
 
     /**
      * Generic Execute. Use this method to execute custom FOXX services.

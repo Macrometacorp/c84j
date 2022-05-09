@@ -304,7 +304,7 @@ public class C8DBTest {
     public void updateUserDefaultDatabaseAccess() {
         try {
             c8DB.createUser(USER, PW, EMAIL);
-            c8DB.grantDefaultDatabaseAccess(C8RequestParam.DEMO_TENANT, USER, Permissions.RW);
+            c8DB.grantDefaultDatabaseAccess(USER, Permissions.RW);
         } finally {
             c8DB.deleteUser(USER);
         }
@@ -314,7 +314,7 @@ public class C8DBTest {
     public void updateUserDefaultCollectionAccess() {
         try {
             c8DB.createUser(USER, PW, EMAIL);
-            c8DB.grantDefaultCollectionAccess(C8RequestParam.DEMO_TENANT, USER, Permissions.RW);
+            c8DB.grantDefaultCollectionAccess(USER, Permissions.RW);
         } finally {
             c8DB.deleteUser(USER);
         }

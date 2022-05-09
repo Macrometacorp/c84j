@@ -269,13 +269,13 @@ public abstract class InternalC8DB<E extends C8Executor> extends C8Executeable<E
         return request;
     }
 
-    protected Request updateUserDefaultDatabaseAccessRequest(final String tenant, final String user, final Permissions permissions) {
-        return request(tenant, C8RequestParam.SYSTEM, RequestType.PUT, PATH_API_USER, user, C8RequestParam.DATABASE,
+    protected Request updateUserDefaultDatabaseAccessRequest(final String user, final Permissions permissions) {
+        return request(C8RequestParam.DEMO_TENANT, C8RequestParam.SYSTEM, RequestType.PUT, PATH_API_USER, user, C8RequestParam.DATABASE,
                 "*").setBody(util().serialize(OptionsBuilder.build(new UserAccessOptions(), permissions)));
     }
 
-    protected Request getUserStreamsAccessRequest(final String tenant, final String user, final String database, boolean full) {
-        Request request = request(tenant, C8RequestParam.SYSTEM, RequestType.GET, PATH_API_USER, user,
+    protected Request getUserStreamsAccessRequest(final String user, final String database, boolean full) {
+        Request request = request(C8RequestParam.DEMO_TENANT, C8RequestParam.SYSTEM, RequestType.GET, PATH_API_USER, user,
             C8RequestParam.DATABASE, database, C8RequestParam.STREAM);
         if (full) {
             request.putQueryParam("full", true);
@@ -283,13 +283,13 @@ public abstract class InternalC8DB<E extends C8Executor> extends C8Executeable<E
         return request;
     }
 
-    protected Request getUserStreamAccessRequest(final String tenant, final String user, final String database, final String stream) {
-        return request(tenant, C8RequestParam.SYSTEM, RequestType.GET, PATH_API_USER, user,
+    protected Request getUserStreamAccessRequest(final String user, final String database, final String stream) {
+        return request(C8RequestParam.DEMO_TENANT, C8RequestParam.SYSTEM, RequestType.GET, PATH_API_USER, user,
             C8RequestParam.DATABASE, database, C8RequestParam.STREAM, stream);
     }
 
-    protected Request getUserAccessRequest(final String tenant, final String user, final String database) {
-        return request(tenant, C8RequestParam.SYSTEM, RequestType.GET, PATH_API_USER, user,
+    protected Request getUserAccessRequest(final String user, final String database) {
+        return request(C8RequestParam.DEMO_TENANT, C8RequestParam.SYSTEM, RequestType.GET, PATH_API_USER, user,
             C8RequestParam.DATABASE, database);
     }
 
@@ -326,8 +326,8 @@ public abstract class InternalC8DB<E extends C8Executor> extends C8Executeable<E
         };
     }
 
-    protected Request updateUserDefaultCollectionAccessRequest(final String tenant, final String user, final Permissions permissions) {
-        return request(tenant, C8RequestParam.SYSTEM, RequestType.PUT, PATH_API_USER, user, C8RequestParam.DATABASE,
+    protected Request updateUserDefaultCollectionAccessRequest(final String user, final Permissions permissions) {
+        return request(C8RequestParam.DEMO_TENANT, C8RequestParam.SYSTEM, RequestType.PUT, PATH_API_USER, user, C8RequestParam.DATABASE,
             "*", "*").setBody(util().serialize(OptionsBuilder.build(new UserAccessOptions(), permissions)));
     }
 
