@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 
+import com.c8db.internal.C8RequestParam;
 import org.junit.AfterClass;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -46,6 +47,7 @@ public class UserAuthTest {
     private static final String COLLECTION_NAME = "AuthUnitTestCollection";
     private static final String COLLECTION_NAME_NEW = COLLECTION_NAME + "new";
     private static final String USER_NAME = "AuthUnitTestUser";
+    private static final String EMAIL = "aa@cc.bb";
     private static final String USER_NAME_NEW = USER_NAME + "new";
 
     public static class UserAuthParam {
@@ -93,7 +95,7 @@ public class UserAuthTest {
             shutdown();
         }
         c8DBRoot = new C8DB.Builder().useProtocol(param.protocol).build();
-        c8DBRoot.createUser(USER_NAME, "");
+        c8DBRoot.createUser(USER_NAME, "", EMAIL);
         c8DB = new C8DB.Builder().useProtocol(param.protocol).user(USER_NAME).build();
         c8DBRoot.createGeoFabric(C8Defaults.DEFAULT_TENANT, DB_NAME, "", C8Defaults.DEFAULT_DC_LIST, DB_NAME);
         c8DBRoot.db(C8Defaults.DEFAULT_TENANT, DB_NAME).createCollection(COLLECTION_NAME);
@@ -179,14 +181,14 @@ public class UserAuthTest {
         try {
             if (Permissions.RW.equals(param.systemPermission)) {
                 try {
-                    c8DB.createUser(USER_NAME_NEW, "");
+                    c8DB.createUser(USER_NAME_NEW, "", EMAIL);
                 } catch (final C8DBException e) {
                     fail(details);
                 }
                 assertThat(details, c8DBRoot.getUsers(), is(notNullValue()));
             } else {
                 try {
-                    c8DB.createUser(USER_NAME_NEW, "");
+                    c8DB.createUser(USER_NAME_NEW, "", EMAIL);
                     fail(details);
                 } catch (final C8DBException e) {
                 }
@@ -207,7 +209,7 @@ public class UserAuthTest {
     @Test
     public void deleteUser() {
         try {
-            c8DBRoot.createUser(USER_NAME_NEW, "");
+            c8DBRoot.createUser(USER_NAME_NEW, "", EMAIL);
             if (Permissions.RW.equals(param.systemPermission)) {
                 try {
                     c8DB.deleteUser(USER_NAME_NEW);
@@ -238,7 +240,7 @@ public class UserAuthTest {
     @Test
     public void updateUser() {
         try {
-            c8DBRoot.createUser(USER_NAME_NEW, "");
+            c8DBRoot.createUser(USER_NAME_NEW, "", EMAIL);
             if (Permissions.RW.equals(param.systemPermission)) {
                 try {
                     c8DB.updateUser(USER_NAME_NEW, new UserUpdateOptions().active(false));
@@ -265,7 +267,7 @@ public class UserAuthTest {
     @Test
     public void grantUserDBAccess() {
         try {
-            c8DBRoot.createUser(USER_NAME_NEW, "");
+            c8DBRoot.createUser(USER_NAME_NEW, "", EMAIL);
             if (Permissions.RW.equals(param.systemPermission)) {
                 try {
                     c8DB.db().grantAccess(USER_NAME_NEW);
@@ -290,7 +292,7 @@ public class UserAuthTest {
     @Test
     public void resetUserDBAccess() {
         try {
-            c8DBRoot.createUser(USER_NAME_NEW, "");
+            c8DBRoot.createUser(USER_NAME_NEW, "", EMAIL);
             c8DBRoot.db().grantAccess(USER_NAME_NEW);
             if (Permissions.RW.equals(param.systemPermission)) {
                 try {
@@ -316,7 +318,7 @@ public class UserAuthTest {
     @Test
     public void grantUserCollcetionAccess() {
         try {
-            c8DBRoot.createUser(USER_NAME_NEW, "");
+            c8DBRoot.createUser(USER_NAME_NEW, "", EMAIL);
             if (Permissions.RW.equals(param.systemPermission)) {
                 try {
                     c8DB.db(C8Defaults.DEFAULT_TENANT, DB_NAME).collection(COLLECTION_NAME)
@@ -343,7 +345,7 @@ public class UserAuthTest {
     @Test
     public void resetUserCollectionAccess() {
         try {
-            c8DBRoot.createUser(USER_NAME_NEW, "");
+            c8DBRoot.createUser(USER_NAME_NEW, "", EMAIL);
             c8DBRoot.db().grantAccess(USER_NAME_NEW);
             if (Permissions.RW.equals(param.systemPermission)) {
                 try {
@@ -371,17 +373,17 @@ public class UserAuthTest {
     @Test
     public void updateUserDefaultDatabaseAccess() {
         try {
-            c8DBRoot.createUser(USER_NAME_NEW, "");
+            c8DBRoot.createUser(USER_NAME_NEW, "", EMAIL);
             c8DBRoot.db().grantAccess(USER_NAME_NEW);
             if (Permissions.RW.equals(param.systemPermission)) {
                 try {
-                    c8DB.grantDefaultDatabaseAccess(USER_NAME_NEW, Permissions.RW);
+                    c8DB.grantDefaultDatabaseAccess(C8RequestParam.DEMO_TENANT, USER_NAME_NEW, Permissions.RW);
                 } catch (final C8DBException e) {
                     fail(details);
                 }
             } else {
                 try {
-                    c8DB.grantDefaultDatabaseAccess(USER_NAME_NEW, Permissions.RW);
+                    c8DB.grantDefaultDatabaseAccess(C8RequestParam.DEMO_TENANT, USER_NAME_NEW, Permissions.RW);
                     fail(details);
                 } catch (final C8DBException e) {
                 }
@@ -397,17 +399,17 @@ public class UserAuthTest {
     @Test
     public void updateUserDefaultCollectionAccess() {
         try {
-            c8DBRoot.createUser(USER_NAME_NEW, "");
+            c8DBRoot.createUser(USER_NAME_NEW, "", EMAIL);
             c8DBRoot.db().grantAccess(USER_NAME_NEW);
             if (Permissions.RW.equals(param.systemPermission)) {
                 try {
-                    c8DB.grantDefaultCollectionAccess(USER_NAME_NEW, Permissions.RW);
+                    c8DB.grantDefaultCollectionAccess(C8RequestParam.DEMO_TENANT, USER_NAME_NEW, Permissions.RW);
                 } catch (final C8DBException e) {
                     fail(details);
                 }
             } else {
                 try {
-                    c8DB.grantDefaultCollectionAccess(USER_NAME_NEW, Permissions.RW);
+                    c8DB.grantDefaultCollectionAccess(C8RequestParam.DEMO_TENANT, USER_NAME_NEW, Permissions.RW);
                     fail(details);
                 } catch (final C8DBException e) {
                 }

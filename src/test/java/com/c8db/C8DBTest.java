@@ -60,6 +60,7 @@ public class C8DBTest {
     private static final String ROOT = "root";
     private static final String USER = "test_user";
     private static final String PW = "machts der hund";
+    private static final String EMAIL = "aaa@bb.cc";
     private final C8DB c8DB;
 
     public C8DBTest(final Builder builder) {
@@ -259,7 +260,7 @@ public class C8DBTest {
         try {
             final Map<String, Object> extra = new HashMap<String, Object>();
             extra.put("hund", false);
-            c8DB.createUser(USER, PW, new UserCreateOptions().extra(extra));
+            c8DB.createUser(USER, PW, EMAIL, new UserCreateOptions().extra(extra));
             extra.put("hund", true);
             extra.put("mund", true);
             final UserEntity user = c8DB.updateUser(USER, new UserUpdateOptions().extra(extra));
@@ -282,7 +283,7 @@ public class C8DBTest {
         try {
             final Map<String, Object> extra = new HashMap<String, Object>();
             extra.put("hund", false);
-            c8DB.createUser(USER, PW, new UserCreateOptions().extra(extra));
+            c8DB.createUser(USER, PW, EMAIL, new UserCreateOptions().extra(extra));
             extra.remove("hund");
             extra.put("mund", true);
             final UserEntity user = c8DB.replaceUser(USER, new UserUpdateOptions().extra(extra));
@@ -302,8 +303,8 @@ public class C8DBTest {
     @Test
     public void updateUserDefaultDatabaseAccess() {
         try {
-            c8DB.createUser(USER, PW);
-            c8DB.grantDefaultDatabaseAccess(USER, Permissions.RW);
+            c8DB.createUser(USER, PW, EMAIL);
+            c8DB.grantDefaultDatabaseAccess(C8RequestParam.DEMO_TENANT, USER, Permissions.RW);
         } finally {
             c8DB.deleteUser(USER);
         }
@@ -312,8 +313,8 @@ public class C8DBTest {
     @Test
     public void updateUserDefaultCollectionAccess() {
         try {
-            c8DB.createUser(USER, PW);
-            c8DB.grantDefaultCollectionAccess(USER, Permissions.RW);
+            c8DB.createUser(USER, PW, EMAIL);
+            c8DB.grantDefaultCollectionAccess(C8RequestParam.DEMO_TENANT, USER, Permissions.RW);
         } finally {
             c8DB.deleteUser(USER);
         }
