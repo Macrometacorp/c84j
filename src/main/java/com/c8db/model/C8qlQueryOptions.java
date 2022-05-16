@@ -12,6 +12,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * Modifications copyright (c) 2022 Macrometa Corp All rights reserved.
  */
 
 package com.c8db.model;
@@ -32,6 +34,8 @@ public class C8qlQueryOptions implements Serializable {
     private Boolean cache;
     private Options options;
     private VPackSlice bindVars;
+    private Long batchSize;
+    private Long ttl;
 
     public C8qlQueryOptions() {
         super();
@@ -133,6 +137,32 @@ public class C8qlQueryOptions implements Serializable {
     public C8qlQueryOptions rules(final Collection<String> rules) {
         getOptions().getOptimizer().rules = rules;
         return this;
+    }
+
+    /**
+     * @param batchSize the batchsize of the result to be processed by the cursor
+     * @return options
+     */
+    public C8qlQueryOptions batchSize(final Long batchSize) {
+        this.batchSize = batchSize;
+        return this;
+    }
+
+    /**
+     * @param ttl the time-to-live for the cursor
+     * @return options
+     */
+    public C8qlQueryOptions ttl(final Long ttl) {
+        this.ttl = ttl;
+        return this;
+    }
+
+    public Long getBatchSize() {
+        return batchSize;
+    }
+
+    public Long getTtl() {
+        return ttl;
     }
 
     private Options getOptions() {
