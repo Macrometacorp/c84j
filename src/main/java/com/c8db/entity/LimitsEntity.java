@@ -66,5 +66,7 @@ public class LimitsEntity implements Entity {
 		private int maxWorkersCpuSecondsPerMinute;
 		private int maxWorkersThroughputInMBPerMinute;
 		private int maxWorkersThroughputOutMBPerMinute;
+		private int maxCpuSecondsPerMinutePerWorker;
+		private int maxLogsLengthKBPerMinutePerWorker;
 	}
 }
