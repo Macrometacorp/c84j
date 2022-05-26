@@ -19,6 +19,7 @@ package com.c8db.internal;
 import java.util.Collection;
 
 import com.c8db.C8Stream;
+import com.c8db.Service;
 import com.c8db.entity.C8StreamBacklogEntity;
 import com.c8db.entity.C8StreamStatisticsEntity;
 
@@ -33,54 +34,33 @@ public class C8StreamImpl extends InternalC8Stream<C8DBImpl, C8DatabaseImpl, C8E
     }
 
     @Override
-    public C8StreamBacklogEntity getBacklog(final boolean isLocal) {
-        return executor.execute(getC8StreamBacklogRequest(isLocal), getC8StreamBacklogResponseDeserializer());
+    public C8StreamBacklogEntity getBacklog() {
+        return executor.execute(getC8StreamBacklogRequest(), getC8StreamBacklogResponseDeserializer(), null, Service.C8STREAMS);
     }
 
     @Override
-    public C8StreamStatisticsEntity getStatistics(final boolean isLocal) {
-        return executor.execute(getC8StreamStatisticsRequest(isLocal), getC8StreamStatisticsResponseDeserializer());
+    public C8StreamStatisticsEntity getStatistics() {
+        return executor.execute(getC8StreamStatisticsRequest(), getC8StreamStatisticsResponseDeserializer(), null, Service.C8STREAMS);
     }
 
     @Override
-    public void terminate(final boolean isLocal) {
-        executor.execute(terminateC8StreamRequest(isLocal), Void.class);
+    public void delete() {
+        executor.execute(deleteC8StreamRequest(), Void.class, null, Service.C8STREAMS);
     }
 
     @Override
-    public Collection<String> getSubscriptions(final boolean isLocal) {
-        return executor.execute(getC8StreamSubscriptionsRequest(isLocal),
-                getC8StreamSubscriptionsResponseDeserializer());
+    public Collection<String> getSubscriptions() {
+        return executor.execute(getC8StreamSubscriptionsRequest(),
+                getC8StreamSubscriptionsResponseDeserializer(), null, Service.C8STREAMS);
     }
 
     @Override
-    public void skipMessages(final String subscriptionName, final int numberOfMessages, final boolean isLocal) {
-        executor.execute(skipMessagesRequest(subscriptionName, numberOfMessages, isLocal), Void.class);
-    }
-
-    @Override
-    public void skipAllMessages(final String subscriptionName, final boolean isLocal) {
-        executor.execute(skipAllMessagesRequest(subscriptionName, isLocal), Void.class);
-    }
-
-    @Override
-    public void resetCursorToTimestamp(final String subscriptionName, final int timestamp, final boolean isLocal) {
-        executor.execute(resetCursorRequest(subscriptionName, timestamp, isLocal), Void.class);
-    }
-
-    @Override
-    public void resetCursor(final String subscriptionName, final boolean isLocal) {
-        executor.execute(resetCursorRequest(subscriptionName, isLocal), Void.class);
-    }
-
-    @Override
-    public void expireMessagesInSeconds(final String subscriptionName, final int expireTimeInSeconds,
-            final boolean isLocal) {
-        executor.execute(expireMessagesRequest(subscriptionName, expireTimeInSeconds, isLocal), Void.class);
+    public void expireMessagesInSeconds(final int expireTimeInSeconds) {
+        executor.execute(expireMessagesRequest(expireTimeInSeconds), Void.class, null, Service.C8STREAMS);
     }
     
     @Override
-    public void deleteSubscription(final String subscriptionName, final boolean isLocal) {
-        executor.execute(deleteSubscriptionRequest(subscriptionName, isLocal), Void.class);
+    public void deleteSubscription(final String subscriptionName) {
+        executor.execute(deleteSubscriptionRequest(subscriptionName), Void.class, null, Service.C8STREAMS);
     }
 }

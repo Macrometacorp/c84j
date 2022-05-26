@@ -83,6 +83,8 @@ public abstract class InternalC8Database<A extends InternalC8DB<E>, E extends C8
     protected static final String PATH_API_QUERY_PROPERTIES = "/query/properties";
     protected static final String PATH_API_USER_QUERIES = "/restql";
 
+    protected static final String QUERY_PARAM_GLOBAL = "global";
+
     private static final String PATH_API_BEGIN_STREAM_TRANSACTION = "/_api/transaction/begin";
     private static final String PATH_API_TRAVERSAL = "/_api/traversal";
 
@@ -449,13 +451,13 @@ public abstract class InternalC8Database<A extends InternalC8DB<E>, E extends C8
 
     protected Request createC8PersistentStreamRequest(final String name, final C8StreamCreateOptions options) {
         Request request = request(tenant(), name(), RequestType.POST, PATH_API_STREAMS, name);
-        request.putQueryParam("local", options != null ? options.getIsLocal() : false);
+        request.putQueryParam(QUERY_PARAM_GLOBAL, options == null || !options.getIsLocal());
         return request;
     }
 
     protected Request getC8PersistentStreamsRequest(final C8StreamCreateOptions options) {
         Request request = request(tenant(), name(), RequestType.GET, PATH_API_STREAMS);
-        request.putQueryParam("local", options != null ? options.getIsLocal() : false);
+        request.putQueryParam(QUERY_PARAM_GLOBAL, options == null || !options.getIsLocal());
         return request;
     }
 
@@ -470,20 +472,68 @@ public abstract class InternalC8Database<A extends InternalC8DB<E>, E extends C8
         };
     }
 
+    protected ResponseDeserializer<String> getC8StreamResponseDeserializer() {
+        return new ResponseDeserializer<String>() {
+            @Override
+            public String deserialize(final Response response) throws VPackException {
+                return util().deserialize(response.getBody().get(C8ResponseField.RESULT).get("stream-id"),
+                    new Type<String>() {}.getType());
+            }
+        };
+    }
+
     protected Request getC8StreamsRequest() {
         return request(tenant(), name(), RequestType.GET, PATH_API_STREAMS);
     }
 
-    protected Request clearC8StreamBacklogRequest() {
-        return request(tenant(), name(), RequestType.POST, PATH_API_STREAMS, "clearbacklog");
+    protected Request clearC8StreamBacklogRequest(final boolean isLocal) {
+        Request request = request(tenant(), name(), RequestType.POST, PATH_API_STREAMS, "clearbacklog");
+        if (isLocal) {
+            request.putQueryParam(QUERY_PARAM_GLOBAL, !isLocal);
+        }
+        return request;
     }
 
-    protected Request clearC8StreamBacklogRequest(final String subscriptionName) {
-        return request(tenant(), name(), RequestType.POST, PATH_API_STREAMS, "clearbacklog", subscriptionName);
+    protected Request getC8StreamTtlRequest(final boolean isLocal) {
+        Request request = request(tenant(), name(), RequestType.GET, PATH_API_STREAMS, "ttl");
+        if (isLocal) {
+            request.putQueryParam(QUERY_PARAM_GLOBAL, !isLocal);
+        }
+        return request;
     }
 
-    protected Request unsubscribeRequest(final String subscriptionName) {
-        return request(tenant(), name(), RequestType.POST, PATH_API_STREAMS, "unsubscribe", subscriptionName);
+    protected ResponseDeserializer<Integer> getC8StreamTtlResponseDeserializer() {
+        return new ResponseDeserializer<Integer>() {
+            @Override
+            public Integer deserialize(final Response response) throws VPackException {
+                return util().deserialize(response.getBody().get(C8ResponseField.RESULT),
+                    new Type<Integer>() {}.getType());
+            }
+        };
+    }
+
+    protected Request c8StreamTtlRequest(final int ttl, final boolean isLocal) {
+        Request request = request(tenant(), name(), RequestType.POST, PATH_API_STREAMS, "ttl", Integer.toString(ttl));
+        if (isLocal) {
+            request.putQueryParam(QUERY_PARAM_GLOBAL, !isLocal);
+        }
+        return request;
+    }
+
+    protected Request clearC8StreamBacklogRequest(final String subscriptionName, final boolean isLocal) {
+        Request request = request(tenant(), name(), RequestType.POST, PATH_API_STREAMS, "clearbacklog", subscriptionName);
+        if (isLocal) {
+            request.putQueryParam(QUERY_PARAM_GLOBAL, !isLocal);
+        }
+        return request;
+    }
+
+    protected Request unsubscribeRequest(final String subscriptionName, final boolean isLocal) {
+        Request request = request(tenant(), name(), RequestType.DELETE, PATH_API_STREAMS, "subscription", subscriptionName);
+        if (isLocal) {
+            request.putQueryParam(QUERY_PARAM_GLOBAL, !isLocal);
+        }
+        return request;
     }
 
     // Macrometa Corp Modification: Add `user` as a parameter.

@@ -56,6 +56,9 @@ import com.c8db.velocystream.Request;
 import java.util.Collection;
 import java.util.Map;
 
+import static com.c8db.internal.InternalC8Variables.GLOBAL_STREAM_PREFIX;
+import static com.c8db.internal.InternalC8Variables.LOCAL_STREAM_PREFIX;
+
 public class C8DatabaseImpl extends InternalC8Database<C8DBImpl, C8ExecutorSync>
         implements C8Database {
 
@@ -362,15 +365,16 @@ public class C8DatabaseImpl extends InternalC8Database<C8DBImpl, C8ExecutorSync>
     }
 
     @Override
-    public void createPersistentStream(final String name, final C8StreamCreateOptions options)
+    public String createPersistentStream(final String name, final C8StreamCreateOptions options)
             throws C8DBException {
         try {
-            executor.execute(createC8PersistentStreamRequest(name, options), Void.class, null, Service.C8STREAMS);
+            return executor.execute(createC8PersistentStreamRequest(name, options), getC8StreamResponseDeserializer(), null, Service.C8STREAMS);
         } catch (final C8DBException e) {
             if (!C8Errors.ERROR_STREAM_ALREADY_EXISTS.equals(e.getErrorNum())) {
                 throw e;
             }
         }
+        return (options.getIsLocal() ? LOCAL_STREAM_PREFIX : GLOBAL_STREAM_PREFIX) + name;
     }
 
     @Override
@@ -385,18 +389,28 @@ public class C8DatabaseImpl extends InternalC8Database<C8DBImpl, C8ExecutorSync>
     }
 
     @Override
-    public void clearBacklog() {
-        executor.execute(clearC8StreamBacklogRequest(), Void.class, null, Service.C8STREAMS);
+    public void clearBacklog(final boolean isLocal) {
+        executor.execute(clearC8StreamBacklogRequest(isLocal), Void.class, null, Service.C8STREAMS);
     }
 
     @Override
-    public void clearBacklog(final String subscriptionName) {
-        executor.execute(clearC8StreamBacklogRequest(subscriptionName), Void.class, null, Service.C8STREAMS);
+    public int getTtlMessages(final boolean isLocal) {
+        return executor.execute(getC8StreamTtlRequest(isLocal), getC8StreamTtlResponseDeserializer(), null, Service.C8STREAMS);
     }
 
     @Override
-    public void unsubscribe(final String subscriptionName) {
-        executor.execute(unsubscribeRequest(subscriptionName), Void.class, null, Service.C8STREAMS);
+    public void ttlMessages(final int ttl, final boolean isLocal) {
+        executor.execute(c8StreamTtlRequest(ttl, isLocal), Void.class, null, Service.C8STREAMS);
+    }
+
+    @Override
+    public void clearBacklog(final String subscriptionName, final boolean isLocal) {
+        executor.execute(clearC8StreamBacklogRequest(subscriptionName, isLocal), Void.class, null, Service.C8STREAMS);
+    }
+
+    @Override
+    public void unsubscribe(final String subscriptionName, final boolean isLocal) {
+        executor.execute(unsubscribeRequest(subscriptionName, isLocal), Void.class, null, Service.C8STREAMS);
     }
 
     @Override

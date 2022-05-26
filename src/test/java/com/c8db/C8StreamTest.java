@@ -43,7 +43,7 @@ import com.c8db.entity.C8StreamStatisticsEntity;
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class C8StreamTest extends BaseTest {
 
-    private static final String STREAM_NAME = "dbCollectionTest";
+    private static final String STREAM_NAME = "c8globals.dbCollectionTest";
 
     public C8StreamTest(final Builder builder) {
         super(builder);
@@ -63,32 +63,28 @@ public class C8StreamTest extends BaseTest {
 
     @Test
     public void getBacklog() {
-        C8StreamBacklogEntity backlog = db.stream(STREAM_NAME).getBacklog(false);
+        C8StreamBacklogEntity backlog = db.stream(STREAM_NAME).getBacklog();
         assertThat(backlog, is(notNullValue()));
         assertThat(backlog.getTopicName().contains(STREAM_NAME), is(true));
     }
 
     @Test
     public void getStreamStatistics() {
-        C8StreamStatisticsEntity statistics = db.stream("_polog").getStatistics(false);
+        C8StreamStatisticsEntity statistics = db.stream("_polog").getStatistics();
         assertThat(statistics, is(notNullValue()));
     }
     
     @Ignore
     @Test
     public void streamsTest() {
-        C8Stream stream = db.stream("test");
+        C8Stream stream = db.stream("c8globals.test");
         Collection<C8StreamEntity> streams = db.getPersistentStreams(null);
-        stream.getBacklog(false);
-        stream.expireMessagesInSeconds("c8gui_51469", 10, true);
-        Collection<String> subs = stream.getSubscriptions(true);
-        
-        stream.resetCursorToTimestamp("c8gui_51469", (int) System.currentTimeMillis(), true);
-        stream.skipMessages("c8gui_51469", 2, true);
-        stream.skipAllMessages("c8gui_51469", true);
-       // stream.resetCursor("c8gui_51469", true);
-        stream.deleteSubscription("c8gui_51469", false);
-        stream.terminate(true);
+        stream.getBacklog();
+        stream.expireMessagesInSeconds(10);
+        Collection<String> subs = stream.getSubscriptions();
+
+        stream.deleteSubscription("c8gui_51469");
+        stream.delete();
     }
     
     
