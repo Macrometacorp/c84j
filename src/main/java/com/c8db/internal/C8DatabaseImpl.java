@@ -428,6 +428,16 @@ public class C8DatabaseImpl extends InternalC8Database<C8DBImpl, C8ExecutorSync>
     }
 
     @Override
+    public <T> C8Cursor<T> executeUserQuery(final String query, final Map<String, Object> bindVars,
+                                             C8qlQueryOptions options, final Class<T> type)
+            throws C8DBException {
+        final Request request = userQueryRequest(query, bindVars, options);
+        final HostHandle hostHandle = new HostHandle();
+        final CursorEntity result = executor.execute(request, CursorEntity.class, hostHandle);
+        return createCursor(result, type, options, hostHandle);
+    }
+
+    @Override
     public C8Event event() {
         return new C8EventImpl(this);
     }

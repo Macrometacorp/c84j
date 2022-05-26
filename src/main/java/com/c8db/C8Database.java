@@ -697,4 +697,7 @@ public interface C8Database extends C8SerializationAccessor {
      */
     C8Dynamo dynamo(final String tableName);
 
+    public <T> C8Cursor<T> executeUserQuery(final String query, final Map<String, Object> bindVars,
+                                            C8qlQueryOptions options, final Class<T> type);
+
 }
