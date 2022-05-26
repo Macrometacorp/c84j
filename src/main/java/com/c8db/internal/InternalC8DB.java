@@ -6,12 +6,9 @@ package com.c8db.internal;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
 
 import com.arangodb.velocypack.Type;
 import com.arangodb.velocypack.VPackSlice;
@@ -19,6 +16,7 @@ import com.arangodb.velocypack.exception.VPackException;
 import com.c8db.entity.DataCenterEntity;
 import com.c8db.entity.DcInfoEntity;
 import com.c8db.entity.GeoFabricEntity;
+import com.c8db.entity.GeoFabricPermissions;
 import com.c8db.entity.LogLevelEntity;
 import com.c8db.entity.Permissions;
 import com.c8db.entity.ServerRole;
@@ -91,8 +89,10 @@ public abstract class InternalC8DB<E extends C8Executor> extends C8Executeable<E
         };
     }
 
-    protected Request getAccessibleGeoFabricsForRequest(final String tenant, final String database, final String user) {
-        return request(tenant, database, RequestType.GET, PATH_API_USER, user, C8RequestParam.DATABASE);
+    protected Request getAccessibleGeoFabricsForRequest(final String tenant, final String database, final String user, boolean full) {
+        final Request request = request(tenant, database, RequestType.GET, PATH_API_USER, user, C8RequestParam.DATABASE);
+        request.putQueryParam("full", full);
+        return request;
     }
 
     protected ResponseDeserializer<Collection<String>> getAccessibleGeoFabricsForResponseDeserializer() {
@@ -293,24 +293,22 @@ public abstract class InternalC8DB<E extends C8Executor> extends C8Executeable<E
             C8RequestParam.DATABASE, database);
     }
 
+    protected ResponseDeserializer<Map<String, GeoFabricPermissions>> resourcesAccessesResponseDeserializer() {
+        return new ResponseDeserializer<Map<String, GeoFabricPermissions>>() {
+            @Override
+            public Map<String, GeoFabricPermissions> deserialize(final Response response) throws VPackException {
+                final VPackSlice result = response.getBody().get(C8ResponseField.RESULT);
+                return util().deserialize(result, new Type<Map<String, GeoFabricPermissions>>(){}.getType());
+            }
+        };
+    }
+
     protected ResponseDeserializer<Map<String, Permissions>> listAccessesResponseDeserializer() {
         return new ResponseDeserializer<Map<String, Permissions>>() {
             @Override
             public Map<String, Permissions> deserialize(final Response response) throws VPackException {
                 final VPackSlice result = response.getBody().get(C8ResponseField.RESULT);
-                Map<String, Permissions> permissions = new HashMap<>();
-                for (Iterator<Map.Entry<String, VPackSlice>> it = result.objectIterator(); it.hasNext();) {
-                    Map.Entry<String, VPackSlice> next = it.next();
-                    String level = util().deserialize(next.getValue(),  new Type<String>(){}.getType());
-                    Permissions permission = null;
-                    try {
-                        permission = Permissions.valueOf(level.toUpperCase());
-                    } catch (Exception e) {
-                        // has level "undefined"
-                    }
-                    permissions.put(next.getKey(), permission);
-                }
-                return permissions;
+                return util().deserialize(result, new Type<Map<String, Permissions>>(){}.getType());
             }
         };
     }

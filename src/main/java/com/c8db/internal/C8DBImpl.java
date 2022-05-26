@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import com.c8db.entity.GeoFabricPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -141,7 +142,7 @@ public class C8DBImpl extends InternalC8DB<C8ExecutorSync> implements C8DB {
 
     @Override
     public Collection<String> getAccessibleGeoFabricsFor(final String user) throws C8DBException {
-        return executor.execute(getAccessibleGeoFabricsForRequest(db().tenant(), db().name(), user),
+        return executor.execute(getAccessibleGeoFabricsForRequest(db().tenant(), db().name(), user, false),
                 getAccessibleGeoFabricsForResponseDeserializer());
     }
 
@@ -244,6 +245,12 @@ public class C8DBImpl extends InternalC8DB<C8ExecutorSync> implements C8DB {
     public void grantDefaultCollectionAccess(final String user, final Permissions permissions)
             throws C8DBException {
         executor.execute(updateUserDefaultCollectionAccessRequest(user, permissions), Void.class);
+    }
+
+    @Override
+    public Map<String, GeoFabricPermissions> getResourcesAccess(final String user) {
+        return executor.execute(getAccessibleGeoFabricsForRequest(db().tenant(), db().name(), user, true),
+            resourcesAccessesResponseDeserializer());
     }
 
     @Override

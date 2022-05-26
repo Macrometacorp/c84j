@@ -28,6 +28,7 @@ import com.c8db.entity.C8DBVersion;
 import com.c8db.entity.DataCenterEntity;
 import com.c8db.entity.DcInfoEntity;
 import com.c8db.entity.GeoFabricEntity;
+import com.c8db.entity.GeoFabricPermissions;
 import com.c8db.entity.LoadBalancingStrategy;
 import com.c8db.entity.LogEntity;
 import com.c8db.entity.LogLevelEntity;
@@ -968,6 +969,14 @@ public interface C8DB extends C8SerializationAccessor {
      * @throws C8DBException
      */
     void grantDefaultCollectionAccess(String user, Permissions permissions) throws C8DBException;
+
+    /**
+     * Get access level for all resources such as the GeoFabric as well as access level for collections and streams.
+     *
+     * @param user        The name of the user
+     * @return result map of GeoFabrics' names with access levels for GeoFabric, collections and streams.
+     */
+    Map<String, GeoFabricPermissions> getResourcesAccess(final String user);
 
     /**
      * Get access level for streams

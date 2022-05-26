@@ -6,6 +6,7 @@ package com.c8db.internal;
 
 import com.c8db.C8ApiKeys;
 import com.c8db.entity.ApiKeyEntity;
+import com.c8db.entity.GeoFabricPermissions;
 import com.c8db.entity.Permissions;
 
 import java.util.Map;
@@ -20,6 +21,11 @@ public class C8ApiKeysImpl extends InternalC8ApiKeys<C8DBImpl, C8DatabaseImpl, C
     @Override
     public ApiKeyEntity validateApiKey(String apikey) {
 	    return executor.execute(validateApiKeyRequest(apikey), validateApiKeyResponseDeserializer());
+    }
+
+    @Override
+    public Map<String, GeoFabricPermissions> getResourcesAccess(final String keyId) {
+        return executor.execute(geoFabricsAccessLevelRequest(keyId, true), gatResourcesAccessResponseDeserializer());
     }
 
     @Override
