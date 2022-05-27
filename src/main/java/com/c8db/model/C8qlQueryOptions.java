@@ -20,6 +20,7 @@ package com.c8db.model;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Map;
 
 import com.arangodb.velocypack.VPackSlice;
 
@@ -36,9 +37,21 @@ public class C8qlQueryOptions implements Serializable {
     private VPackSlice bindVars;
     private Long batchSize;
     private Long ttl;
+    private Map<String, Object> bindVarMap;
 
     public C8qlQueryOptions() {
         super();
+    }
+
+    public C8qlQueryOptions(C8qlQueryOptions queryOptions) {
+       this.count = queryOptions.count;
+       this.query = queryOptions.query;
+       this.cache = queryOptions.cache;
+       this.options = queryOptions.options;
+       this.bindVars = queryOptions.bindVars;
+       this.batchSize = queryOptions.batchSize;
+       this.ttl = queryOptions.ttl;
+       this.bindVarMap = queryOptions.bindVarMap;
     }
 
     public Boolean getCount() {
@@ -85,6 +98,11 @@ public class C8qlQueryOptions implements Serializable {
      */
     protected C8qlQueryOptions bindVars(final VPackSlice bindVars) {
         this.bindVars = bindVars;
+        return this;
+    }
+
+    protected C8qlQueryOptions bindVarsMap(final Map<String, Object> bindVarMap) {
+        this.bindVarMap = bindVarMap;
         return this;
     }
 

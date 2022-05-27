@@ -554,7 +554,6 @@ public abstract class InternalC8Database<A extends InternalC8DB<E>, E extends C8
     }
 
     protected Request userQueryRequest(final String userName, final String restqlName, final Map<String, Object> bindVars) {
-        System.out.println("BindVars in restql c84j = " + bindVars);
         final Request request = userName == null ?
                 request(tenant, name, RequestType.POST, PATH_API_USER_QUERIES, "execute", "root", restqlName)
                 : request(tenant, name, RequestType.POST, PATH_API_USER_QUERIES, "execute", userName, restqlName);
@@ -564,13 +563,9 @@ public abstract class InternalC8Database<A extends InternalC8DB<E>, E extends C8
 
     protected Request userQueryRequest(final String query, final Map<String, Object> bindVars,
                                    final C8qlQueryOptions options) {
-        System.out.println("Executing user query request");
-        System.out.println("BindVars in db c84j = " + bindVars);
-        final C8qlQueryOptions opt = options != null ? options : new C8qlQueryOptions();
         final Request request = request(tenant, name, RequestType.POST, PATH_API_CURSOR);
-        request.setBody(
-                util().serialize(OptionsBuilder.build(opt, query,
-                        util().serialize(bindVars != null ? bindVars :  new HashMap<String, Object>()))));
+        request.setBody(util().serialize(OptionsBuilder.build(options, query,
+                bindVars == null ? new HashMap<>() : bindVars)));
         return request;
     }
 }
