@@ -54,12 +54,6 @@ public class RestqlImpl extends InternalRestql<C8DBImpl, C8DatabaseImpl, C8Execu
     }
 
     @Override
-    public <T> C8Cursor<T> executeUserQueryByUserNameAndName(final String query, final Map<String, Object> bindVars,
-                                                             C8qlQueryOptions options, final Class<T> type) {
-        return db().executeUserQuery(query, bindVars, options, type);
-    }
-
-    @Override
     public Collection<UserQueryEntity> getUserQueries() throws C8DBException {
         return executor.execute(getUserQueriesRequest(), getUserQueriesResponseDeserializer());
     }

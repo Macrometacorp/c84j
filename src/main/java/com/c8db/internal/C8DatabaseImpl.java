@@ -186,6 +186,18 @@ public class C8DatabaseImpl extends InternalC8Database<C8DBImpl, C8ExecutorSync>
     }
 
     @Override
+    public <T> C8Cursor<T> query(final String query, final Map<String, Object> bindVars,
+                                 final C8qlQueryOptions options, final Class<T> type, String requestSource) throws C8DBException {
+
+        final Request request = queryRequest(query, bindVars, options,requestSource);
+        final HostHandle hostHandle = new HostHandle();
+        final CursorEntity result = executor.execute(request, CursorEntity.class, hostHandle);
+
+        return createCursor(result, type, options, hostHandle);
+
+    }
+
+    @Override
     public <T> C8Cursor<T> query(final String query, final Map<String, Object> bindVars, final Class<T> type)
             throws C8DBException {
         return query(query, bindVars, null, type);
@@ -439,16 +451,6 @@ public class C8DatabaseImpl extends InternalC8Database<C8DBImpl, C8ExecutorSync>
         final HostHandle hostHandle = new HostHandle();
         final CursorEntity result = executor.execute(request, CursorEntity.class, hostHandle);
         return createCursor(result, type, null, hostHandle);
-    }
-
-    @Override
-    public <T> C8Cursor<T> executeUserQuery(final String query, final Map<String, Object> bindVars,
-                                             C8qlQueryOptions options, final Class<T> type)
-            throws C8DBException {
-        final Request request = userQueryRequest(query, bindVars, options);
-        final HostHandle hostHandle = new HostHandle();
-        final CursorEntity result = executor.execute(request, CursorEntity.class, hostHandle);
-        return createCursor(result, type, options, hostHandle);
     }
 
     @Override

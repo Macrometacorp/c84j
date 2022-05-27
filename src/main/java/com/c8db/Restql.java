@@ -115,8 +115,4 @@ public interface Restql extends C8SerializationAccessor {
      * @userName userName
      */
     Collection<UserQueryEntity> getUserQueries(final String userName) throws C8DBException;
-
-    public <T> C8Cursor<T> executeUserQueryByUserNameAndName(final String query, final Map<String, Object> bindVars,
-                                                             C8qlQueryOptions options, final Class<T> type);
-
 }

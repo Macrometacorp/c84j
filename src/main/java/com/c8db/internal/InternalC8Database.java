@@ -561,11 +561,10 @@ public abstract class InternalC8Database<A extends InternalC8DB<E>, E extends C8
         return request;
     }
 
-    protected Request userQueryRequest(final String query, final Map<String, Object> bindVars,
-                                   final C8qlQueryOptions options) {
-        final Request request = request(tenant, name, RequestType.POST, PATH_API_CURSOR);
-        request.setBody(util().serialize(OptionsBuilder.build(options, query,
-                bindVars == null ? new HashMap<>() : bindVars)));
+    protected Request queryRequest(final String query, final Map<String, Object> bindVars,
+                                   final C8qlQueryOptions options, String type) {
+        final Request request = request(tenant, name, RequestType.POST, PATH_API_CURSOR)
+                .setBody(util().serialize(OptionsBuilder.build(options, query, bindVars == null ? new HashMap<>() : bindVars)));
         return request;
     }
 }
