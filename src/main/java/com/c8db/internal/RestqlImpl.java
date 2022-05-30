@@ -10,7 +10,6 @@ import com.c8db.C8DBException;
 import com.c8db.Restql;
 import com.c8db.entity.UserQueryEntity;
 import com.c8db.entity.UserQueryOptions;
-import com.c8db.model.C8qlQueryOptions;
 
 import java.util.Collection;
 import java.util.Map;

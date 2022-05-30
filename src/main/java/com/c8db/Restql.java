@@ -19,7 +19,6 @@ package com.c8db;
 
 import com.c8db.entity.UserQueryEntity;
 import com.c8db.entity.UserQueryOptions;
-import com.c8db.model.C8qlQueryOptions;
 
 import java.util.Collection;
 import java.util.Map;
@@ -98,7 +97,6 @@ public interface Restql extends C8SerializationAccessor {
     <T> C8Cursor<T> executeUserQueryByUserNameAndName(String userName, String name, Map<String, Object> bindVars,
                                                       Class<T> type);
 
-
     /**
      * Fetches all user queries associated with the current user
      *
@@ -115,4 +113,5 @@ public interface Restql extends C8SerializationAccessor {
      * @userName userName
      */
     Collection<UserQueryEntity> getUserQueries(final String userName) throws C8DBException;
+
 }
