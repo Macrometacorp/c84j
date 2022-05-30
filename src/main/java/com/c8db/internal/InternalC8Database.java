@@ -566,6 +566,7 @@ public abstract class InternalC8Database<A extends InternalC8DB<E>, E extends C8
         Request request;
         boolean isParameterized = query.contains("@") ? true : false;
         if(isParameterized) {
+            System.out.println("isParameterized = " + isParameterized);
             Map<String, Object> bindVarMap;
             if (bindVars.containsKey("bindVars")) {
                 bindVarMap = (HashMap) bindVars.get("bindVars");
@@ -575,6 +576,7 @@ public abstract class InternalC8Database<A extends InternalC8DB<E>, E extends C8
             request = request(tenant, name, RequestType.POST, PATH_API_CURSOR)
                     .setBody(util().serialize(OptionsBuilder.build(options, query, util().serialize(bindVarMap))));
         } else {
+            System.out.println("isParameterized = " + isParameterized);
             request = request(tenant, name, RequestType.POST, PATH_API_CURSOR)
                     .setBody(util().serialize(OptionsBuilder.build(options, query, bindVars)));
         }
