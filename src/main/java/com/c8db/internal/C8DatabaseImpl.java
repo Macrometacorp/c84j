@@ -189,7 +189,7 @@ public class C8DatabaseImpl extends InternalC8Database<C8DBImpl, C8ExecutorSync>
     public <T> C8Cursor<T> query(final String query, final Map<String, Object> bindVars,
                                  final C8qlQueryOptions options, final Class<T> type, String requestSource) throws C8DBException {
 
-        final Request request = queryRequest(query, bindVars, options,requestSource);
+        final Request request = queryRequest(query, bindVars, options, requestSource);
         final HostHandle hostHandle = new HostHandle();
         final CursorEntity result = executor.execute(request, CursorEntity.class, hostHandle);
 
