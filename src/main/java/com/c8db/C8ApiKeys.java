@@ -28,14 +28,14 @@ public interface C8ApiKeys extends C8SerializationAccessor {
      * @param keyId key id of a stream. ApiKey has the next structure: tenant.keyId.hash
      * @return result map of GeoFabrics' names with access levels for GeoFabric, collections and streams.
      */
-    Map<String, GeoFabricPermissions> getResourcesAccess(final String keyId);
+    Map<String, GeoFabricPermissions> getResourcesPermissions(final String keyId);
 
     /**
      * Get the GeoFabric access level
      * @param keyId key id of a stream. ApiKey has the next structure: tenant.keyId.hash
      * @return result of access level.
      */
-    Permissions getGeoFabricAccess(final String keyId);
+    Permissions getGeoFabricPermissions(final String keyId);
 
     /**
      * Get access level for streams
@@ -43,7 +43,7 @@ public interface C8ApiKeys extends C8SerializationAccessor {
      * @param full Return the full set of access levels for all streams. If set to false, return the read-only streams.
      * @return result map of streams with access levels.
      */
-    Map<String, Permissions> getStreamsAccess(final String keyId, final boolean full);
+    Map<String, Permissions> getStreamsPermissions(final String keyId, final boolean full);
 
     /**
      * Get the stream access level
@@ -51,7 +51,7 @@ public interface C8ApiKeys extends C8SerializationAccessor {
      * @param stream stream name
      * @return result of access level.
      */
-    Permissions getStreamAccess(final String keyId, final String stream);
+    Permissions getStreamPermissions(final String keyId, final String stream);
 
     // TODO: Implement other required apikeys features.
 
