@@ -34,6 +34,8 @@ import com.c8db.velocystream.Request;
 import com.c8db.velocystream.RequestType;
 import com.c8db.velocystream.Response;
 
+import static com.c8db.internal.InternalC8Database.QUERY_PARAM_FULL;
+
 
 public abstract class InternalC8DB<E extends C8Executor> extends C8Executeable<E> {
 
@@ -89,9 +91,9 @@ public abstract class InternalC8DB<E extends C8Executor> extends C8Executeable<E
         };
     }
 
-    protected Request getAccessibleGeoFabricsForRequest(final String tenant, final String database, final String user, boolean full) {
-        final Request request = request(tenant, database, RequestType.GET, PATH_API_USER, user, C8RequestParam.DATABASE);
-        request.putQueryParam("full", full);
+    protected Request getAccessibleGeoFabricsForRequest(final String tenant, String fabric, final String user, boolean full) {
+        final Request request = request(tenant, fabric, RequestType.GET, PATH_API_USER, user, C8RequestParam.DATABASE);
+        request.putQueryParam(QUERY_PARAM_FULL, full);
         return request;
     }
 
@@ -272,56 +274,6 @@ public abstract class InternalC8DB<E extends C8Executor> extends C8Executeable<E
     protected Request updateUserDefaultDatabaseAccessRequest(final String user, final Permissions permissions) {
         return request(C8RequestParam.DEMO_TENANT, C8RequestParam.SYSTEM, RequestType.PUT, PATH_API_USER, user, C8RequestParam.DATABASE,
                 "*").setBody(util().serialize(OptionsBuilder.build(new UserAccessOptions(), permissions)));
-    }
-
-    protected Request getUserStreamsAccessRequest(final String user, final String database, boolean full) {
-        Request request = request(C8RequestParam.DEMO_TENANT, C8RequestParam.SYSTEM, RequestType.GET, PATH_API_USER, user,
-            C8RequestParam.DATABASE, database, C8RequestParam.STREAM);
-        if (full) {
-            request.putQueryParam("full", true);
-        }
-        return request;
-    }
-
-    protected Request getUserStreamAccessRequest(final String user, final String database, final String stream) {
-        return request(C8RequestParam.DEMO_TENANT, C8RequestParam.SYSTEM, RequestType.GET, PATH_API_USER, user,
-            C8RequestParam.DATABASE, database, C8RequestParam.STREAM, stream);
-    }
-
-    protected Request getUserAccessRequest(final String user, final String database) {
-        return request(C8RequestParam.DEMO_TENANT, C8RequestParam.SYSTEM, RequestType.GET, PATH_API_USER, user,
-            C8RequestParam.DATABASE, database);
-    }
-
-    protected ResponseDeserializer<Map<String, GeoFabricPermissions>> resourcesAccessesResponseDeserializer() {
-        return new ResponseDeserializer<Map<String, GeoFabricPermissions>>() {
-            @Override
-            public Map<String, GeoFabricPermissions> deserialize(final Response response) throws VPackException {
-                final VPackSlice result = response.getBody().get(C8ResponseField.RESULT);
-                return util().deserialize(result, new Type<Map<String, GeoFabricPermissions>>(){}.getType());
-            }
-        };
-    }
-
-    protected ResponseDeserializer<Map<String, Permissions>> listAccessesResponseDeserializer() {
-        return new ResponseDeserializer<Map<String, Permissions>>() {
-            @Override
-            public Map<String, Permissions> deserialize(final Response response) throws VPackException {
-                final VPackSlice result = response.getBody().get(C8ResponseField.RESULT);
-                return util().deserialize(result, new Type<Map<String, Permissions>>(){}.getType());
-            }
-        };
-    }
-
-    protected ResponseDeserializer<Permissions> accessResponseDeserializer() {
-        return new ResponseDeserializer<Permissions>() {
-            @Override
-            public Permissions deserialize(final Response response) throws VPackException {
-                final VPackSlice result = response.getBody().get(C8ResponseField.RESULT);
-                String level = util().deserialize(result,  new Type<String>(){}.getType());
-                return Permissions.valueOf(level.toUpperCase());
-            }
-        };
     }
 
     protected Request updateUserDefaultCollectionAccessRequest(final String user, final Permissions permissions) {

@@ -42,7 +42,7 @@ public class C8ApiKeysTest extends BaseTest {
 
     @Test
     public void getBacklog() {
-        Permissions apiKeyStreamAccess = db.apiKeys().getStreamAccess("key", STREAM_NAME);
+        Permissions apiKeyStreamAccess = db.apiKeys().getStreamPermissions("key", STREAM_NAME);
         assertThat(apiKeyStreamAccess, is(notNullValue()));
     }
 

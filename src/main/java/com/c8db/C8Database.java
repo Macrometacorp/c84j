@@ -11,6 +11,7 @@ import com.c8db.entity.C8qlParseEntity;
 import com.c8db.entity.CollectionEntity;
 import com.c8db.entity.DatabaseEntity;
 import com.c8db.entity.EdgeDefinition;
+import com.c8db.entity.GeoFabricPermissions;
 import com.c8db.entity.GraphEntity;
 import com.c8db.entity.IndexEntity;
 import com.c8db.entity.Permissions;
@@ -239,6 +240,41 @@ public interface C8Database extends C8SerializationAccessor {
      * @since ArangoDB 3.2.0
      */
     Permissions getPermissions(String user) throws C8DBException;
+
+    /**
+     * Get access level for all resources such as the GeoFabric as well as access level for collections and streams.
+     *
+     * @param user        The name of the user
+     * @return result map of GeoFabrics' names with access levels for GeoFabric, collections and streams.
+     */
+    Map<String, GeoFabricPermissions> getResourcesPermissions(final String user);
+
+    /**
+     * Get access level for streams
+     *
+     * @param user        The name of the user
+     * @param full Return the full set of access levels for all streams. If set to false, return the read-only streams.
+     * @return result map of streams with access levels.
+     */
+    Map<String, Permissions> getStreamsPermissions(final String user, final String fabric, final boolean full);
+
+    /**
+     * Get the GeoFabric access level
+     *
+     * @param user        The name of the user
+     * @param fabric      The fabric of the user
+     * @return result of access level.
+     */
+    Permissions getGeoFabricPermissions(final String user, String fabric);
+
+    /**
+     * Get the stream access level
+     *
+     * @param user        The name of the user
+     * @param stream      The stream name
+     * @return result of access level.
+     */
+    Permissions getStreamPermissions(final String user, final String fabric, final String stream);
 
     /**
      * Performs a database query using the given {@code query} and {@code bindVars},

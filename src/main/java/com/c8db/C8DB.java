@@ -971,41 +971,6 @@ public interface C8DB extends C8SerializationAccessor {
     void grantDefaultCollectionAccess(String user, Permissions permissions) throws C8DBException;
 
     /**
-     * Get access level for all resources such as the GeoFabric as well as access level for collections and streams.
-     *
-     * @param user        The name of the user
-     * @return result map of GeoFabrics' names with access levels for GeoFabric, collections and streams.
-     */
-    Map<String, GeoFabricPermissions> getResourcesAccess(final String user);
-
-    /**
-     * Get access level for streams
-     *
-     * @param user        The name of the user
-     * @param full Return the full set of access levels for all streams. If set to false, return the read-only streams.
-     * @return result map of streams with access levels.
-     */
-    Map<String, Permissions> getStreamsAccess(final String user, final String fabric, final boolean full);
-
-    /**
-     * Get the stream access level
-     *
-     * @param user        The name of the user
-     * @param stream      The stream name
-     * @return result of access level.
-     */
-    Permissions getStreamAccess(final String user, final String fabric, final String stream);
-
-    /**
-     * Get the GeoFabric access level
-     *
-     * @param user        The name of the user
-     * @param fabric      The fabric of the user
-     * @return result of access level.
-     */
-    Permissions getGeoFabricAccess(final String user, String fabric);
-
-    /**
      * Generic Execute. Use this method to execute custom FOXX services.
      *
      * @param request VelocyStream request

@@ -20,6 +20,8 @@ import com.c8db.velocystream.Response;
 
 import java.util.Map;
 
+import static com.c8db.internal.InternalC8Database.QUERY_PARAM_FULL;
+
 /**
  * Internal request/response related functions.
  */
@@ -54,30 +56,30 @@ public abstract class InternalC8ApiKeys<A extends InternalC8DB<E>, D extends Int
     }
 
     protected Request geoFabricsAccessLevelRequest(final String keyId, boolean full) {
-        final Request request = request(db.tenant(), db.name(), RequestType.GET, PATH_API_KEY, keyId,
-            C8RequestParam.DATABASE);
-        request.putQueryParam("full", full);
+        final Request request = request(null, null, RequestType.GET, PATH_API_KEY,
+            String.join("." ,db.tenant(), keyId), C8RequestParam.DATABASE);
+        request.putQueryParam(QUERY_PARAM_FULL, full);
         return request;
     }
 
     protected Request geoFabricAccessLevelRequest(final String keyId) {
-        final Request request = request(db.tenant(), db.name(), RequestType.GET, PATH_API_KEY, keyId,
-            C8RequestParam.DATABASE, db.name());
+        final Request request = request(null, null, RequestType.GET, PATH_API_KEY,
+            String.join("." ,db.tenant(), keyId), C8RequestParam.DATABASE, String.join("." ,db.tenant(), db.name()));
         return request;
     }
 
     protected Request streamsAccessLevelRequest(final String keyId, final boolean full) {
-        final Request request = request(db.tenant(), db.name(), RequestType.GET, PATH_API_KEY, keyId,
-            C8RequestParam.DATABASE, db.name(), C8RequestParam.STREAM);
+        final Request request = request(null, null, RequestType.GET, PATH_API_KEY,
+            String.join("." ,db.tenant(), keyId), C8RequestParam.DATABASE, String.join("." ,db.tenant(), db.name()), C8RequestParam.STREAM);
         if (full) {
-            request.putQueryParam("full", true);
+            request.putQueryParam(QUERY_PARAM_FULL, true);
         }
         return request;
     }
 
     protected Request streamAccessLevelRequest(final String keyId, final String stream) {
-        final Request request = request(db.tenant(), db.name(), RequestType.GET, PATH_API_KEY, keyId,
-            C8RequestParam.DATABASE, db.name(), C8RequestParam.STREAM, stream);
+        final Request request = request(db.tenant(), db.name(), RequestType.GET, PATH_API_KEY,
+            String.join("." ,db.tenant(), keyId), C8RequestParam.DATABASE, String.join("." ,db.tenant(), db.name()), C8RequestParam.STREAM, stream);
         return request;
     }
 

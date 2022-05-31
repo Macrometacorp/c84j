@@ -248,30 +248,6 @@ public class C8DBImpl extends InternalC8DB<C8ExecutorSync> implements C8DB {
     }
 
     @Override
-    public Map<String, GeoFabricPermissions> getResourcesAccess(final String user) {
-        return executor.execute(getAccessibleGeoFabricsForRequest(db().tenant(), db().name(), user, true),
-            resourcesAccessesResponseDeserializer());
-    }
-
-    @Override
-    public Map<String, Permissions> getStreamsAccess(final String user, final String fabric, final boolean full)
-        throws C8DBException {
-        return executor.execute(getUserStreamsAccessRequest(user, fabric, full), listAccessesResponseDeserializer());
-    }
-
-    @Override
-    public Permissions getStreamAccess(final String user, final String fabric, final String stream)
-        throws C8DBException {
-        return executor.execute(getUserStreamAccessRequest(user, fabric, stream), accessResponseDeserializer());
-    }
-
-    @Override
-    public Permissions getGeoFabricAccess(final String user, final String fabric)
-        throws C8DBException {
-        return executor.execute(getUserAccessRequest(user, fabric), accessResponseDeserializer());
-    }
-
-    @Override
     public Response execute(final Request request) throws C8DBException {
         return executor.execute(request, new ResponseDeserializer<Response>() {
             @Override
