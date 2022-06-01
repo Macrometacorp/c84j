@@ -377,13 +377,13 @@ public class UserAuthTest {
             c8DBRoot.db().grantAccess(USER_NAME_NEW);
             if (Permissions.RW.equals(param.systemPermission)) {
                 try {
-                    c8DB.grantDefaultDatabaseAccess(C8RequestParam.DEMO_TENANT, USER_NAME_NEW, Permissions.RW);
+                    c8DB.grantDefaultDatabaseAccess(USER_NAME_NEW, Permissions.RW);
                 } catch (final C8DBException e) {
                     fail(details);
                 }
             } else {
                 try {
-                    c8DB.grantDefaultDatabaseAccess(C8RequestParam.DEMO_TENANT, USER_NAME_NEW, Permissions.RW);
+                    c8DB.grantDefaultDatabaseAccess(USER_NAME_NEW, Permissions.RW);
                     fail(details);
                 } catch (final C8DBException e) {
                 }
@@ -403,13 +403,13 @@ public class UserAuthTest {
             c8DBRoot.db().grantAccess(USER_NAME_NEW);
             if (Permissions.RW.equals(param.systemPermission)) {
                 try {
-                    c8DB.grantDefaultCollectionAccess(C8RequestParam.DEMO_TENANT, USER_NAME_NEW, Permissions.RW);
+                    c8DB.grantDefaultCollectionAccess(USER_NAME_NEW, Permissions.RW);
                 } catch (final C8DBException e) {
                     fail(details);
                 }
             } else {
                 try {
-                    c8DB.grantDefaultCollectionAccess(C8RequestParam.DEMO_TENANT, USER_NAME_NEW, Permissions.RW);
+                    c8DB.grantDefaultCollectionAccess(USER_NAME_NEW, Permissions.RW);
                     fail(details);
                 } catch (final C8DBException e) {
                 }

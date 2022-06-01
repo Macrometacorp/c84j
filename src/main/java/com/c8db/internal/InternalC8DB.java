@@ -6,12 +6,9 @@ package com.c8db.internal;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
 
 import com.arangodb.velocypack.Type;
 import com.arangodb.velocypack.VPackSlice;
@@ -19,6 +16,7 @@ import com.arangodb.velocypack.exception.VPackException;
 import com.c8db.entity.DataCenterEntity;
 import com.c8db.entity.DcInfoEntity;
 import com.c8db.entity.GeoFabricEntity;
+import com.c8db.entity.GeoFabricPermissions;
 import com.c8db.entity.LogLevelEntity;
 import com.c8db.entity.Permissions;
 import com.c8db.entity.ServerRole;
@@ -35,6 +33,8 @@ import com.c8db.model.UserUpdateOptions;
 import com.c8db.velocystream.Request;
 import com.c8db.velocystream.RequestType;
 import com.c8db.velocystream.Response;
+
+import static com.c8db.internal.InternalC8Database.QUERY_PARAM_FULL;
 
 
 public abstract class InternalC8DB<E extends C8Executor> extends C8Executeable<E> {
@@ -91,8 +91,10 @@ public abstract class InternalC8DB<E extends C8Executor> extends C8Executeable<E
         };
     }
 
-    protected Request getAccessibleGeoFabricsForRequest(final String tenant, final String database, final String user) {
-        return request(tenant, database, RequestType.GET, PATH_API_USER, user, C8RequestParam.DATABASE);
+    protected Request getAccessibleGeoFabricsForRequest(final String tenant, String fabric, final String user, boolean full) {
+        final Request request = request(tenant, fabric, RequestType.GET, PATH_API_USER, user, C8RequestParam.DATABASE);
+        request.putQueryParam(QUERY_PARAM_FULL, full);
+        return request;
     }
 
     protected ResponseDeserializer<Collection<String>> getAccessibleGeoFabricsForResponseDeserializer() {
@@ -269,65 +271,13 @@ public abstract class InternalC8DB<E extends C8Executor> extends C8Executeable<E
         return request;
     }
 
-    protected Request updateUserDefaultDatabaseAccessRequest(final String tenant, final String user, final Permissions permissions) {
-        return request(tenant, C8RequestParam.SYSTEM, RequestType.PUT, PATH_API_USER, user, C8RequestParam.DATABASE,
+    protected Request updateUserDefaultDatabaseAccessRequest(final String user, final Permissions permissions) {
+        return request(C8RequestParam.DEMO_TENANT, C8RequestParam.SYSTEM, RequestType.PUT, PATH_API_USER, user, C8RequestParam.DATABASE,
                 "*").setBody(util().serialize(OptionsBuilder.build(new UserAccessOptions(), permissions)));
     }
 
-    protected Request getUserStreamsAccessRequest(final String tenant, final String user, final String database, boolean full) {
-        Request request = request(tenant, C8RequestParam.SYSTEM, RequestType.GET, PATH_API_USER, user,
-            C8RequestParam.DATABASE, database, C8RequestParam.STREAM);
-        if (full) {
-            request.putQueryParam("full", true);
-        }
-        return request;
-    }
-
-    protected Request getUserStreamAccessRequest(final String tenant, final String user, final String database, final String stream) {
-        return request(tenant, C8RequestParam.SYSTEM, RequestType.GET, PATH_API_USER, user,
-            C8RequestParam.DATABASE, database, C8RequestParam.STREAM, stream);
-    }
-
-    protected Request getUserAccessRequest(final String tenant, final String user, final String database) {
-        return request(tenant, C8RequestParam.SYSTEM, RequestType.GET, PATH_API_USER, user,
-            C8RequestParam.DATABASE, database);
-    }
-
-    protected ResponseDeserializer<Map<String, Permissions>> listAccessesResponseDeserializer() {
-        return new ResponseDeserializer<Map<String, Permissions>>() {
-            @Override
-            public Map<String, Permissions> deserialize(final Response response) throws VPackException {
-                final VPackSlice result = response.getBody().get(C8ResponseField.RESULT);
-                Map<String, Permissions> permissions = new HashMap<>();
-                for (Iterator<Map.Entry<String, VPackSlice>> it = result.objectIterator(); it.hasNext();) {
-                    Map.Entry<String, VPackSlice> next = it.next();
-                    String level = util().deserialize(next.getValue(),  new Type<String>(){}.getType());
-                    Permissions permission = null;
-                    try {
-                        permission = Permissions.valueOf(level.toUpperCase());
-                    } catch (Exception e) {
-                        // has level "undefined"
-                    }
-                    permissions.put(next.getKey(), permission);
-                }
-                return permissions;
-            }
-        };
-    }
-
-    protected ResponseDeserializer<Permissions> accessResponseDeserializer() {
-        return new ResponseDeserializer<Permissions>() {
-            @Override
-            public Permissions deserialize(final Response response) throws VPackException {
-                final VPackSlice result = response.getBody().get(C8ResponseField.RESULT);
-                String level = util().deserialize(result,  new Type<String>(){}.getType());
-                return Permissions.valueOf(level.toUpperCase());
-            }
-        };
-    }
-
-    protected Request updateUserDefaultCollectionAccessRequest(final String tenant, final String user, final Permissions permissions) {
-        return request(tenant, C8RequestParam.SYSTEM, RequestType.PUT, PATH_API_USER, user, C8RequestParam.DATABASE,
+    protected Request updateUserDefaultCollectionAccessRequest(final String user, final Permissions permissions) {
+        return request(C8RequestParam.DEMO_TENANT, C8RequestParam.SYSTEM, RequestType.PUT, PATH_API_USER, user, C8RequestParam.DATABASE,
             "*", "*").setBody(util().serialize(OptionsBuilder.build(new UserAccessOptions(), permissions)));
     }
 

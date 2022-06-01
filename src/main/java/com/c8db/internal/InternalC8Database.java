@@ -26,6 +26,7 @@ import com.c8db.entity.C8StreamEntity;
 import com.c8db.entity.CollectionEntity;
 import com.c8db.entity.DatabaseEntity;
 import com.c8db.entity.EdgeDefinition;
+import com.c8db.entity.GeoFabricPermissions;
 import com.c8db.entity.GraphEntity;
 import com.c8db.entity.PathEntity;
 import com.c8db.entity.Permissions;
@@ -71,7 +72,7 @@ public abstract class InternalC8Database<A extends InternalC8DB<E>, E extends C8
     protected static final String PATH_API_DATABASE = "/database";
     protected static final String PATH_API_DCLIST = "/datacenter";
     protected static final String PATH_API_TENANT = "/_tenant";
-    protected static final String PATH_API_USER = "/_admin/user";
+    protected static final String PATH_API_USER = "/_api/user";
     protected static final String PATH_API_VERSION = "/_admin/version";
     protected static final String PATH_API_STREAMS = "/_api/streams";
     protected static final String PATH_API_TRANSACTION = "/transaction";
@@ -84,6 +85,7 @@ public abstract class InternalC8Database<A extends InternalC8DB<E>, E extends C8
     protected static final String PATH_API_USER_QUERIES = "/restql";
 
     protected static final String QUERY_PARAM_GLOBAL = "global";
+    protected static final String QUERY_PARAM_FULL = "full";
 
     private static final String PATH_API_BEGIN_STREAM_TRANSACTION = "/_api/transaction/begin";
     private static final String PATH_API_TRAVERSAL = "/_api/traversal";
@@ -182,19 +184,19 @@ public abstract class InternalC8Database<A extends InternalC8DB<E>, E extends C8
     }
 
     protected Request grantAccessRequest(final String user, final Permissions permissions) {
-        return request(C8RequestParam.DEMO_TENANT, C8RequestParam.SYSTEM, RequestType.PUT, PATH_API_USER, user,
-                C8RequestParam.DATABASE, name)
+        return request(null, C8RequestParam.SYSTEM, RequestType.PUT, PATH_API_USER, String.join("." , tenant, user),
+                C8RequestParam.DATABASE, String.join("." , tenant, name))
                 .setBody(util().serialize(OptionsBuilder.build(new UserAccessOptions(), permissions)));
     }
 
     protected Request resetAccessRequest(final String user) {
-        return request(C8RequestParam.DEMO_TENANT, C8RequestParam.SYSTEM, RequestType.DELETE, PATH_API_USER,
-                user, C8RequestParam.DATABASE, name);
+        return request(null, C8RequestParam.SYSTEM, RequestType.DELETE, PATH_API_USER,
+            String.join("." , tenant, user), C8RequestParam.DATABASE, String.join("." , tenant, name));
     }
 
     protected Request getPermissionsRequest(final String user) {
-        return request(C8RequestParam.DEMO_TENANT, C8RequestParam.SYSTEM, RequestType.GET, PATH_API_USER, user,
-                C8RequestParam.DATABASE, name);
+        return request(null, C8RequestParam.SYSTEM, RequestType.GET, PATH_API_USER, String.join("." , tenant, user),
+                C8RequestParam.DATABASE, String.join("." , tenant, name));
     }
 
     protected ResponseDeserializer<Permissions> getPermissionsResponseDeserialzer() {
@@ -209,6 +211,63 @@ public abstract class InternalC8Database<A extends InternalC8DB<E>, E extends C8
                     }
                 }
                 return null;
+            }
+        };
+    }
+
+    protected Request getResourcesRequest(final String user, boolean full) {
+        final Request request = request(null, C8RequestParam.SYSTEM, RequestType.GET, PATH_API_USER,
+            String.join("." , tenant, user), C8RequestParam.DATABASE);
+        request.putQueryParam(QUERY_PARAM_FULL, full);
+        return request;
+    }
+
+    protected Request getUserStreamPermissionsRequest(final String user, final String database, final String stream) {
+        return request(null, C8RequestParam.SYSTEM, RequestType.GET, PATH_API_USER, String.join("." , tenant, user),
+            C8RequestParam.DATABASE, String.join("." , tenant, database), C8RequestParam.STREAM, stream);
+    }
+
+    protected Request getUserStreamsAccessRequest(final String user, final String database, boolean full) {
+        Request request = request(null, C8RequestParam.SYSTEM, RequestType.GET, PATH_API_USER, String.join("." , tenant, user),
+            C8RequestParam.DATABASE, String.join("." , tenant, database), C8RequestParam.STREAM);
+        if (full) {
+            request.putQueryParam(QUERY_PARAM_FULL, true);
+        }
+        return request;
+    }
+
+    protected ResponseDeserializer<Map<String, Permissions>> listPermissionsResponseDeserializer() {
+        return new ResponseDeserializer<Map<String, Permissions>>() {
+            @Override
+            public Map<String, Permissions> deserialize(final Response response) throws VPackException {
+                final VPackSlice result = response.getBody().get(C8ResponseField.RESULT);
+                return util().deserialize(result, new Type<Map<String, Permissions>>(){}.getType());
+            }
+        };
+    }
+
+    protected Request getUserPermissionsRequest(final String user, final String database) {
+        return request(null, C8RequestParam.SYSTEM, RequestType.GET, PATH_API_USER, String.join("." , tenant, user),
+            C8RequestParam.DATABASE, String.join("." , tenant, database));
+    }
+
+    protected ResponseDeserializer<Permissions> permissionsResponseDeserializer() {
+        return new ResponseDeserializer<Permissions>() {
+            @Override
+            public Permissions deserialize(final Response response) throws VPackException {
+                final VPackSlice result = response.getBody().get(C8ResponseField.RESULT);
+                String level = util().deserialize(result,  new Type<String>(){}.getType());
+                return Permissions.valueOf(level.toUpperCase());
+            }
+        };
+    }
+
+    protected ResponseDeserializer<Map<String, GeoFabricPermissions>> resourcesPermissionsResponseDeserializer() {
+        return new ResponseDeserializer<Map<String, GeoFabricPermissions>>() {
+            @Override
+            public Map<String, GeoFabricPermissions> deserialize(final Response response) throws VPackException {
+                final VPackSlice result = response.getBody().get(C8ResponseField.RESULT);
+                return util().deserialize(result, new Type<Map<String, GeoFabricPermissions>>(){}.getType());
             }
         };
     }

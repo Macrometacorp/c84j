@@ -63,18 +63,18 @@ import com.c8db.velocystream.Request;
 import com.c8db.velocystream.RequestType;
 import com.c8db.velocystream.Response;
 
+import static com.c8db.internal.InternalC8Database.PATH_API_USER;
+
 /**
  */
 public abstract class InternalC8Collection<A extends InternalC8DB<E>, D extends InternalC8Database<A, E>, E extends C8Executor>
         extends C8Executeable<E> {
 
-    private static final String COLLECTION = "collection";
+    private static final String COLLECTION_QUERY_PARAM = "collection";
 
     protected static final String PATH_API_COLLECTION = "/collection";
     protected static final String PATH_API_DOCUMENT = "/document";
     protected static final String PATH_API_INDEX = "/index";
-    
-    private static final String PATH_API_USER = "/_api/user";
 
     private static final String MERGE_OBJECTS = "mergeObjects";
     private static final String IGNORE_REVS = "ignoreRevs";
@@ -591,7 +591,7 @@ public abstract class InternalC8Collection<A extends InternalC8DB<E>, D extends 
 
     protected Request createHashIndexRequest(final Iterable<String> fields, final HashIndexOptions options) {
         final Request request = request(db.tenant(), db.name(), RequestType.POST, PATH_API_INDEX);
-        request.putQueryParam(COLLECTION, name);
+        request.putQueryParam(COLLECTION_QUERY_PARAM, name);
         request.setBody(
                 util().serialize(OptionsBuilder.build(options != null ? options : new HashIndexOptions(), fields)));
         return request;
@@ -599,7 +599,7 @@ public abstract class InternalC8Collection<A extends InternalC8DB<E>, D extends 
 
     protected Request createSkiplistIndexRequest(final Iterable<String> fields, final SkiplistIndexOptions options) {
         final Request request = request(db.tenant(), db.name(), RequestType.POST, PATH_API_INDEX);
-        request.putQueryParam(COLLECTION, name);
+        request.putQueryParam(COLLECTION_QUERY_PARAM, name);
         request.setBody(
                 util().serialize(OptionsBuilder.build(options != null ? options : new SkiplistIndexOptions(), fields)));
         return request;
@@ -608,7 +608,7 @@ public abstract class InternalC8Collection<A extends InternalC8DB<E>, D extends 
     protected Request createPersistentIndexRequest(final Iterable<String> fields,
             final PersistentIndexOptions options) {
         final Request request = request(db.tenant(), db.name(), RequestType.POST, PATH_API_INDEX);
-        request.putQueryParam(COLLECTION, name);
+        request.putQueryParam(COLLECTION_QUERY_PARAM, name);
         request.setBody(util()
                 .serialize(OptionsBuilder.build(options != null ? options : new PersistentIndexOptions(), fields)));
         return request;
@@ -616,7 +616,7 @@ public abstract class InternalC8Collection<A extends InternalC8DB<E>, D extends 
 
     protected Request createGeoIndexRequest(final Iterable<String> fields, final GeoIndexOptions options) {
         final Request request = request(db.tenant(), db.name(), RequestType.POST, PATH_API_INDEX);
-        request.putQueryParam(COLLECTION, name);
+        request.putQueryParam(COLLECTION_QUERY_PARAM, name);
         request.setBody(
                 util().serialize(OptionsBuilder.build(options != null ? options : new GeoIndexOptions(), fields)));
         return request;
@@ -624,7 +624,7 @@ public abstract class InternalC8Collection<A extends InternalC8DB<E>, D extends 
 
     protected Request createFulltextIndexRequest(final Iterable<String> fields, final FulltextIndexOptions options) {
         final Request request = request(db.tenant(), db.name(), RequestType.POST, PATH_API_INDEX);
-        request.putQueryParam(COLLECTION, name);
+        request.putQueryParam(COLLECTION_QUERY_PARAM, name);
         request.setBody(
                 util().serialize(OptionsBuilder.build(options != null ? options : new FulltextIndexOptions(), fields)));
         return request;
@@ -633,7 +633,7 @@ public abstract class InternalC8Collection<A extends InternalC8DB<E>, D extends 
     // Macrometa Corp Modification: Add `createTTLIndexRequest` method.
     protected Request createTTLIndexRequest(final Iterable<String> fields, final TTLIndexOptions options) {
         final Request request = request(db.tenant(), db.name(), RequestType.POST, PATH_API_INDEX);
-        request.putQueryParam(COLLECTION, name);
+        request.putQueryParam(COLLECTION_QUERY_PARAM, name);
         request.setBody(
                 util().serialize(OptionsBuilder.build(options != null ? options : new TTLIndexOptions(), fields)));
         return request;
@@ -641,7 +641,7 @@ public abstract class InternalC8Collection<A extends InternalC8DB<E>, D extends 
 
     protected Request getIndexesRequest() {
         final Request request = request(db.tenant(), db.name(), RequestType.GET, PATH_API_INDEX);
-        request.putQueryParam(COLLECTION, name);
+        request.putQueryParam(COLLECTION_QUERY_PARAM, name);
         return request;
     }
 
@@ -707,19 +707,19 @@ public abstract class InternalC8Collection<A extends InternalC8DB<E>, D extends 
     }
 
     protected Request grantAccessRequest(final String user, final Permissions permissions) {
-        return request(C8RequestParam.DEMO_TENANT, C8RequestParam.SYSTEM, RequestType.PUT, PATH_API_USER, user,
-                C8RequestParam.DATABASE, db.name(), name)
+        return request(null, C8RequestParam.SYSTEM, RequestType.PUT, PATH_API_USER, String.join("." , db.tenant(), user),
+                C8RequestParam.DATABASE, String.join("." ,db.tenant(), db.name()), C8RequestParam.COLLECTION, name)
                         .setBody(util().serialize(OptionsBuilder.build(new UserAccessOptions(), permissions)));
     }
 
     protected Request resetAccessRequest(final String user) {
-        return request(C8RequestParam.DEMO_TENANT, C8RequestParam.SYSTEM, RequestType.DELETE, PATH_API_USER, user,
-                C8RequestParam.DATABASE, db.name(), name);
+        return request(null, C8RequestParam.SYSTEM, RequestType.DELETE, PATH_API_USER, String.join("." , db.tenant(), user),
+                C8RequestParam.DATABASE, String.join("." ,db.tenant(), db.name()), C8RequestParam.COLLECTION, name);
     }
 
     protected Request getPermissionsRequest(final String user) {
-        return request(C8RequestParam.DEMO_TENANT, C8RequestParam.SYSTEM, RequestType.GET, PATH_API_USER, user,
-                C8RequestParam.DATABASE, db.name(), name);
+        return request(null, C8RequestParam.SYSTEM, RequestType.GET, PATH_API_USER, String.join("." , db.tenant(), user),
+                C8RequestParam.DATABASE, String.join("." ,db.tenant(), db.name()), C8RequestParam.COLLECTION, name);
     }
 
     protected ResponseDeserializer<Permissions> getPermissionsResponseDeserialzer() {

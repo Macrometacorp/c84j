@@ -27,6 +27,7 @@ import com.c8db.entity.CollectionEntity;
 import com.c8db.entity.CursorEntity;
 import com.c8db.entity.DatabaseEntity;
 import com.c8db.entity.EdgeDefinition;
+import com.c8db.entity.GeoFabricPermissions;
 import com.c8db.entity.GraphEntity;
 import com.c8db.entity.IndexEntity;
 import com.c8db.entity.Permissions;
@@ -171,6 +172,30 @@ public class C8DatabaseImpl extends InternalC8Database<C8DBImpl, C8ExecutorSync>
     @Override
     public Permissions getPermissions(final String user) throws C8DBException {
         return executor.execute(getPermissionsRequest(user), getPermissionsResponseDeserialzer());
+    }
+
+    @Override
+    public Map<String, GeoFabricPermissions> getResourcesPermissions(final String user) {
+        return executor.execute(getResourcesRequest(user, true),
+            resourcesPermissionsResponseDeserializer());
+    }
+
+    @Override
+    public Map<String, Permissions> getStreamsPermissions(final String user, final String fabric, final boolean full)
+        throws C8DBException {
+        return executor.execute(getUserStreamsAccessRequest(user, fabric, full), listPermissionsResponseDeserializer());
+    }
+
+    @Override
+    public Permissions getGeoFabricPermissions(final String user, final String fabric)
+        throws C8DBException {
+        return executor.execute(getUserPermissionsRequest(user, fabric), permissionsResponseDeserializer());
+    }
+
+    @Override
+    public Permissions getStreamPermissions(final String user, final String fabric, final String stream)
+        throws C8DBException {
+        return executor.execute(getUserStreamPermissionsRequest(user, fabric, stream), permissionsResponseDeserializer());
     }
 
     @Override
