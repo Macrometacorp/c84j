@@ -22,6 +22,7 @@ import com.arangodb.velocypack.VPack;
 import com.arangodb.velocypack.VPackParser;
 import com.c8db.C8DB;
 import com.c8db.C8DBException;
+import com.c8db.SecretProvider;
 import com.c8db.Service;
 import com.c8db.entity.LoadBalancingStrategy;
 import com.c8db.internal.net.ConnectionFactory;
@@ -104,6 +105,7 @@ public abstract class InternalC8DBBuilder {
     protected LoadBalancingStrategy loadBalancingStrategy;
     protected C8Serialization customSerializer;
     protected String apiKey;
+    protected SecretProvider secretProvider;
 
     public InternalC8DBBuilder() {
         super();
@@ -112,7 +114,7 @@ public abstract class InternalC8DBBuilder {
         vpackBuilder.registerModule(new VPackDriverModule());
         vpackParserBuilder.registerModule(new VPackDriverModule());
         host = new HostDescription(C8Defaults.DEFAULT_HOST, C8Defaults.DEFAULT_PORT);
-        hosts = new HashMap();
+        hosts = new HashMap<>();
         for (Service key : Service.values()) {
             hosts.put(key, new ArrayList<>());
         }
@@ -220,6 +222,10 @@ public abstract class InternalC8DBBuilder {
 
     protected void setLoadBalancingStrategy(final LoadBalancingStrategy loadBalancingStrategy) {
         this.loadBalancingStrategy = loadBalancingStrategy;
+    }
+
+    protected void setSecretProvider(final SecretProvider secretProvider) {
+        this.secretProvider = secretProvider;
     }
 
     protected void serializer(final C8Serializer serializer) {

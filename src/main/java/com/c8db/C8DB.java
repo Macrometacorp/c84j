@@ -3,15 +3,6 @@
  */
 package com.c8db;
 
-import java.io.InputStream;
-import java.lang.annotation.Annotation;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-
-import javax.net.ssl.SSLContext;
-
 import com.arangodb.velocypack.VPack;
 import com.arangodb.velocypack.VPackAnnotationFieldFilter;
 import com.arangodb.velocypack.VPackAnnotationFieldNaming;
@@ -28,7 +19,6 @@ import com.c8db.entity.C8DBVersion;
 import com.c8db.entity.DataCenterEntity;
 import com.c8db.entity.DcInfoEntity;
 import com.c8db.entity.GeoFabricEntity;
-import com.c8db.entity.GeoFabricPermissions;
 import com.c8db.entity.LoadBalancingStrategy;
 import com.c8db.entity.LogEntity;
 import com.c8db.entity.LogLevelEntity;
@@ -43,6 +33,7 @@ import com.c8db.internal.http.HttpCommunication;
 import com.c8db.internal.http.HttpConnectionFactory;
 import com.c8db.internal.net.ConnectionFactory;
 import com.c8db.internal.net.Host;
+import com.c8db.internal.net.HostDescription;
 import com.c8db.internal.net.HostHandle;
 import com.c8db.internal.net.HostHandler;
 import com.c8db.internal.net.HostResolver;
@@ -61,6 +52,14 @@ import com.c8db.util.C8Serialization;
 import com.c8db.util.C8Serializer;
 import com.c8db.velocystream.Request;
 import com.c8db.velocystream.Response;
+
+import java.io.InputStream;
+import java.lang.annotation.Annotation;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import javax.net.ssl.SSLContext;
 
 /**
  * Central access point for applications to communicate with an C8DB server.
@@ -81,9 +80,9 @@ public interface C8DB extends C8SerializationAccessor {
      * Builder class to build an instance of {@link C8DB}.
      *
      */
-    public static class Builder extends InternalC8DBBuilder {
+    class Builder extends InternalC8DBBuilder {
 
-        private static String PROPERTY_KEY_PROTOCOL = "arangodb.protocol";
+        private static final String PROPERTY_KEY_PROTOCOL = "arangodb.protocol";
 
         protected Protocol protocol;
 
@@ -294,6 +293,17 @@ public interface C8DB extends C8SerializationAccessor {
          */
         public Builder loadBalancingStrategy(final LoadBalancingStrategy loadBalancingStrategy) {
             setLoadBalancingStrategy(loadBalancingStrategy);
+            return this;
+        }
+
+        /**
+         * Sets the secret provider for retrieving the authentication token.
+         *
+         * @param provider the secret provider to be used. (default: {@link com.c8db.internal.C8RemoteSecretProvider})
+         * @return {@link C8DB.Builder}
+         */
+        public Builder secretProvider(final SecretProvider provider) {
+            setSecretProvider(provider);
             return this;
         }
 
@@ -604,6 +614,7 @@ public interface C8DB extends C8SerializationAccessor {
          * @return {@link C8DB}
          */
         public synchronized C8DB build() {
+            HostDescription auxHost = hosts.get(Service.C8DB).get(0);
             if (hosts.get(Service.C8DB).isEmpty()) {
                 hosts.get(Service.C8DB).add(host);
             }
@@ -611,7 +622,6 @@ public interface C8DB extends C8SerializationAccessor {
             if (hosts.get(Service.C8STREAMS).isEmpty()) {
                 hosts.get(Service.C8STREAMS).addAll(hosts.get(Service.C8DB));
             }
-
             final VPack vpacker = vpackBuilder.serializeNullValues(false).build();
             final VPack vpackerNull = vpackBuilder.serializeNullValues(true).build();
             final VPackParser vpackParser = vpackParserBuilder.build();
@@ -628,11 +638,13 @@ public interface C8DB extends C8SerializationAccessor {
                     : C8Defaults.MAX_CONNECTIONS_HTTP_DEFAULT;
             final int max = maxConnections != null ? Math.max(1, maxConnections) : protocolMaxConnections;
 
-            final ConnectionFactory connectionFactory = (protocol == null || Protocol.VST == protocol)
-                    ? new VstConnectionFactorySync(host, timeout, connectionTtl, useSsl, sslContext)
-                    : new HttpConnectionFactory(timeout, user, password, email, jwtAuth, useSsl, sslContext, custom, protocol,
-                            connectionTtl, httpCookieSpec, jwtToken, apiKey, hosts.get(Service.C8DB).get(0));
-
+            final ConnectionFactory connectionFactory ;
+            if (protocol == null || Protocol.VST == protocol) {
+                connectionFactory = new VstConnectionFactorySync(host, timeout, connectionTtl, useSsl, sslContext);
+            } else {
+                connectionFactory = new HttpConnectionFactory(timeout, secretProvider, email, jwtAuth, useSsl,
+                    sslContext, custom, protocol, connectionTtl, httpCookieSpec, apiKey, auxHost);
+            }
             final Map<Service, Collection<Host>> hostsMatrix = createHostMatrix(max, connectionFactory);
             final HostResolver hostResolver = createHostResolver(hostsMatrix, max, connectionFactory);
             final HostHandler hostHandler = createHostHandler(hostResolver);
