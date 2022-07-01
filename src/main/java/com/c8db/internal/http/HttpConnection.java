@@ -138,8 +138,9 @@ public class HttpConnection implements Connection {
             builder.setConnectionTimeToLive(ttl, TimeUnit.MILLISECONDS);
         }
         client = builder.build();
-        this.secretProvider = secretProvider == null ?
-            new C8RemoteSecretProvider(user, password, useSsl, contentType, auxHost, util, client): secretProvider;
+        this.secretProvider =
+            secretProvider == null ? new C8RemoteSecretProvider(user, password.toCharArray(), useSsl,
+                contentType, auxHost, util, client) : secretProvider;
     }
 
     private static String buildUrl(final String baseUrl, final Request request) throws UnsupportedEncodingException {

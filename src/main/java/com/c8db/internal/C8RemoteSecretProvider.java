@@ -19,7 +19,6 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.entity.ContentType;
 import org.apache.http.impl.client.CloseableHttpClient;
 
 /**
@@ -36,10 +35,10 @@ public class C8RemoteSecretProvider implements SecretProvider {
     private final CloseableHttpClient client;
 
 
-    public C8RemoteSecretProvider(String username, String password, boolean useSsl, Protocol contentType,
+    public C8RemoteSecretProvider(String username, char[] password, boolean useSsl, Protocol contentType,
         HostDescription authHost, C8Serialization util, CloseableHttpClient client) {
         this.username = username;
-        this.password = password != null ? password.toCharArray() : "".toCharArray();
+        this.password = password != null ? password : "".toCharArray();
         this.useSsl = useSsl;
         this.contentType = contentType;
         this.authHost = authHost;

@@ -43,15 +43,15 @@ public class HttpConnectionFactory implements ConnectionFactory {
                 .apiKey(apiKey).auxHost(auxiliaryHost);
     }
 
-    public HttpConnectionFactory(final Integer timeout, SecretProvider secretProvider, final String email,
-        final Boolean jwtAuth, final Boolean useSsl, final SSLContext sslContext, final C8Serialization util,
-        final Protocol protocol, final Long connectionTtl, String httpCookieSpec, final String apiKey,
-        final HostDescription auxiliaryHost) {
+    public HttpConnectionFactory(final Integer timeout, final String user, final String password,
+        SecretProvider secretProvider, final String email, final Boolean jwtAuth, final Boolean useSsl,
+        final SSLContext sslContext, final C8Serialization util, final Protocol protocol, final Long connectionTtl,
+        String httpCookieSpec, final String apiKey, final HostDescription auxiliaryHost) {
         super();
         builder = new HttpConnection.Builder().timeout(timeout).secretProvider(secretProvider).email(email)
             .jwtAuthEnabled(jwtAuth).useSsl(useSsl).sslContext(sslContext).serializationUtil(util)
             .contentType(protocol).ttl(connectionTtl).httpCookieSpec(httpCookieSpec)
-            .apiKey(apiKey).auxHost(auxiliaryHost);
+            .apiKey(apiKey).auxHost(auxiliaryHost).user(user).password(password);
     }
 
     @Override

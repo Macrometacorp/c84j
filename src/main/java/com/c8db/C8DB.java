@@ -614,7 +614,6 @@ public interface C8DB extends C8SerializationAccessor {
          * @return {@link C8DB}
          */
         public synchronized C8DB build() {
-            HostDescription auxHost = hosts.get(Service.C8DB).get(0);
             if (hosts.get(Service.C8DB).isEmpty()) {
                 hosts.get(Service.C8DB).add(host);
             }
@@ -622,6 +621,7 @@ public interface C8DB extends C8SerializationAccessor {
             if (hosts.get(Service.C8STREAMS).isEmpty()) {
                 hosts.get(Service.C8STREAMS).addAll(hosts.get(Service.C8DB));
             }
+            final HostDescription auxHost = hosts.get(Service.C8DB).get(0);
             final VPack vpacker = vpackBuilder.serializeNullValues(false).build();
             final VPack vpackerNull = vpackBuilder.serializeNullValues(true).build();
             final VPackParser vpackParser = vpackParserBuilder.build();
@@ -638,11 +638,11 @@ public interface C8DB extends C8SerializationAccessor {
                     : C8Defaults.MAX_CONNECTIONS_HTTP_DEFAULT;
             final int max = maxConnections != null ? Math.max(1, maxConnections) : protocolMaxConnections;
 
-            final ConnectionFactory connectionFactory ;
+            final ConnectionFactory connectionFactory;
             if (protocol == null || Protocol.VST == protocol) {
                 connectionFactory = new VstConnectionFactorySync(host, timeout, connectionTtl, useSsl, sslContext);
             } else {
-                connectionFactory = new HttpConnectionFactory(timeout, secretProvider, email, jwtAuth, useSsl,
+                connectionFactory = new HttpConnectionFactory(timeout, user, password, secretProvider, email, jwtAuth, useSsl,
                     sslContext, custom, protocol, connectionTtl, httpCookieSpec, apiKey, auxHost);
             }
             final Map<Service, Collection<Host>> hostsMatrix = createHostMatrix(max, connectionFactory);
