@@ -119,6 +119,10 @@ public class OptionsBuilder {
         return options.apiKey(apiKey);
     }
 
+    public static JwtOptions build(final JwtOptions options, final String jwt) {
+        return options.jwt(jwt);
+    }
+
     public static C8DynamoCreateOptions build(final C8DynamoCreateOptions options, final String tableName) {
         return options.tableName(tableName);
     }

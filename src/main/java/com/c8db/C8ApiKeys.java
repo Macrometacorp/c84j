@@ -4,7 +4,7 @@
 
 package com.c8db;
 
-import com.c8db.entity.ApiKeyEntity;
+import com.c8db.entity.ApiKeyJwtEntity;
 import com.c8db.entity.GeoFabricPermissions;
 import com.c8db.entity.Permissions;
 
@@ -21,7 +21,15 @@ public interface C8ApiKeys extends C8SerializationAccessor {
      * @param apikey The apiKey
      * @return The api key properties
      */
-    ApiKeyEntity validateApiKey(final String apikey);
+    ApiKeyJwtEntity validateApiKey(final String apikey);
+
+    /**
+     * Validates JWT and returns its properties
+     *
+     * @param jwt The JWT
+     * @return The JWT properties
+     */
+    ApiKeyJwtEntity validateJwt(final String jwt);
 
     /**
      * Get access level for all resources such as the GeoFabric as well as access level for collections and streams.
