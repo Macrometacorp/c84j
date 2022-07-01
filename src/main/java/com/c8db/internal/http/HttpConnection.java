@@ -139,7 +139,7 @@ public class HttpConnection implements Connection {
         }
         client = builder.build();
         this.secretProvider =
-            secretProvider == null ? new C8RemoteSecretProvider(user, password.toCharArray(), useSsl,
+            secretProvider == null ? new C8RemoteSecretProvider(user, email, password.toCharArray(), useSsl,
                 contentType, auxHost, util, client) : secretProvider;
     }
 

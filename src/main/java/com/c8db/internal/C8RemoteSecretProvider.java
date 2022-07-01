@@ -27,6 +27,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 public class C8RemoteSecretProvider implements SecretProvider {
 
     private final String username;
+    private final String email;
     private final char[] password;
     private final boolean useSsl;
     private final Protocol contentType;
@@ -35,9 +36,10 @@ public class C8RemoteSecretProvider implements SecretProvider {
     private final CloseableHttpClient client;
 
 
-    public C8RemoteSecretProvider(String username, char[] password, boolean useSsl, Protocol contentType,
+    public C8RemoteSecretProvider(String username, String email, char[] password, boolean useSsl, Protocol contentType,
         HostDescription authHost, C8Serialization util, CloseableHttpClient client) {
         this.username = username;
+        this.email = email;
         this.password = password != null ? password : "".toCharArray();
         this.useSsl = useSsl;
         this.contentType = contentType;
@@ -58,6 +60,7 @@ public class C8RemoteSecretProvider implements SecretProvider {
 
         credentials.put("username", username);
         credentials.put("password", new String(password));
+        credentials.put("email", email);
         final HttpRequestBase authHttpRequest = RequestUtils.buildHttpRequestBase(
             new Request("_mm", C8RequestParam.SYSTEM, RequestType.POST, authUrl)
                 .setBody(util.serialize(credentials)),
