@@ -8,7 +8,7 @@ import com.c8db.C8DBException;
 import com.c8db.Protocol;
 import com.c8db.SecretProvider;
 import com.c8db.internal.C8RemoteSecretProvider;
-import com.c8db.internal.C8RequestParam;
+import com.c8db.internal.SecretProviderContext;
 import com.c8db.internal.net.Connection;
 import com.c8db.internal.net.HostDescription;
 import com.c8db.internal.util.CURLLogger;
@@ -16,7 +16,6 @@ import com.c8db.internal.util.RequestUtils;
 import com.c8db.internal.util.ResponseUtils;
 import com.c8db.util.C8Serialization;
 import com.c8db.velocystream.Request;
-import com.c8db.velocystream.RequestType;
 import com.c8db.velocystream.Response;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HeaderElement;
@@ -138,9 +137,12 @@ public class HttpConnection implements Connection {
             builder.setConnectionTimeToLive(ttl, TimeUnit.MILLISECONDS);
         }
         client = builder.build();
+
+        SecretProviderContext secCtx = new SecretProviderContext.Builder().email(email).username(user).
+                password(password.toCharArray()).client(client).host(auxHost).serialization(util).build();
         this.secretProvider =
-            secretProvider == null ? new C8RemoteSecretProvider(user, email, password.toCharArray(), useSsl,
-                contentType, auxHost, util, client) : secretProvider;
+                secretProvider == null ? new C8RemoteSecretProvider(useSsl, contentType) : secretProvider;
+        secretProvider.init(secCtx);
     }
 
     private static String buildUrl(final String baseUrl, final Request request) throws UnsupportedEncodingException {
@@ -221,7 +223,7 @@ public class HttpConnection implements Connection {
                 LOGGER.debug("Using API Key for authentication.");
                 httpRequest.addHeader(HttpHeaders.AUTHORIZATION, "apikey " + apiKey);
             } else if (jwt == null) { //Generate JWT using user credentials if jwt and apikey are absent
-                addJWT(request);
+                addJWT();
                 LOGGER.debug("Using JWT for authentication.");
                 httpRequest.addHeader(HttpHeaders.AUTHORIZATION, "bearer " + jwt);
             } else { //Add Header when JWT is provided
@@ -242,8 +244,8 @@ public class HttpConnection implements Connection {
             ResponseUtils.checkError(util, response);
         } catch (C8DBException ex) {
             if (ex.getResponseCode().equals(401)) {
-                // jwt might has expired refresh it
-                addJWT(request);
+                // jwt might have expired refresh it
+                addJWT();
                 httpRequest.removeHeaders(HttpHeaders.AUTHORIZATION);
                 httpRequest.addHeader(HttpHeaders.AUTHORIZATION, "bearer " + jwt);
                 response = ResponseUtils.buildResponse(util, client.execute(httpRequest), contentType);
@@ -276,8 +278,8 @@ public class HttpConnection implements Connection {
             } catch (InterruptedException e) {
             } catch (Exception e) {
                 if (e instanceof C8DBException && ((C8DBException) e).getResponseCode().equals(401)) {
-                    // jwt might has expired refresh it
-                    addJWT(request);
+                    // jwt might have expired refresh it
+                    addJWT();
                     httpRequest.removeHeaders(HttpHeaders.AUTHORIZATION);
                     httpRequest.addHeader(HttpHeaders.AUTHORIZATION, "bearer " + jwt);
                 }
@@ -288,37 +290,9 @@ public class HttpConnection implements Connection {
         return response;
     }
 
-    private synchronized void addJWT(final Request request) throws IOException {
-        addServiceJWT();
-        if(StringUtils.isNotEmpty(user) && !host.getHost().equals(auxHost.getHost())) {
-            addUserJWT(request.getTenant(), user);
-        }
-    }
-
-    private synchronized void addServiceJWT() throws IOException {
+    private synchronized void addJWT() {
         String secret = secretProvider.fetchSecret();
         setJwt(secret);
-    }
-
-    private synchronized void addUserJWT(String tenant, String user) throws IOException {
-        String authUrl = new StringBuilder(RequestUtils.buildBaseUrl(host, useSsl))
-                .append("/_tenant/").append(tenant)
-                .append("/_fabric/").append(C8RequestParam.SYSTEM)
-                .append("/_api/streams/user/").append(user)
-                .append("/jwt").toString();
-
-        final HttpRequestBase authHttpRequest = RequestUtils.buildHttpRequestBase(
-            new Request(tenant, C8RequestParam.SYSTEM, RequestType.POST, authUrl),
-            authUrl, contentType);
-        authHttpRequest.setHeader(HttpHeaders.USER_AGENT,
-            "Mozilla/5.0 (compatible; C8DB-JavaDriver/1.1; +http://mt.orz.at/)");
-        authHttpRequest.setHeader(HttpHeaders.AUTHORIZATION, "bearer " + jwt);
-        if (contentType == Protocol.HTTP_VPACK) {
-            authHttpRequest.setHeader(HttpHeaders.ACCEPT, "application/x-velocypack");
-        }
-        Response authResponse = ResponseUtils.buildResponse(util, client.execute(authHttpRequest), contentType);
-        ResponseUtils.checkError(util, authResponse);
-        setJwt(authResponse.getBody().get("result").getAsString());
     }
 
     public Credentials addCredentials(final HttpRequestBase httpRequest) {

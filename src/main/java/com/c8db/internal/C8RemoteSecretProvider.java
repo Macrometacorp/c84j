@@ -26,26 +26,27 @@ import org.apache.http.impl.client.CloseableHttpClient;
  */
 public class C8RemoteSecretProvider implements SecretProvider {
 
-    private final String username;
-    private final String email;
-    private final char[] password;
     private final boolean useSsl;
     private final Protocol contentType;
-    private final HostDescription authHost;
-    private final C8Serialization util;
-    private final CloseableHttpClient client;
+    private String username;
+    private String email;
+    private char[] password;
+    private HostDescription authHost;
+    private C8Serialization serialization;
+    private CloseableHttpClient client;
 
-
-    public C8RemoteSecretProvider(String username, String email, char[] password, boolean useSsl, Protocol contentType,
-        HostDescription authHost, C8Serialization util, CloseableHttpClient client) {
-        this.username = username;
-        this.email = email;
-        this.password = password != null ? password : "".toCharArray();
+    public C8RemoteSecretProvider(boolean useSsl, Protocol contentType) {
         this.useSsl = useSsl;
         this.contentType = contentType;
-        this.authHost = authHost;
-        this.util = util;
-        this.client = client;
+    }
+
+    public void init(SecretProviderContext context) {
+        this.username = context.getUsername();
+        this.email = context.getEmail();
+        this.password = password != null ? password : "".toCharArray();
+        this.serialization = context.getSerialization();
+        this.client = context.getClient();
+        this.authHost = context.getHost();
     }
 
     /**
@@ -62,8 +63,8 @@ public class C8RemoteSecretProvider implements SecretProvider {
         credentials.put("password", new String(password));
         credentials.put("email", email);
         final HttpRequestBase authHttpRequest = RequestUtils.buildHttpRequestBase(
-            new Request("_mm", C8RequestParam.SYSTEM, RequestType.POST, authUrl)
-                .setBody(util.serialize(credentials)),
+            new Request(null, null, RequestType.POST, authUrl)
+                .setBody(serialization.serialize(credentials)),
             authUrl, contentType);
         authHttpRequest.setHeader(HttpHeaders.USER_AGENT,
             "Mozilla/5.0 (compatible; C8DB-JavaDriver/1.1; +http://mt.orz.at/)");
@@ -73,8 +74,9 @@ public class C8RemoteSecretProvider implements SecretProvider {
         }
 
         try {
-            Response authResponse = ResponseUtils.buildResponse(util, client.execute(authHttpRequest), contentType);
-            ResponseUtils.checkError(util, authResponse);
+            Response authResponse = ResponseUtils.buildResponse(serialization,
+                    client.execute(authHttpRequest), contentType);
+            ResponseUtils.checkError(serialization, authResponse);
             return authResponse.getBody().get("jwt").getAsString();
         } catch (IOException e) {
             throw new C8DBException(e);
