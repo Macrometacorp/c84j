@@ -43,7 +43,7 @@ public class C8RemoteSecretProvider implements SecretProvider {
     public void init(SecretProviderContext context) {
         this.username = context.getUsername();
         this.email = context.getEmail();
-        this.password = password != null ? password : "".toCharArray();
+        this.password = context.getPassword() != null ? context.getPassword() : "".toCharArray();
         this.serialization = context.getSerialization();
         this.client = context.getClient();
         this.authHost = context.getHost();

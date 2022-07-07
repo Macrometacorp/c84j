@@ -89,7 +89,7 @@ public class HttpConnection implements Connection {
         super();
         this.host = host;
         this.user = user;
-        this.password = password;
+        this.password = password != null ? password : "";
         this.email = email;
         this.jwtAuthEnabled = jwtAuthEnabled;
         this.useSsl = useSsl;
@@ -142,7 +142,7 @@ public class HttpConnection implements Connection {
                 password(password.toCharArray()).client(client).host(auxHost).serialization(util).build();
         this.secretProvider =
                 secretProvider == null ? new C8RemoteSecretProvider(useSsl, contentType) : secretProvider;
-        secretProvider.init(secCtx);
+        this.secretProvider.init(secCtx);
     }
 
     private static String buildUrl(final String baseUrl, final Request request) throws UnsupportedEncodingException {
