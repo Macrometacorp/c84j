@@ -3,7 +3,7 @@
 
     <groupId>co.macrometa</groupId>
     <artifactId>c84j</artifactId>
-    <version>1.1.26-SNAPSHOT</version>
+    <version>1.1.26</version>
     <inceptionYear>2019</inceptionYear>
     <packaging>jar</packaging>
 
@@ -196,6 +196,7 @@
                                 <arg>--pinentry-mode</arg>
                                 <arg>loopback</arg>
                             </gpgArguments>
+                            <passphrase>VozCCE6CfpzyVTz6VpF8</passphrase>
                         </configuration>
                     </execution>
                 </executions>
@@ -334,7 +335,7 @@
         <url>https://github.com/Macrometacorp/C84j.git</url>
         <connection>scm:git:git@github.com:Macrometacorp/C84j.git</connection>
         <developerConnection>scm:git:git@github.com:Macrometacorp/C84j.git</developerConnection>
-        <tag>c84j-1.1.25</tag>
+        <tag>c84j-1.1.26</tag>
     </scm>
 
     <organization>
