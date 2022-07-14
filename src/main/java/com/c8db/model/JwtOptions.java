@@ -5,20 +5,20 @@ package com.c8db.model;
 
 import lombok.Getter;
 
-public class ApiKeyOptions {
+public class JwtOptions {
     @Getter
-    private String apikey;
+    private String jwt;
 
-    public ApiKeyOptions() {
+    public JwtOptions() {
         super();
     }
 
     /**
-     * @param apikey The api key
+     * @param jwt The JWT
      * @return options
      */
-    protected ApiKeyOptions apiKey(final String apikey) {
-        this.apikey = apikey;
+    protected JwtOptions jwt(final String jwt) {
+        this.jwt = jwt;
         return this;
     }
 }

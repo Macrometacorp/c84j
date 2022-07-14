@@ -6,9 +6,10 @@ package com.c8db.entity;
 import lombok.Data;
 
 @Data
-public class ApiKeyEntity {
+public class ApiKeyJwtEntity {
     private String keyid;
     private String tenant;
     private String parent;
+    private long expires;
     private int limitRequestsPerSec;
 }
