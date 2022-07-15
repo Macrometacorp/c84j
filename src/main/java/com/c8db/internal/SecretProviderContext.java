@@ -4,6 +4,7 @@
 
 package com.c8db.internal;
 
+import com.c8db.Protocol;
 import com.c8db.internal.net.HostDescription;
 import com.c8db.util.C8Serialization;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -14,22 +15,26 @@ import org.apache.http.impl.client.CloseableHttpClient;
  * during the initialization of the secret provider.
  */
 public class SecretProviderContext {
+    private boolean useSsl;
     private String username;
     private String email;
     private char[] password;
     private HostDescription host;
     private C8Serialization serialization;
     private CloseableHttpClient client;
+    private Protocol contentType;
 
     private SecretProviderContext() {}
 
     public static class Builder {
+        private boolean useSsl;
         private String username;
         private String email;
         private char[] password;
         private HostDescription host;
         private C8Serialization serialization;
         private CloseableHttpClient client;
+        private Protocol contentType;
 
         public Builder username(String username) {
             this.username = username;
@@ -61,6 +66,16 @@ public class SecretProviderContext {
             return this;
         }
 
+        public Builder useSsl(boolean useSsl) {
+            this.useSsl = useSsl;
+            return this;
+        }
+
+        public Builder contentType(Protocol contentType) {
+            this.contentType = contentType;
+            return this;
+        }
+
         public SecretProviderContext build() {
             SecretProviderContext ctx = new SecretProviderContext();
             ctx.client = client;
@@ -69,6 +84,8 @@ public class SecretProviderContext {
             ctx.email = email;
             ctx.host = host;
             ctx.serialization = serialization;
+            ctx.useSsl = useSsl;
+            ctx.contentType = contentType;
             return ctx;
         }
     }
@@ -97,4 +114,11 @@ public class SecretProviderContext {
         return email;
     }
 
+    public boolean getUseSsl() {
+        return useSsl;
+    }
+
+    public Protocol getContentType() {
+        return contentType;
+    }
 }

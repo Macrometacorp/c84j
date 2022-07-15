@@ -25,20 +25,14 @@ import org.apache.http.impl.client.CloseableHttpClient;
  * Secret provider implementation which could communicate with a remote identity provider to retrieve required secrets.
  */
 public class C8RemoteSecretProvider implements SecretProvider {
-
-    private final boolean useSsl;
-    private final Protocol contentType;
+    private Protocol contentType;
+    private boolean useSsl;
     private String username;
     private String email;
     private char[] password;
     private HostDescription authHost;
     private C8Serialization serialization;
     private CloseableHttpClient client;
-
-    public C8RemoteSecretProvider(boolean useSsl, Protocol contentType) {
-        this.useSsl = useSsl;
-        this.contentType = contentType;
-    }
 
     public void init(SecretProviderContext context) {
         this.username = context.getUsername();
@@ -47,6 +41,8 @@ public class C8RemoteSecretProvider implements SecretProvider {
         this.serialization = context.getSerialization();
         this.client = context.getClient();
         this.authHost = context.getHost();
+        this.useSsl = context.getUseSsl();
+        this.contentType = context.getContentType();
     }
 
     /**
@@ -64,8 +60,7 @@ public class C8RemoteSecretProvider implements SecretProvider {
         credentials.put("email", email);
         final HttpRequestBase authHttpRequest = RequestUtils.buildHttpRequestBase(
             new Request(null, null, RequestType.POST, authUrl)
-                .setBody(serialization.serialize(credentials)),
-            authUrl, contentType);
+                .setBody(serialization.serialize(credentials)), authUrl, contentType);
         authHttpRequest.setHeader(HttpHeaders.USER_AGENT,
             "Mozilla/5.0 (compatible; C8DB-JavaDriver/1.1; +http://mt.orz.at/)");
 
