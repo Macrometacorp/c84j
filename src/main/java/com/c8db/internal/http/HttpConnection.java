@@ -139,7 +139,7 @@ public class HttpConnection implements Connection {
         client = builder.build();
 
         SecretProviderContext secCtx = new SecretProviderContext.Builder().email(email).username(user).
-                password(password.toCharArray()).client(client).host(auxHost).serialization(util).build();
+                password(password != null ? password.toCharArray() : null).client(client).host(auxHost).serialization(util).build();
         this.secretProvider =
                 secretProvider == null ? new C8RemoteSecretProvider(useSsl, contentType) : secretProvider;
         this.secretProvider.init(secCtx);
