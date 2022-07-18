@@ -138,10 +138,12 @@ public class HttpConnection implements Connection {
         }
         client = builder.build();
 
-        SecretProviderContext secCtx = new SecretProviderContext.Builder().email(email).username(user).
-                password(password.toCharArray()).client(client).host(auxHost).serialization(util).build();
+        String pwd = password != null ? password : "";
+        SecretProviderContext secCtx = new SecretProviderContext.Builder().email(email).username(user).useSsl(useSsl)
+                .password(pwd.toCharArray()).client(client).host(auxHost).serialization(util)
+                .contentType(contentType).build();
         this.secretProvider =
-                secretProvider == null ? new C8RemoteSecretProvider(useSsl, contentType) : secretProvider;
+                secretProvider == null ? new C8RemoteSecretProvider() : secretProvider;
         this.secretProvider.init(secCtx);
     }
 
