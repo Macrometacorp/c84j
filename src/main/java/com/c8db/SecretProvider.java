@@ -22,7 +22,9 @@ public interface SecretProvider {
     /**
      * Retrieves a secret to communicate with the server.
      *
+     * @param tenant for which tenant to fetch the secret
+     * @param user   for which user to fetch the secret
      * @return a valid secrete
      */
-    String fetchSecret();
+    String fetchSecret(String tenant, String user);
 }
