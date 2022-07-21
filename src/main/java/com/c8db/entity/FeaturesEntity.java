@@ -33,6 +33,8 @@ public class FeaturesEntity implements Entity {
     private Boolean computeEnabled;
     @SerializedName("LOCAL_COLLECTIONS")
     private Boolean localCollectionsEnabled;
+    @SerializedName("STREAM_IO_CONNECTORS")
+    private Boolean streamConnectorsEnabled;
 
     public FeaturesEntity() {
         super();
@@ -82,4 +84,7 @@ public class FeaturesEntity implements Entity {
         return localCollectionsEnabled;
     }
 
+    public Boolean isStreamConnectorsEnabled() {
+        return streamConnectorsEnabled;
+    }
 }
