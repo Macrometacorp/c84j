@@ -225,7 +225,7 @@ public class HttpConnection implements Connection {
                 LOGGER.debug("Using API Key for authentication.");
                 httpRequest.addHeader(HttpHeaders.AUTHORIZATION, "apikey " + apiKey);
             } else if (jwt == null) { //Generate JWT using user credentials if jwt and apikey are absent
-                addJWT();
+                addJWT(request.getTenant());
                 LOGGER.debug("Using JWT for authentication.");
                 httpRequest.addHeader(HttpHeaders.AUTHORIZATION, "bearer " + jwt);
             } else { //Add Header when JWT is provided
@@ -247,7 +247,7 @@ public class HttpConnection implements Connection {
         } catch (C8DBException ex) {
             if (ex.getResponseCode().equals(401)) {
                 // jwt might have expired refresh it
-                addJWT();
+                addJWT(request.getTenant());
                 httpRequest.removeHeaders(HttpHeaders.AUTHORIZATION);
                 httpRequest.addHeader(HttpHeaders.AUTHORIZATION, "bearer " + jwt);
                 response = ResponseUtils.buildResponse(util, client.execute(httpRequest), contentType);
@@ -281,7 +281,7 @@ public class HttpConnection implements Connection {
             } catch (Exception e) {
                 if (e instanceof C8DBException && ((C8DBException) e).getResponseCode().equals(401)) {
                     // jwt might have expired refresh it
-                    addJWT();
+                    addJWT(request.getTenant());
                     httpRequest.removeHeaders(HttpHeaders.AUTHORIZATION);
                     httpRequest.addHeader(HttpHeaders.AUTHORIZATION, "bearer " + jwt);
                 }
@@ -292,8 +292,8 @@ public class HttpConnection implements Connection {
         return response;
     }
 
-    private synchronized void addJWT() {
-        String secret = secretProvider.fetchSecret();
+    private synchronized void addJWT(String tenant) {
+        String secret = secretProvider.fetchSecret(tenant, user);
         setJwt(secret);
     }
 

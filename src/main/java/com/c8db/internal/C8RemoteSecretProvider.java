@@ -17,6 +17,8 @@ import com.c8db.velocystream.Response;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -48,14 +50,15 @@ public class C8RemoteSecretProvider implements SecretProvider {
     /**
      * Retrieve a token by talking to auth endpoint of c8 service.
      *
+     * @param tenant not used
      * @return a secret token in JWT format.
      */
     @Override
-    public String fetchSecret() {
+    public String fetchSecret(String tenant, String user) {
         String authUrl = RequestUtils.buildBaseUrl(authHost, useSsl) + "/_open/auth";
         Map<String, String> credentials = new HashMap<>();
 
-        credentials.put("username", username);
+        credentials.put("username", StringUtils.isNotEmpty(user) ? user : username);
         credentials.put("password", new String(password));
         credentials.put("email", email);
         final HttpRequestBase authHttpRequest = RequestUtils.buildHttpRequestBase(
