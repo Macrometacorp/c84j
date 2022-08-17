@@ -92,6 +92,7 @@ public class HttpConnection implements Connection {
     private final Protocol contentType;
     private final HostDescription host;
     private volatile String jwt;
+    private volatile String defaultJWT;
     private final String apiKey;
     private final HostDescription auxHost;
 
@@ -110,7 +111,7 @@ public class HttpConnection implements Connection {
         this.useSsl = useSsl;
         this.util = util;
         this.contentType = contentType;
-        this.jwt = jwt;
+        this.defaultJWT = jwt;
         this.apiKey = apiKey;
         this.auxHost = auxHost;
         final RegistryBuilder<ConnectionSocketFactory> registryBuilder = RegistryBuilder
@@ -226,6 +227,7 @@ public class HttpConnection implements Connection {
         }
         addHeader(request, httpRequest);
         if (jwtAuthEnabled) {
+            updateJWT();
             if (StringUtils.isNotEmpty(apiKey) && jwt == null) {  //Use API key onlu if API Key is provided
                 LOGGER.debug("Using API Key for authenication.");
                 httpRequest.addHeader("Authorization", "apikey " + apiKey);
@@ -297,6 +299,14 @@ public class HttpConnection implements Connection {
         return response;
     }
 
+    private void updateJWT() {
+        if (StringUtils.isNotEmpty(user) && !host.getHost().equals(auxHost.getHost())) {
+            jwt = null;
+        } else {
+            jwt = defaultJWT;
+        }
+    }
+
     private synchronized void addJWT(final Request request) throws IOException {
         addServiceJWT();
         if(StringUtils.isNotEmpty(user) && !host.getHost().equals(auxHost.getHost())) {
@@ -321,7 +331,8 @@ public class HttpConnection implements Connection {
         }
         Response authResponse = buildResponse(client.execute(authHttpRequest));
         checkError(authResponse);
-        setJwt(authResponse.getBody().get("jwt").getAsString());
+        defaultJWT = authResponse.getBody().get("jwt").getAsString();
+        setJwt(defaultJWT);
     }
 
     private synchronized void addUserJWT(String tenant, String user) throws IOException {
