@@ -75,6 +75,7 @@ public class HttpConnection implements Connection {
     private final Protocol contentType;
     private final HostDescription host;
     private volatile String jwt;
+    private volatile String defaultJWT;
     private final String apiKey;
     private final HostDescription auxHost;
     private final SecretProvider secretProvider;
@@ -95,7 +96,7 @@ public class HttpConnection implements Connection {
         this.useSsl = useSsl;
         this.util = util;
         this.contentType = contentType;
-        this.jwt = jwt;
+        this.defaultJWT = jwt;
         this.apiKey = apiKey;
         this.auxHost = auxHost;
 
@@ -221,6 +222,7 @@ public class HttpConnection implements Connection {
         }
         addHeader(request, httpRequest);
         if (jwtAuthEnabled) {
+            updateJWT();
             if (StringUtils.isNotEmpty(apiKey) && jwt == null) {  //Use API key only if API Key is provided
                 LOGGER.debug("Using API Key for authentication.");
                 httpRequest.addHeader(HttpHeaders.AUTHORIZATION, "apikey " + apiKey);
@@ -292,9 +294,18 @@ public class HttpConnection implements Connection {
         return response;
     }
 
+    private void updateJWT() {
+        if (StringUtils.isNotEmpty(user) && !host.getHost().equals(auxHost.getHost())) {
+            jwt = null;
+        } else {
+            jwt = defaultJWT;
+        }
+    }
+
     private synchronized void addJWT(String tenant) {
         String secret = secretProvider.fetchSecret(tenant, user);
-        setJwt(secret);
+        defaultJWT = secret;
+        setJwt(defaultJWT);
     }
 
     public Credentials addCredentials(final HttpRequestBase httpRequest) {
