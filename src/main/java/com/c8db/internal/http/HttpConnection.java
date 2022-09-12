@@ -55,7 +55,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 import javax.net.ssl.SSLContext;
 
 public class HttpConnection implements Connection {
@@ -74,8 +77,9 @@ public class HttpConnection implements Connection {
     private final Boolean useSsl;
     private final Protocol contentType;
     private final HostDescription host;
-    private volatile String jwt;
-    private volatile String defaultJWT;
+    private Map<TenantUser, String> cachedJwt = new ConcurrentHashMap<>();
+    //private volatile String jwt;
+    //private volatile String defaultJWT;
     private final String apiKey;
     private final HostDescription auxHost;
     private final SecretProvider secretProvider;
@@ -96,9 +100,12 @@ public class HttpConnection implements Connection {
         this.useSsl = useSsl;
         this.util = util;
         this.contentType = contentType;
-        this.defaultJWT = jwt;
         this.apiKey = apiKey;
         this.auxHost = auxHost;
+
+        if (StringUtils.isNotEmpty(jwt)) {
+            cachedJwt.put(new TenantUser(null, user), jwt);
+        }
 
         final RegistryBuilder<ConnectionSocketFactory> registryBuilder = RegistryBuilder
                 .create();
@@ -221,13 +228,14 @@ public class HttpConnection implements Connection {
             httpRequest.setHeader(HttpHeaders.ACCEPT, "application/x-velocypack");
         }
         addHeader(request, httpRequest);
+        TenantUser tenantUser = new TenantUser(request.getTenant(), user);
         if (jwtAuthEnabled) {
-            updateJWT();
+            String jwt = cachedJwt.get(tenantUser);
             if (StringUtils.isNotEmpty(apiKey) && jwt == null) {  //Use API key only if API Key is provided
                 LOGGER.debug("Using API Key for authentication.");
                 httpRequest.addHeader(HttpHeaders.AUTHORIZATION, "apikey " + apiKey);
             } else if (jwt == null) { //Generate JWT using user credentials if jwt and apikey are absent
-                addJWT(request.getTenant());
+                jwt = addJWT(tenantUser);
                 LOGGER.debug("Using JWT for authentication.");
                 httpRequest.addHeader(HttpHeaders.AUTHORIZATION, "bearer " + jwt);
             } else { //Add Header when JWT is provided
@@ -249,7 +257,7 @@ public class HttpConnection implements Connection {
         } catch (C8DBException ex) {
             if (ex.getResponseCode().equals(401)) {
                 // jwt might have expired refresh it
-                addJWT(request.getTenant());
+                String jwt = addJWT(tenantUser);
                 httpRequest.removeHeaders(HttpHeaders.AUTHORIZATION);
                 httpRequest.addHeader(HttpHeaders.AUTHORIZATION, "bearer " + jwt);
                 response = ResponseUtils.buildResponse(util, client.execute(httpRequest), contentType);
@@ -283,7 +291,7 @@ public class HttpConnection implements Connection {
             } catch (Exception e) {
                 if (e instanceof C8DBException && ((C8DBException) e).getResponseCode().equals(401)) {
                     // jwt might have expired refresh it
-                    addJWT(request.getTenant());
+                    String jwt = addJWT(new TenantUser(request.getTenant(), user));
                     httpRequest.removeHeaders(HttpHeaders.AUTHORIZATION);
                     httpRequest.addHeader(HttpHeaders.AUTHORIZATION, "bearer " + jwt);
                 }
@@ -294,18 +302,10 @@ public class HttpConnection implements Connection {
         return response;
     }
 
-    private void updateJWT() {
-        if (StringUtils.isNotEmpty(user) && !host.getHost().equals(auxHost.getHost())) {
-            jwt = null;
-        } else {
-            jwt = defaultJWT;
-        }
-    }
-
-    private synchronized void addJWT(String tenant) {
-        String secret = secretProvider.fetchSecret(tenant, user);
-        defaultJWT = secret;
-        setJwt(defaultJWT);
+    private synchronized String addJWT(TenantUser tenantUser) {
+        String secret = secretProvider.fetchSecret(tenantUser.tenant, tenantUser.user);
+        cachedJwt.put(tenantUser, secret);
+        return secret;
     }
 
     public Credentials addCredentials(final HttpRequestBase httpRequest) {
@@ -319,11 +319,6 @@ public class HttpConnection implements Connection {
             }
         }
         return credentials;
-    }
-
-
-    public void setJwt(String jwt) {
-        this.jwt = jwt;
     }
 
     public static class Builder {
@@ -428,6 +423,30 @@ public class HttpConnection implements Connection {
         public HttpConnection build() {
             return new HttpConnection(host, timeout, user, password, email, jwtAuthEnabled, useSsl, sslContext, util,
                     contentType, ttl, httpCookieSpec, jwt, apiKey, auxHost, secretProvider);
+        }
+    }
+
+    private static class TenantUser {
+
+        public String tenant;
+        public String user;
+
+        public TenantUser(String tenant, String user) {
+            this.tenant = tenant;
+            this.user = user;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            TenantUser that = (TenantUser) o;
+            return Objects.equals(tenant, that.tenant) && Objects.equals(user, that.user);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(tenant, user);
         }
     }
 
