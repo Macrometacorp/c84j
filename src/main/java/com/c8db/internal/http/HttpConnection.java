@@ -78,8 +78,7 @@ public class HttpConnection implements Connection {
     private final Protocol contentType;
     private final HostDescription host;
     private Map<TenantUser, String> cachedJwt = new ConcurrentHashMap<>();
-    //private volatile String jwt;
-    //private volatile String defaultJWT;
+    private final String defaultJWT;
     private final String apiKey;
     private final HostDescription auxHost;
     private final SecretProvider secretProvider;
@@ -102,10 +101,7 @@ public class HttpConnection implements Connection {
         this.contentType = contentType;
         this.apiKey = apiKey;
         this.auxHost = auxHost;
-
-        if (StringUtils.isNotEmpty(jwt)) {
-            cachedJwt.put(new TenantUser(null, user), jwt);
-        }
+        this.defaultJWT = jwt;
 
         final RegistryBuilder<ConnectionSocketFactory> registryBuilder = RegistryBuilder
                 .create();
@@ -230,7 +226,7 @@ public class HttpConnection implements Connection {
         addHeader(request, httpRequest);
         TenantUser tenantUser = new TenantUser(request.getTenant(), user);
         if (jwtAuthEnabled) {
-            String jwt = cachedJwt.get(tenantUser);
+            String jwt = defaultJWT != null ? defaultJWT : cachedJwt.get(tenantUser);
             if (StringUtils.isNotEmpty(apiKey) && jwt == null) {  //Use API key only if API Key is provided
                 LOGGER.debug("Using API Key for authentication.");
                 httpRequest.addHeader(HttpHeaders.AUTHORIZATION, "apikey " + apiKey);
@@ -255,7 +251,7 @@ public class HttpConnection implements Connection {
             response = ResponseUtils.buildResponse(util, client.execute(httpRequest), contentType);
             ResponseUtils.checkError(util, response);
         } catch (C8DBException ex) {
-            if (ex.getResponseCode().equals(401)) {
+            if (ex.getResponseCode().equals(401) && defaultJWT == null) {
                 // jwt might have expired refresh it
                 String jwt = addJWT(tenantUser);
                 httpRequest.removeHeaders(HttpHeaders.AUTHORIZATION);
