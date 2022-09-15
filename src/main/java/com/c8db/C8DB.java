@@ -642,7 +642,7 @@ public interface C8DB extends C8SerializationAccessor {
             if (protocol == null || Protocol.VST == protocol) {
                 connectionFactory = new VstConnectionFactorySync(host, timeout, connectionTtl, useSsl, sslContext);
             } else {
-                connectionFactory = new HttpConnectionFactory(timeout, user, password, secretProvider, email, jwtAuth, useSsl,
+                connectionFactory = new HttpConnectionFactory(timeout, user, password, secretProvider, email, jwtAuth, jwtToken, useSsl,
                     sslContext, custom, protocol, connectionTtl, httpCookieSpec, apiKey, auxHost);
             }
             final Map<Service, Collection<Host>> hostsMatrix = createHostMatrix(max, connectionFactory);
