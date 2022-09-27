@@ -750,4 +750,10 @@ public interface C8Database extends C8SerializationAccessor {
      */
     C8Dynamo dynamo(final String tableName);
 
+    /**
+     * Returns a {@code C8Compute} instance.
+     * @return C8Compute handler
+     */
+    C8Compute compute();
+
 }
