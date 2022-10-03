@@ -27,21 +27,21 @@ public class C8ComputeImpl extends InternalC8Compute<C8DBImpl, C8DatabaseImpl, C
 
     @Override
     public Collection<FxEntity> getFunctions(final FxReadOptions options) throws C8DBException {
-        return executor.execute(getFunctionsRequest(options), getFunctionsResponseDeserializer(), null, Service.C8COMPUTE);
+        return executor.execute(getFunctionsRequest(options), getFunctionsResponseDeserializer(), null, Service.C8FUNCTION);
     }
 
     @Override
     public FxEntity getInfo(String name) throws C8DBException {
-        return executor.execute(getInfoRequest(name), getInfoResponseDeserializer(), null, Service.C8COMPUTE);
+        return executor.execute(getInfoRequest(name), getInfoResponseDeserializer(), null, Service.C8FUNCTION);
     }
 
     @Override
     public FxMetadataEntity getMetadata() throws C8DBException {
-        return executor.execute(getMetadataRequest(), getMetadataResponseDeserializer(), null, Service.C8COMPUTE);
+        return executor.execute(getMetadataRequest(), getMetadataResponseDeserializer(), null, Service.C8FUNCTION);
     }
 
     @Override
     public Collection<Map<String, Object>> executeFunction(String name, Map<String, Object> arguments) throws C8DBException {
-        return executor.execute(executeFunctionRequest(name, arguments), executeFunctionResponseDeserializer(), null, Service.C8COMPUTE);
+        return executor.execute(executeFunctionRequest(name, arguments), executeFunctionResponseDeserializer(), null, Service.C8FUNCTION);
     }
 }

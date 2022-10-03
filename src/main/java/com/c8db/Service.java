@@ -8,6 +8,6 @@ public enum Service {
 
     C8DB,
     C8STREAMS,
-    C8COMPUTE
+    C8FUNCTION
 
 }
