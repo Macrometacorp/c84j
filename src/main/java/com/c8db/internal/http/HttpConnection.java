@@ -7,6 +7,7 @@ package com.c8db.internal.http;
 import com.arangodb.velocypack.VPackSlice;
 import com.c8db.C8DBException;
 import com.c8db.Protocol;
+import com.c8db.Service;
 import com.c8db.internal.C8RequestParam;
 import com.c8db.internal.net.Connection;
 import com.c8db.internal.net.HostDescription;
@@ -24,6 +25,7 @@ import org.apache.http.Header;
 import org.apache.http.HeaderElement;
 import org.apache.http.HeaderElementIterator;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.NoHttpResponseException;
@@ -73,6 +75,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 import javax.net.ssl.SSLContext;
 
 public class HttpConnection implements Connection {
@@ -173,11 +177,11 @@ public class HttpConnection implements Connection {
         client = builder.build();
     }
 
-    private static String buildUrl(final String baseUrl, final Request request) throws UnsupportedEncodingException {
+    private static String buildUrl(final String baseUrl, final Request request, Service service) throws UnsupportedEncodingException {
         final StringBuilder sb = new StringBuilder().append(baseUrl);
         final String database = request.getDatabase();
         final String tenant = request.getTenant();
-        if (tenant != null && !tenant.isEmpty()) {
+        if (tenant != null && !tenant.isEmpty() && service != Service.C8FUNCTION) {
             sb.append("/_tenant/").append(tenant);
         }
 
@@ -236,8 +240,8 @@ public class HttpConnection implements Connection {
         client.close();
     }
 
-    public Response execute(final Request request) throws C8DBException, IOException {
-        final String url = buildUrl(buildBaseUrl(host), request);
+    public Response execute(final Request request, final Service service) throws C8DBException, IOException {
+        final String url = buildUrl(buildBaseUrl(host), request, service);
         final HttpRequestBase httpRequest = buildHttpRequestBase(request, url);
         httpRequest.setHeader("User-Agent", "Mozilla/5.0 (compatible; C8DB-JavaDriver/1.1; +http://mt.orz.at/)");
 
@@ -252,7 +256,7 @@ public class HttpConnection implements Connection {
                 LOGGER.debug("Using API Key for authenication.");
                 httpRequest.addHeader("Authorization", "apikey " + apiKey);
             } else if (jwt == null) { //Generate JWT using user credentials if jwt and apikey are absent
-                addJWT(request);
+                addJWT(request, service);
                 LOGGER.debug("Using JWT for authentication.");
                 httpRequest.addHeader("Authorization", "bearer " + jwt);
             } else { //Add Header when JWT is provided
@@ -274,13 +278,13 @@ public class HttpConnection implements Connection {
         } catch (C8DBException ex) {
             if (ex.getResponseCode().equals(401)) {
                 // jwt might has expired refresh it
-                addJWT(request);
+                addJWT(request, service);
                 httpRequest.removeHeaders("Authorization");
                 httpRequest.addHeader("Authorization", "bearer " + jwt);
                 response = buildResponse(client.execute(httpRequest));
                 checkError(response);
             } else if (ex.getResponseCode() >= 500) {
-                response = retryRequest(request, httpRequest);
+                response = retryRequest(request, httpRequest, service);
             } else if (ex.getResponseCode() >= 400) {
                 // Handle HTTP Error messages.
                 checkError(response);
@@ -288,12 +292,12 @@ public class HttpConnection implements Connection {
                 checkError(response);
             }
         } catch (UnknownHostException | NoHttpResponseException ex) {
-            response = retryRequest(request, httpRequest);
+            response = retryRequest(request, httpRequest, service);
         }
         return response;
     }
 
-    private Response retryRequest(final Request request, HttpRequestBase httpRequest) throws IOException {
+    private Response retryRequest(final Request request, HttpRequestBase httpRequest, Service service) throws IOException {
         Response response = null;
 
         for (int currentWaitTime = INITIAL_SLEEP_TIME_SEC; currentWaitTime <= MAX_SLEEP_TIME_SEC; currentWaitTime *= SLEEP_TIME_MULTIPLIER) {
@@ -308,7 +312,7 @@ public class HttpConnection implements Connection {
             } catch (Exception e) {
                 if (e instanceof C8DBException && ((C8DBException) e).getResponseCode().equals(401)) {
                     // jwt might has expired refresh it
-                    addJWT(request);
+                    addJWT(request, service);
                     httpRequest.removeHeaders("Authorization");
                     httpRequest.addHeader("Authorization", "bearer " + jwt);
                 }
@@ -327,9 +331,9 @@ public class HttpConnection implements Connection {
         }
     }
 
-    private synchronized void addJWT(final Request request) throws IOException {
+    private synchronized void addJWT(final Request request, Service service) throws IOException {
         addServiceJWT();
-        if(StringUtils.isNotEmpty(user) && !host.getHost().equals(auxHost.getHost())) {
+        if(StringUtils.isNotEmpty(user) && !host.getHost().equals(auxHost.getHost()) && service != Service.C8FUNCTION) {
             addUserJWT(request.getTenant(), user);
         }
     }

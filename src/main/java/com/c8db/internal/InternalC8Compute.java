@@ -37,7 +37,7 @@ public abstract class InternalC8Compute<A extends InternalC8DB<E>, D extends Int
     }
 
     protected Request getFunctionsRequest(final FxReadOptions options) {
-        final Request request = request(null, db.name(), RequestType.GET, PATH_API_FX);
+        final Request request = request(db.tenant(), db.name(), RequestType.GET, PATH_API_FX);
         final FxReadOptions params = (options != null ? options : new FxReadOptions());
         request.putQueryParam("type", params.getType().toString().toLowerCase());
         return request;
@@ -55,7 +55,7 @@ public abstract class InternalC8Compute<A extends InternalC8DB<E>, D extends Int
     }
 
     protected Request getInfoRequest(final String name) {
-        final Request request = request(null, db.name(), RequestType.GET, PATH_API_FX, name);
+        final Request request = request(db.tenant(), db.name(), RequestType.GET, PATH_API_FX, name);
         return request;
     }
 
@@ -72,7 +72,7 @@ public abstract class InternalC8Compute<A extends InternalC8DB<E>, D extends Int
     }
 
     protected Request getMetadataRequest() {
-        final Request request = request(null, db.name(), RequestType.GET, PATH_API_FX, METADATA);
+        final Request request = request(db.tenant(), db.name(), RequestType.GET, PATH_API_FX, METADATA);
         return request;
     }
 
@@ -89,7 +89,7 @@ public abstract class InternalC8Compute<A extends InternalC8DB<E>, D extends Int
 
     protected Request executeFunctionRequest(String name, Map<String, Object> arguments) {
         final VPackSlice body = util().serialize(arguments);
-        final Request request = request(null, db.name(), RequestType.POST, PATH_API_FX, "invoke", name);
+        final Request request = request(db.tenant(), db.name(), RequestType.POST, PATH_API_FX, "invoke", name);
         request.putQueryParam("params", body.toString());
         return request;
     }

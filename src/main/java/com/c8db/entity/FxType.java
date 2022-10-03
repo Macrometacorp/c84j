@@ -3,6 +3,9 @@
  */
 package com.c8db.entity;
 
+/**
+ * Class describes type of function worker.
+ */
 public enum FxType {
 
     ALL,

@@ -5,6 +5,9 @@ package com.c8db.entity;
 
 import com.arangodb.velocypack.annotations.SerializedName;
 
+/**
+ * Class describes function worker
+ */
 public class FxEntity implements Entity {
 
     @SerializedName("_id")
