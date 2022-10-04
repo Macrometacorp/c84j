@@ -65,6 +65,7 @@ public abstract class InternalC8DBBuilder {
     private static final String PROPERTY_KEY_HOST = "c8db.host";
     private static final String PROPERTY_KEY_PORT = "c8db.port";
     private static final String PROPERTY_KEY_TIMEOUT = "c8db.timeout";
+    private static final String PROPERTY_KEY_RESPONSE_SIZE_LIMIT = "c8db.responseSizeLimit";
     private static final String PROPERTY_KEY_USER = "c8db.user";
     private static final String PROPERTY_KEY_PASSWORD = "c8db.password";
     private static final String PROPERTY_KEY_EMAIL = "c8db.email";
@@ -83,6 +84,7 @@ public abstract class InternalC8DBBuilder {
 
     protected final Map<Service, List<HostDescription>> hosts;
     protected HostDescription host;
+    protected Integer responseSizeLimit;
     protected Integer timeout;
     protected String user;
     protected String password;
@@ -145,6 +147,7 @@ public abstract class InternalC8DBBuilder {
         final String host = loadHost(properties, this.host.getHost());
         final int port = loadPort(properties, this.host.getPort());
         this.host = new HostDescription(host, port);
+        responseSizeLimit = loadMaxResponseSize(properties, responseSizeLimit);
         timeout = loadTimeout(properties, timeout);
         user = loadUser(properties, user);
         password = loadPassword(properties, password);
@@ -180,6 +183,10 @@ public abstract class InternalC8DBBuilder {
 
     protected void setTimeout(final Integer timeout) {
         this.timeout = timeout;
+    }
+
+    protected void setResponseSizeLimit(final Integer responseSizeLimit) {
+        this.responseSizeLimit = responseSizeLimit;
     }
 
     protected void setUser(final String user) {
@@ -308,6 +315,11 @@ public abstract class InternalC8DBBuilder {
     private static Integer loadTimeout(final Properties properties, final Integer currentValue) {
         return Integer
                 .parseInt(getProperty(properties, PROPERTY_KEY_TIMEOUT, currentValue, C8Defaults.DEFAULT_TIMEOUT));
+    }
+
+    private static Integer loadMaxResponseSize(final Properties properties, final Integer currentValue) {
+        return Integer
+                .parseInt(getProperty(properties, PROPERTY_KEY_RESPONSE_SIZE_LIMIT, currentValue, C8Defaults.DEFAULT_RESPONSE_SIZE_LIMIT));
     }
 
     private static String loadUser(final Properties properties, final String currentValue) {

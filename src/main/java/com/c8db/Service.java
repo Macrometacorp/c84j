@@ -7,6 +7,7 @@ package com.c8db;
 public enum Service {
 
     C8DB,
-    C8STREAMS
+    C8STREAMS,
+    C8FUNCTION
 
 }

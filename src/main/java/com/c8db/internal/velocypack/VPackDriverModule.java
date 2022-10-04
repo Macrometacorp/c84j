@@ -29,6 +29,7 @@ import com.c8db.entity.BaseEdgeDocument;
 import com.c8db.entity.CollectionStatus;
 import com.c8db.entity.CollectionType;
 import com.c8db.entity.DocumentField;
+import com.c8db.entity.FxType;
 import com.c8db.entity.License;
 import com.c8db.entity.LogLevel;
 import com.c8db.entity.MinReplicationFactor;
@@ -78,6 +79,7 @@ public class VPackDriverModule implements VPackModule, VPackParserModule {
         context.registerDeserializer(LogLevel.class, VPackDeserializers.LOG_LEVEL);
         context.registerDeserializer(License.class, VPackDeserializers.LICENSE);
         context.registerDeserializer(Permissions.class, VPackDeserializers.PERMISSIONS);
+        context.registerDeserializer(FxType.class, VPackDeserializers.FX_TYPE);
         context.registerDeserializer(QueryExecutionState.class, VPackDeserializers.QUERY_EXECUTION_STATE);
         context.registerDeserializer(ReplicationFactor.class, VPackDeserializers.REPLICATION_FACTOR);
         context.registerDeserializer(MinReplicationFactor.class, VPackDeserializers.MIN_REPLICATION_FACTOR);

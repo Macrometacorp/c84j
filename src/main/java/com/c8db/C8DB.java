@@ -28,7 +28,6 @@ import com.c8db.entity.C8DBVersion;
 import com.c8db.entity.DataCenterEntity;
 import com.c8db.entity.DcInfoEntity;
 import com.c8db.entity.GeoFabricEntity;
-import com.c8db.entity.GeoFabricPermissions;
 import com.c8db.entity.LoadBalancingStrategy;
 import com.c8db.entity.LogEntity;
 import com.c8db.entity.LogLevelEntity;
@@ -146,6 +145,17 @@ public interface C8DB extends C8SerializationAccessor {
          */
         public Builder timeout(final Integer timeout) {
             setTimeout(timeout);
+            return this;
+        }
+
+        /**
+         * Sets the response size in bytes.
+         *
+         * @param responseSizeLimit size in bytes
+         * @return {@link C8DB.Builder}
+         */
+        public Builder responseSizeLimit(final Integer responseSizeLimit) {
+            setResponseSizeLimit(responseSizeLimit);
             return this;
         }
 
@@ -611,6 +621,9 @@ public interface C8DB extends C8SerializationAccessor {
             if (hosts.get(Service.C8STREAMS).isEmpty()) {
                 hosts.get(Service.C8STREAMS).addAll(hosts.get(Service.C8DB));
             }
+            if (hosts.get(Service.C8FUNCTION).isEmpty()) {
+                hosts.get(Service.C8FUNCTION).addAll(hosts.get(Service.C8DB));
+            }
 
             final VPack vpacker = vpackBuilder.serializeNullValues(false).build();
             final VPack vpackerNull = vpackBuilder.serializeNullValues(true).build();
@@ -630,7 +643,7 @@ public interface C8DB extends C8SerializationAccessor {
 
             final ConnectionFactory connectionFactory = (protocol == null || Protocol.VST == protocol)
                     ? new VstConnectionFactorySync(host, timeout, connectionTtl, useSsl, sslContext)
-                    : new HttpConnectionFactory(timeout, user, password, email, jwtAuth, useSsl, sslContext, custom, protocol,
+                    : new HttpConnectionFactory(timeout, responseSizeLimit, user, password, email, jwtAuth, useSsl, sslContext, custom, protocol,
                             connectionTtl, httpCookieSpec, jwtToken, apiKey, hosts.get(Service.C8DB).get(0));
 
             final Map<Service, Collection<Host>> hostsMatrix = createHostMatrix(max, connectionFactory);

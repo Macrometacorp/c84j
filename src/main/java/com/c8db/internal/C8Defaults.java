@@ -38,6 +38,7 @@ public final class C8Defaults {
     public static final String DEFAULT_DC_LIST = "tonchev-europe-west4,tonchev-europe-west1";
     public static final String DEFAULT_TENANT = "demo";
     public static final Integer DEFAULT_TIMEOUT = 0;
+    public static final Integer DEFAULT_RESPONSE_SIZE_LIMIT = 1024 * 1024;
     public static final String DEFAULT_USER = "root";
     public static final Boolean DEFAULT_USE_SSL = true;
     public static final Boolean DEFAULT_JWT_AUTH = true;
