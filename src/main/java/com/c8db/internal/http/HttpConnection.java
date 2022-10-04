@@ -7,6 +7,7 @@ package com.c8db.internal.http;
 import com.c8db.C8DBException;
 import com.c8db.Protocol;
 import com.c8db.SecretProvider;
+import com.c8db.Service;
 import com.c8db.internal.C8RemoteSecretProvider;
 import com.c8db.internal.SecretProviderContext;
 import com.c8db.internal.net.Connection;
@@ -18,6 +19,7 @@ import com.c8db.util.C8Serialization;
 import com.c8db.velocystream.Request;
 import com.c8db.velocystream.Response;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.Consts;
 import org.apache.http.HeaderElement;
 import org.apache.http.HeaderElementIterator;
 import org.apache.http.HttpHeaders;
@@ -30,6 +32,8 @@ import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.http.config.ConnectionConfig;
+import org.apache.http.config.MessageConstraints;
 import org.apache.http.config.RegistryBuilder;
 import org.apache.http.conn.ConnectionKeepAliveStrategy;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
@@ -51,6 +55,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.UnknownHostException;
+import java.nio.charset.CodingErrorAction;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -83,7 +88,7 @@ public class HttpConnection implements Connection {
     private final HostDescription auxHost;
     private final SecretProvider secretProvider;
 
-    private HttpConnection(final HostDescription host, final Integer timeout, final String user, final String password,
+    private HttpConnection(final HostDescription host, final Integer timeout, final Integer responseSizeLimit, final String user, final String password,
         final String email, final Boolean jwtAuthEnabled, final Boolean useSsl,
         final SSLContext sslContext, final C8Serialization util,
         final Protocol contentType, final Long ttl, final String httpCookieSpec,
@@ -114,7 +119,19 @@ public class HttpConnection implements Connection {
         } else {
             registryBuilder.register("http", new PlainConnectionSocketFactory());
         }
+        MessageConstraints messageConstraints = MessageConstraints.custom()
+            .setMaxLineLength(responseSizeLimit)
+            .build();
+
+        ConnectionConfig connectionConfig = ConnectionConfig.custom()
+            .setMalformedInputAction(CodingErrorAction.IGNORE)
+            .setUnmappableInputAction(CodingErrorAction.IGNORE)
+            .setCharset(Consts.UTF_8)
+            .setMessageConstraints(messageConstraints)
+            .build();
+
         cm = new PoolingHttpClientConnectionManager(registryBuilder.build());
+        cm.setDefaultConnectionConfig(connectionConfig);
         cm.setDefaultMaxPerRoute(1);
         cm.setMaxTotal(1);
         final RequestConfig.Builder requestConfig = RequestConfig.custom();
@@ -136,7 +153,7 @@ public class HttpConnection implements Connection {
         };
         final HttpClientBuilder builder = HttpClientBuilder.create().setDefaultRequestConfig(requestConfig.build())
                 .setConnectionManager(cm).setKeepAliveStrategy(keepAliveStrategy)
-                .setRetryHandler(new DefaultHttpRequestRetryHandler());
+                .setRetryHandler(new HttpRequestRetryHandler());
         if (ttl != null) {
             builder.setConnectionTimeToLive(ttl, TimeUnit.MILLISECONDS);
         }
@@ -151,11 +168,11 @@ public class HttpConnection implements Connection {
         this.secretProvider.init(secCtx);
     }
 
-    private static String buildUrl(final String baseUrl, final Request request) throws UnsupportedEncodingException {
+    private static String buildUrl(final String baseUrl, final Request request, final Service service) throws UnsupportedEncodingException {
         final StringBuilder sb = new StringBuilder().append(baseUrl);
         final String database = request.getDatabase();
         final String tenant = request.getTenant();
-        if (tenant != null && !tenant.isEmpty()) {
+        if (tenant != null && !tenant.isEmpty() && service != Service.C8FUNCTION) {
             sb.append("/_tenant/").append(tenant);
         }
 
@@ -214,8 +231,8 @@ public class HttpConnection implements Connection {
         client.close();
     }
 
-    public Response execute(final Request request) throws C8DBException, IOException {
-        final String url = buildUrl(RequestUtils.buildBaseUrl(host, useSsl), request);
+    public Response execute(final Request request, final Service service) throws C8DBException, IOException {
+        final String url = buildUrl(RequestUtils.buildBaseUrl(host, useSsl), request, service);
         final HttpRequestBase httpRequest = RequestUtils.buildHttpRequestBase(request, url, contentType);
         httpRequest.setHeader(HttpHeaders.USER_AGENT,
             "Mozilla/5.0 (compatible; C8DB-JavaDriver/1.1; +http://mt.orz.at/)");
@@ -224,6 +241,7 @@ public class HttpConnection implements Connection {
             httpRequest.setHeader(HttpHeaders.ACCEPT, "application/x-velocypack");
         }
         addHeader(request, httpRequest);
+        httpRequest.setHeader("x-gdn-tenantid", request.getTenant());
         TenantUser tenantUser = new TenantUser(request.getTenant(), user);
         if (jwtAuthEnabled) {
             String jwt = defaultJWT != null ? defaultJWT : cachedJwt.get(tenantUser);
@@ -331,6 +349,7 @@ public class HttpConnection implements Connection {
         private Long ttl;
         private SSLContext sslContext;
         private Integer timeout;
+        private Integer responseSizeLimit;
         private String jwt;
         private String apiKey;
         private HostDescription auxHost;
@@ -416,8 +435,13 @@ public class HttpConnection implements Connection {
             return this;
         }
 
+        public Builder responseSizeLimit(final Integer responseSizeLimit) {
+            this.responseSizeLimit = responseSizeLimit;
+            return this;
+        }
+
         public HttpConnection build() {
-            return new HttpConnection(host, timeout, user, password, email, jwtAuthEnabled, useSsl, sslContext, util,
+            return new HttpConnection(host, timeout, responseSizeLimit, user, password, email, jwtAuthEnabled, useSsl, sslContext, util,
                     contentType, ttl, httpCookieSpec, jwt, apiKey, auxHost, secretProvider);
         }
     }
