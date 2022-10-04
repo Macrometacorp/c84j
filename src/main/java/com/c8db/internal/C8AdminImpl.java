@@ -28,6 +28,11 @@ public class C8AdminImpl extends InternalC8Admin<C8DBImpl, C8DatabaseImpl, C8Exe
     }
 
 	@Override
+	public Boolean isLimitsEnabled() throws C8DBException {
+		return executor.execute(getLimitsEnabledRequest(), getLimitsEnabledResponseDeserializer());
+	}
+
+	@Override
 	public LimitsEntity getTenantLimits(String tenant) throws C8DBException {
 		return executor.execute(getTenantLimitsRequest(tenant), getTenantLimitsResponseDeserializer());
 	}
