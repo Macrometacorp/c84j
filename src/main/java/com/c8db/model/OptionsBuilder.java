@@ -62,6 +62,10 @@ public class OptionsBuilder {
         return options.query(query).bindVars(bindVars);
     }
 
+    public static C8qlQueryOptions build(final C8qlQueryOptions options, final String query, final Map<String, Object> bindVars) {
+        return options.query(query).bindVarsMap(bindVars);
+    }
+
     public static C8qlQueryExplainOptions build(final C8qlQueryExplainOptions options, final String query,
             final VPackSlice bindVars) {
         return options.query(query).bindVars(bindVars);

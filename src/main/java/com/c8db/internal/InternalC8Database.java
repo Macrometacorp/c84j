@@ -620,4 +620,23 @@ public abstract class InternalC8Database<A extends InternalC8DB<E>, E extends C8
         return request;
     }
 
+    protected Request queryRequest(final String query, final Map<String, Object> bindVars,
+                                   final C8qlQueryOptions options, String requestSource) {
+        Request request;
+        boolean isParameterized = query.contains("@") ? true : false;
+        if(isParameterized) {
+            Map<String, Object> bindVarMap;
+            if (bindVars.containsKey("bindVars")) {
+                bindVarMap = (HashMap) bindVars.get("bindVars");
+            } else {
+                bindVarMap = new HashMap<>();
+            }
+            request = request(tenant, name, RequestType.POST, PATH_API_CURSOR)
+                    .setBody(util().serialize(OptionsBuilder.build(options, query, util().serialize(bindVarMap))));
+        } else {
+            request = request(tenant, name, RequestType.POST, PATH_API_CURSOR)
+                    .setBody(util().serialize(OptionsBuilder.build(options, query, bindVars)));
+        }
+        return request;
+    }
 }

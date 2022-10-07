@@ -358,6 +358,24 @@ public interface C8Database extends C8SerializationAccessor {
     <T> C8Cursor<T> cursor(String cursorId, Class<T> type) throws C8DBException;
 
     /**
+     * Performs a database query using the given {@code query} and {@code bindVars},
+     * then returns a new {@code ArangoCursor} instance for the result list.
+     *
+     * @param query    An AQL query string
+     * @param bindVars key/value pairs defining the variables to bind the query to
+     * @param type     The type of the result (POJO class, VPackSlice, String for
+     *                 JSON, or Collection/List/Map)
+     * @param requestSource a placeholder that represents the source of the request
+     * @return cursor of the results
+     * @throws C8DBException
+     * @see <a href=
+     * "https://docs.arangodb.com/current/HTTP/AqlQueryCursor/AccessingCursors.html#create-cursor">API
+     * Documentation</a>
+     */
+    <T> C8Cursor<T> query(final String query, final Map<String, Object> bindVars, final C8qlQueryOptions options,
+                          final Class<T> type, String requestSource) throws C8DBException;
+
+    /**
      * Explain an AQL query and return information about it
      *
      * @param query    the query which you want explained
@@ -749,5 +767,4 @@ public interface C8Database extends C8SerializationAccessor {
      * @return C8Dynamo handler
      */
     C8Dynamo dynamo(final String tableName);
-
 }
