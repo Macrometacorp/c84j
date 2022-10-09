@@ -21,6 +21,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 
+import com.c8db.entity.FxType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -137,6 +138,14 @@ public class VPackDeserializers {
         public Permissions deserialize(final VPackSlice parent, final VPackSlice vpack,
                 final VPackDeserializationContext context) throws VPackException {
             return Permissions.valueOf(vpack.getAsString().toUpperCase());
+        }
+    };
+
+    public static final VPackDeserializer<FxType> FX_TYPE = new VPackDeserializer<FxType>() {
+        @Override
+        public FxType deserialize(final VPackSlice parent, final VPackSlice vpack,
+                                  final VPackDeserializationContext context) throws VPackException {
+            return FxType.valueOf(vpack.getAsString().toUpperCase());
         }
     };
 

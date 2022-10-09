@@ -9,6 +9,8 @@ import com.c8db.C8Admin;
 import com.c8db.C8Alerts;
 import com.c8db.C8ApiKeys;
 import com.c8db.C8Collection;
+import com.c8db.C8Compute;
+import com.c8db.C8ComputeImpl;
 import com.c8db.C8Cursor;
 import com.c8db.C8Database;
 import com.c8db.C8Dynamo;
@@ -493,5 +495,10 @@ public class C8DatabaseImpl extends InternalC8Database<C8DBImpl, C8ExecutorSync>
     @Override
     public C8Dynamo dynamo(String tableName) {
         return new C8DynamoImpl(this, tableName);
+    }
+
+    @Override
+    public C8Compute compute() {
+        return new C8ComputeImpl(this);
     }
 }

@@ -149,6 +149,17 @@ public interface C8DB extends C8SerializationAccessor {
         }
 
         /**
+         * Sets the response size in bytes.
+         *
+         * @param responseSizeLimit size in bytes
+         * @return {@link C8DB.Builder}
+         */
+        public Builder responseSizeLimit(final Integer responseSizeLimit) {
+            setResponseSizeLimit(responseSizeLimit);
+            return this;
+        }
+
+        /**
          * Sets the username to use for authentication.
          *
          * @param user the user in the database (default: {@code root})
@@ -621,6 +632,9 @@ public interface C8DB extends C8SerializationAccessor {
             if (hosts.get(Service.C8STREAMS).isEmpty()) {
                 hosts.get(Service.C8STREAMS).addAll(hosts.get(Service.C8DB));
             }
+            if (hosts.get(Service.C8FUNCTION).isEmpty()) {
+                hosts.get(Service.C8FUNCTION).addAll(hosts.get(Service.C8DB));
+            }
             final HostDescription auxHost = hosts.get(Service.C8DB).get(0);
             final VPack vpacker = vpackBuilder.serializeNullValues(false).build();
             final VPack vpackerNull = vpackBuilder.serializeNullValues(true).build();
@@ -642,7 +656,7 @@ public interface C8DB extends C8SerializationAccessor {
             if (protocol == null || Protocol.VST == protocol) {
                 connectionFactory = new VstConnectionFactorySync(host, timeout, connectionTtl, useSsl, sslContext);
             } else {
-                connectionFactory = new HttpConnectionFactory(timeout, user, password, secretProvider, email, jwtAuth, jwtToken, useSsl,
+                connectionFactory = new HttpConnectionFactory(timeout, responseSizeLimit, user, password, secretProvider, email, jwtAuth, jwtToken, useSsl,
                     sslContext, custom, protocol, connectionTtl, httpCookieSpec, apiKey, auxHost);
             }
             final Map<Service, Collection<Host>> hostsMatrix = createHostMatrix(max, connectionFactory);

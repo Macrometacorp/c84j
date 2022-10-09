@@ -32,23 +32,25 @@ public class HttpConnectionFactory implements ConnectionFactory {
 
     private final HttpConnection.Builder builder;
 
-    public HttpConnectionFactory(final Integer timeout, final String user, final String password, final String email,
-            final Boolean jwtAuth, final Boolean useSsl, final SSLContext sslContext, final C8Serialization util,
-            final Protocol protocol, final Long connectionTtl, String httpCookieSpec, final String jwtToken, final String apiKey,
+    public HttpConnectionFactory(final Integer timeout, final Integer responseSizeLimit, final String user,
+                                 final String password, final String email, final Boolean jwtAuth, final Boolean useSsl,
+                                 final SSLContext sslContext, final C8Serialization util, final Protocol protocol,
+                                 final Long connectionTtl, String httpCookieSpec, final String jwtToken, final String apiKey,
                                  final HostDescription auxiliaryHost) {
         super();
-        builder = new HttpConnection.Builder().timeout(timeout).user(user).password(password).email(email)
+        builder = new HttpConnection.Builder().timeout(timeout).responseSizeLimit(responseSizeLimit).user(user)
+                .password(password).email(email)
                 .jwtAuthEnabled(jwtAuth).useSsl(useSsl).sslContext(sslContext).serializationUtil(util)
                 .contentType(protocol).ttl(connectionTtl).httpCookieSpec(httpCookieSpec).jwt(jwtToken)
                 .apiKey(apiKey).auxHost(auxiliaryHost);
     }
 
-    public HttpConnectionFactory(final Integer timeout, final String user, final String password,
+    public HttpConnectionFactory(final Integer timeout, final Integer responseSizeLimit, final String user, final String password,
         SecretProvider secretProvider, final String email, final Boolean jwtAuth, final String jwtToken, final Boolean useSsl,
         final SSLContext sslContext, final C8Serialization util, final Protocol protocol, final Long connectionTtl,
         String httpCookieSpec, final String apiKey, final HostDescription auxiliaryHost) {
         super();
-        builder = new HttpConnection.Builder().timeout(timeout).secretProvider(secretProvider).email(email)
+        builder = new HttpConnection.Builder().timeout(timeout).responseSizeLimit(responseSizeLimit).secretProvider(secretProvider).email(email)
             .jwtAuthEnabled(jwtAuth).jwt(jwtToken).useSsl(useSsl).sslContext(sslContext).serializationUtil(util)
             .contentType(protocol).ttl(connectionTtl).httpCookieSpec(httpCookieSpec)
             .apiKey(apiKey).auxHost(auxiliaryHost).user(user).password(password);
