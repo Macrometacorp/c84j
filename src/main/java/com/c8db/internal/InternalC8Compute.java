@@ -25,9 +25,9 @@ import java.util.Map;
 public abstract class InternalC8Compute<A extends InternalC8DB<E>, D extends InternalC8Database<A, E>, E extends C8Executor>
     extends C8Executeable<E> {
 
-    protected static final String PATH_API_COMPUTE = "/_api/compute";
-    protected static final String PATH_API_FX = PATH_API_COMPUTE + "/fx";
+    protected static final String PATH_API_FX = "/_api/function";
     protected static final String METADATA = "metadata";
+    protected static final String INVOKE = "invoke";
 
     private final D db;
 
@@ -89,7 +89,7 @@ public abstract class InternalC8Compute<A extends InternalC8DB<E>, D extends Int
 
     protected Request executeFunctionRequest(String name, Map<String, Object> arguments) {
         final VPackSlice body = util().serialize(arguments);
-        final Request request = request(db.tenant(), db.name(), RequestType.POST, PATH_API_FX, "invoke", name);
+        final Request request = request(db.tenant(), db.name(), RequestType.POST, PATH_API_FX, INVOKE, name);
         request.putQueryParam("params", body.toString());
         return request;
     }
