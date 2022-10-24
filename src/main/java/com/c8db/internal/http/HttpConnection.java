@@ -249,6 +249,11 @@ public class HttpConnection implements Connection {
             httpRequest.setHeader("Accept", "application/x-velocypack");
         }
         httpRequest.setHeader("x-gdn-tenantid", request.getTenant());
+        // TODO: it is temporal solution for FaaS server.
+        // "internalRequest" will be changed to encoded value to make sure that this call was made inside of cluster
+        if (StringUtils.isNotEmpty(System.getenv("C8_SVCUSER"))) {
+            httpRequest.setHeader("x-c8-requester", "internalRequest");
+        }
         addHeader(request, httpRequest);
         if (jwtAuthEnabled) {
             updateJWT();
