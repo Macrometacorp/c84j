@@ -69,25 +69,30 @@ import java.util.Map;
 public abstract class InternalC8Database<A extends InternalC8DB<E>, E extends C8Executor>
         extends C8Executeable<E> {
 
-    protected static final String PATH_API_DATABASE = "/database";
+    protected static final String PATH_API_DATABASE = "/_api/database";
     protected static final String PATH_API_DCLIST = "/datacenter";
     protected static final String PATH_API_TENANT = "/_tenant";
     protected static final String PATH_API_USER = "/_api/user";
     protected static final String PATH_API_VERSION = "/_admin/version";
     protected static final String PATH_API_STREAMS = "/_api/streams";
+    // TODO: doesnt exist in API Reference. Should it be removed?
     protected static final String PATH_API_TRANSACTION = "/transaction";
-    protected static final String PATH_API_CURSOR = "/cursor";
-    protected static final String PATH_API_QUERY = "/query";
+    protected static final String PATH_API_CURSOR = "/_api/cursor";
+    protected static final String PATH_API_QUERY = "/_api/query";
+    // TODO: doesnt exist in API Reference. Should it be removed?
     protected static final String PATH_API_QUERY_CURRENT = "/query/current";
     protected static final String PATH_API_EXPLAIN = "explain";
+    // TODO: doesnt exist in API Reference. Should it be removed?
     protected static final String PATH_API_QUERY_SLOW = "/query/slow";
+    // TODO: doesnt exist in API Reference. Should it be removed?
     protected static final String PATH_API_QUERY_PROPERTIES = "/query/properties";
-    protected static final String PATH_API_USER_QUERIES = "/restql";
+    protected static final String PATH_API_USER_QUERIES = "/_api/restql";
 
     protected static final String QUERY_PARAM_GLOBAL = "global";
     protected static final String QUERY_PARAM_FULL = "full";
-
+    // TODO: doesnt exist in API Reference. Should it be removed?
     private static final String PATH_API_BEGIN_STREAM_TRANSACTION = "/_api/transaction/begin";
+    // TODO: doesnt exist in API Reference. Should it be removed?
     private static final String PATH_API_TRAVERSAL = "/_api/traversal";
 
     private final String tenant;
