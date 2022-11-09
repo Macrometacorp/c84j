@@ -72,9 +72,9 @@ public abstract class InternalC8Collection<A extends InternalC8DB<E>, D extends 
 
     private static final String COLLECTION_QUERY_PARAM = "collection";
 
-    protected static final String PATH_API_COLLECTION = "/collection";
-    protected static final String PATH_API_DOCUMENT = "/document";
-    protected static final String PATH_API_INDEX = "/index";
+    protected static final String PATH_API_COLLECTION = "/_api/collection";
+    protected static final String PATH_API_DOCUMENT = "/_api/document";
+    protected static final String PATH_API_INDEX = "/_api/index";
 
     private static final String MERGE_OBJECTS = "mergeObjects";
     private static final String IGNORE_REVS = "ignoreRevs";

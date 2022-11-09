@@ -34,8 +34,8 @@ public abstract class InternalC8Admin<A extends InternalC8DB<E>, D extends Inter
 
     protected static final String PATH_API_TENANTS = "/_api/tenants";
     protected static final String PATH_API_TENANT = "/_api/tenant";
-    protected static final String PATH_API_FEATURES = "/features";
-    protected static final String PATH_API_LIMITS = "/limits";
+    protected static final String PATH_API_FEATURES = "/_api/features";
+    protected static final String PATH_API_LIMITS = "/_api/limits";
     protected static final String PATH_ENABLE = "enable";
     protected static final String PATH_TENANT = "tenant";
     protected static final String PATH_API_METRICS = "/_api/metrics/query";

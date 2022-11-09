@@ -36,7 +36,7 @@ import com.c8db.velocystream.Response;
 public abstract class InternalC8Event<A extends InternalC8DB<E>, D extends InternalC8Database<A, E>, E extends C8Executor>
         extends C8Executeable<E> {
 
-    protected static final String PATH_API_EVENT = "/events";
+    protected static final String PATH_API_EVENT = "/_api/events";
 
     private static final String RETURN_OLD = "returnOld";
     private static final String SILENT = "silent";
