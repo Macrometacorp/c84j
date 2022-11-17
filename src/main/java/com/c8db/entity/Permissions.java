@@ -25,15 +25,29 @@ public enum Permissions {
     /**
      * read and write access
      */
-    RW,
+    RW(0),
     /**
      * read-only access
      */
-    RO, NONE,
+    RO(1),
+
+    /*
+     * no access
+     */
+    NONE(2),
 
     /**
      * default access
      */
-    UNDEFINED
+    UNDEFINED(3);
 
+    private final int level;
+
+    private Permissions(int level) {
+        this.level = level;
+    }
+
+    public int getLevel() {
+        return level;
+    }
 }
