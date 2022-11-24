@@ -53,5 +53,5 @@ public interface C8Compute {
      * @return - result of execution of a function.
      * @throws C8DBException
      */
-    Collection<Map<String, Object>> executeFunction(String name, Map<String, Object> arguments) throws C8DBException;
+    Collection<Object> executeFunction(String name, Map<String, Object> arguments) throws C8DBException;
 }
