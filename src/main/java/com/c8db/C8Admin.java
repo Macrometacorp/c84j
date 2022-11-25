@@ -53,7 +53,7 @@ public interface C8Admin extends C8SerializationAccessor {
     TenantEntity getTenant(final String tenant) throws C8DBException;
 
     /**
-     * Returns whether the limits are enebled in the federation.
+     * Returns whether the limits are enabled in the federation.
      *
      * @return <code>true</code> if the limits are enabled, <code>false</code> otherwise.
      * @throws C8DBException
