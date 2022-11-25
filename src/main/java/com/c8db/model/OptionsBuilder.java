@@ -107,13 +107,6 @@ public class OptionsBuilder {
             options.parameter(new HashMap<String,Object> ());
         return options.name(name);
     }
-    
-    public static EventCreateOptions build(final EventCreateOptions options, final String action,
-            final String description, final String entity, final String entityType, final String status,
-            final String details, final Map<String, String> attributes) {
-        return options.description(description).action(action).attributes(attributes).details(details)
-                .entityType(entityType).status(status);
-    }
 
     public static ApiKeyOptions build(final ApiKeyOptions options, final String apiKey) {
         return options.apiKey(apiKey);

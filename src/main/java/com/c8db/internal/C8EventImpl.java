@@ -18,6 +18,7 @@ package com.c8db.internal;
 
 import java.util.Collection;
 
+import com.c8db.entity.C8EventIDEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +27,7 @@ import com.c8db.C8Event;
 import com.c8db.entity.C8EventEntity;
 import com.c8db.model.DocumentDeleteOptions;
 import com.c8db.model.DocumentReadOptions;
-import com.c8db.model.EventCreateOptions;
+import com.c8db.model.C8EventCreate;
 
 /**
  */
@@ -39,13 +40,8 @@ public class C8EventImpl extends InternalC8Event<C8DBImpl, C8DatabaseImpl, C8Exe
     }
 
     @Override
-    public <T> C8EventEntity insertEvent(T value) throws C8DBException {
-        return insertEvent(value, new EventCreateOptions());
-    }
-
-    @Override
-    public <T> C8EventEntity insertEvent(T value, EventCreateOptions options) throws C8DBException {
-        return executor.execute(insertEventRequest(value, options), insertEventResponseDeserializer(value, options));
+    public C8EventIDEntity insertEvent(C8EventCreate value) throws C8DBException {
+        return executor.execute(insertEventRequest(value), insertEventResponseDeserializer());
     }
 
     @Override
@@ -77,19 +73,18 @@ public class C8EventImpl extends InternalC8Event<C8DBImpl, C8DatabaseImpl, C8Exe
     }
 
     @Override
-    public Collection<C8EventEntity> getEvents(Collection<String> keys) throws C8DBException {
+    public Collection<C8EventEntity> getEvents() throws C8DBException {
         return executor.execute(getEventsRequest(), getEventsResponseDeserializer());
     }
 
     @Override
-    public void deleteEvent(String key) throws C8DBException {
-        executor.execute(deleteEventRequest(key, new DocumentDeleteOptions()), Void.class);
-
+    public C8EventIDEntity deleteEvent(String key) throws C8DBException {
+        return executor.execute(deleteEventRequest(key, new DocumentDeleteOptions()), deleteEventResponseDeserializer());
     }
 
     @Override
-    public void deleteEvents(Collection<?> values) throws C8DBException {
-        executor.execute(deleteEventsRequest(values, new DocumentDeleteOptions()), Void.class);
+    public Collection<C8EventIDEntity> deleteEvents(Collection<?> keys) throws C8DBException {
+        return executor.execute(deleteEventsRequest(keys, new DocumentDeleteOptions()), deleteEventsResponseDeserializer());
     }
 
 }

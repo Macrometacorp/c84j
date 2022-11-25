@@ -17,16 +17,16 @@
 package com.c8db.internal;
 
 import java.util.Collection;
+import java.util.Collections;
 
 import com.arangodb.velocypack.Type;
 import com.arangodb.velocypack.exception.VPackException;
 import com.c8db.entity.C8EventEntity;
+import com.c8db.entity.C8EventIDEntity;
 import com.c8db.internal.C8Executor.ResponseDeserializer;
-import com.c8db.internal.util.C8SerializationFactory.Serializer;
-import com.c8db.model.DocumentCreateOptions;
 import com.c8db.model.DocumentDeleteOptions;
 import com.c8db.model.DocumentReadOptions;
-import com.c8db.model.EventCreateOptions;
+import com.c8db.model.C8EventCreate;
 import com.c8db.velocystream.Request;
 import com.c8db.velocystream.RequestType;
 import com.c8db.velocystream.Response;
@@ -52,18 +52,36 @@ public abstract class InternalC8Event<A extends InternalC8DB<E>, D extends Inter
         return db;
     }
 
-    protected <T> Request insertEventRequest(final T value, final EventCreateOptions options) {
+    protected Request insertEventRequest(final C8EventCreate value) {
         final Request request = request(db.tenant(), db.name(), RequestType.POST, PATH_API_EVENT);
-        request.setBody(util(Serializer.CUSTOM).serialize(value));
+        request.setBody(util().serialize(value));
         return request;
     }
 
-    protected <T> ResponseDeserializer<C8EventEntity> insertEventResponseDeserializer(final T value,
-            final EventCreateOptions options) {
-        return new ResponseDeserializer<C8EventEntity>() {
+    protected ResponseDeserializer<C8EventIDEntity> insertEventResponseDeserializer() {
+        return new ResponseDeserializer<C8EventIDEntity>() {
             @Override
-            public C8EventEntity deserialize(final Response response) throws VPackException {
-                return util().deserialize(response.getBody(), C8EventEntity.class);
+            public C8EventIDEntity deserialize(final Response response) throws VPackException {
+                return util().deserialize(response.getBody(), C8EventIDEntity.class);
+            }
+        };
+    }
+
+    protected ResponseDeserializer<Collection<C8EventIDEntity>> deleteEventsResponseDeserializer() {
+        return new ResponseDeserializer<Collection<C8EventIDEntity>>() {
+            @Override
+            public Collection<C8EventIDEntity> deserialize(final Response response) throws VPackException {
+                return util().deserialize(response.getBody(), new Type<Collection<C8EventIDEntity>>() {}.getType());
+            }
+        };
+    }
+
+    protected ResponseDeserializer<C8EventIDEntity> deleteEventResponseDeserializer() {
+        return new ResponseDeserializer<C8EventIDEntity>() {
+            @Override
+            public C8EventIDEntity deserialize(final Response response) throws VPackException {
+                Collection<C8EventIDEntity> coll = util().deserialize(response.getBody(), new Type<Collection<C8EventIDEntity>>() {}.getType());
+                return coll != null && coll.size() > 0 ? coll.iterator().next() : null;
             }
         };
     }
@@ -92,12 +110,13 @@ public abstract class InternalC8Event<A extends InternalC8DB<E>, D extends Inter
     }
 
     protected Request deleteEventRequest(final String key, final DocumentDeleteOptions options) {
-        final Request request = request(db.tenant(), db.name(), RequestType.DELETE, PATH_API_EVENT, key);
+        final Request request = request(db.tenant(), db.name(), RequestType.DELETE, PATH_API_EVENT);
         final DocumentDeleteOptions params = (options != null ? options : new DocumentDeleteOptions());
         request.putHeaderParam(C8RequestParam.IF_MATCH, params.getIfMatch());
         request.putQueryParam(C8RequestParam.WAIT_FOR_SYNC, params.getWaitForSync());
         request.putQueryParam(RETURN_OLD, params.getReturnOld());
         request.putQueryParam(SILENT, params.getSilent());
+        request.setBody(util().serialize(Collections.singletonList(key)));
         return request;
     }
 
