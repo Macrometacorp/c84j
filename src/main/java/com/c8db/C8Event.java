@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
+ * Modifications copyright (c) 2021 Macrometa Corp All rights reserved.
+ *
  */
 
 package com.c8db;
@@ -20,8 +22,9 @@ package com.c8db;
 import java.util.Collection;
 
 import com.c8db.entity.C8EventEntity;
+import com.c8db.entity.C8EventIDEntity;
 import com.c8db.model.DocumentReadOptions;
-import com.c8db.model.EventCreateOptions;
+import com.c8db.model.C8EventCreate;
 
 /**
  * Interface for operations on C8DB events level.
@@ -41,32 +44,16 @@ public interface C8Event extends C8SerializationAccessor {
      * document with the _key given. If no _key is given, a new unique _key is
      * generated automatically.
      *
-     * @param value A representation of a single document (POJO, VPackSlice or
-     *              String for JSON)
-     * @return information about the document
+     * @param value object of C8EventCreate
+     * @return id, key and revision  about the document
      * @throws C8DBException
      */
-    <T> C8EventEntity insertEvent(T value) throws C8DBException;
-
-    /**
-     * Creates a new document from the given document, unless there is already a
-     * document with the _key given. If no _key is given, a new unique _key is
-     * generated automatically.
-     *
-     * @param value   A representation of a single document (POJO, VPackSlice or
-     *                String for JSON)
-     * @param options Additional options, can be null
-     * @return information about the document
-     * @throws C8DBException
-     */
-    <T> C8EventEntity insertEvent(T value, EventCreateOptions options) throws C8DBException;
+    C8EventIDEntity insertEvent(C8EventCreate value) throws C8DBException;
 
     /**
      * Retrieves the document with the given {@code key} from the collection.
      *
      * @param key  The key of the document
-     * @param type The type of the document (POJO class, VPackSlice or String for
-     *             JSON)
      * @return the document identified by the key
      * @throws C8DBException
      */
@@ -76,8 +63,6 @@ public interface C8Event extends C8SerializationAccessor {
      * Retrieves the document with the given {@code key} from the collection.
      *
      * @param key     The key of the document
-     * @param type    The type of the document (POJO class, VPackSlice or String for
-     *                JSON)
      * @param options Additional options, can be null
      * @return the document identified by the key
      * @throws C8DBException
@@ -87,28 +72,27 @@ public interface C8Event extends C8SerializationAccessor {
     /**
      * Retrieves multiple documents with the given {@code _key} from the collection.
      *
-     * @param keys The keys of the documents
-     * @param type The type of the documents (POJO class, VPackSlice or String for
-     *             JSON)
      * @return the documents and possible errors
      * @throws C8DBException
      */
-    Collection<C8EventEntity> getEvents(Collection<String> keys) throws C8DBException;
+    Collection<C8EventEntity> getEvents() throws C8DBException;
 
     /**
      * Deletes the document with the given {@code key} from the collection.
      *
      * @param key The key of the document
+     * @return id, key and revision  about the document
      * @throws C8DBException
      */
-    void deleteEvent(String key) throws C8DBException;
+    C8EventIDEntity deleteEvent(String key) throws C8DBException;
 
     /**
      * Deletes multiple documents from the collection.
      *
-     * @param values The keys of the documents or the documents themselves
+     * @param keys The keys of the documents or the documents themselves
+     * @return list of C8EventIDEntity objects
      * @throws C8DBException
      */
-    void deleteEvents(Collection<?> values) throws C8DBException;
+    Collection<C8EventIDEntity> deleteEvents(Collection<?> keys) throws C8DBException;
 
 }
