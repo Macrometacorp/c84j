@@ -17,6 +17,7 @@ import com.c8db.velocystream.Response;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 
 /**
@@ -94,15 +95,16 @@ public abstract class InternalC8Compute<A extends InternalC8DB<E>, D extends Int
         return request;
     }
 
-    protected ResponseDeserializer<Collection<Map<String, Object>>> executeFunctionResponseDeserializer() {
-        return new ResponseDeserializer<Collection<Map<String, Object>>>() {
+    protected ResponseDeserializer<Collection<Object>> executeFunctionResponseDeserializer() {
+        return new ResponseDeserializer<Collection<Object>>() {
             @Override
-            public Collection<Map<String, Object>> deserialize(final Response response) throws VPackException {
+            public Collection<Object> deserialize(final Response response) throws VPackException {
                 final VPackSlice result = response.getBody();
                 if (result.isArray()) {
-                    return util().deserialize(result, new Type<Collection<Map<String, Object>>>(){}.getType());
+                    return util().deserialize(result, new Type<Collection<Object>>(){}.getType());
                 } else {
-                    return Arrays.asList(util().deserialize(result, new Type<Map<String, Object>>(){}.getType()));
+                    Map<String, Object> map = util().deserialize(result, new Type<Map<String, Object>>(){}.getType());
+                    return Collections.singletonList(map);
                 }
             }
         };
