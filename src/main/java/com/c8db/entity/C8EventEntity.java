@@ -17,16 +17,26 @@
 
 package com.c8db.entity;
 
+import com.arangodb.velocypack.annotations.SerializedName;
+import lombok.Data;
+
 import java.util.Map;
 
 /**
  *
  */
+@Data
 public class C8EventEntity implements Entity {
 
-    private String _key;
+    @SerializedName("_id")
+    private String id;
+    @SerializedName("_key")
+    private String key;
+    @SerializedName("_rev")
+    private String revision;
     private String status;
     private String description;
+    private String clusterID;
     private String email;
     private String entityName;
     private String entityType;
@@ -35,102 +45,6 @@ public class C8EventEntity implements Entity {
     private String user;
     private String details;
     private String action;
-    private Map<String, String> attributes;
-
-    public String get_key() {
-        return _key;
-    }
-
-    public void set_key(String _key) {
-        this._key = _key;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getEntityType() {
-        return entityType;
-    }
-
-    public void setEntityType(String entityType) {
-        this.entityType = entityType;
-    }
-
-    public String getEntityName() {
-        return entityName;
-    }
-
-    public void setEntityName(String entityName) {
-        this.entityName = entityName;
-    }
-
-    public String getFabric() {
-        return fabric;
-    }
-
-    public void setFabric(String fabric) {
-        this.fabric = fabric;
-    }
-
-    public String getTenant() {
-        return tenant;
-    }
-
-    public void setTenant(String tenant) {
-        this.tenant = tenant;
-    }
-
-    public String getUser() {
-        return user;
-    }
-
-    public void setUser(String user) {
-        this.user = user;
-    }
-
-    public String getDetails() {
-        return details;
-    }
-
-    public void setDetails(String details) {
-        this.details = details;
-    }
-
-    public String getAction() {
-        return action;
-    }
-
-    public void setAction(String action) {
-        this.action = action;
-    }
-
-    public Map<String, String> getAttributes() {
-        return attributes;
-    }
-
-    public void setAttributes(Map<String, String> attributes) {
-        this.attributes = attributes;
-    }
+    private Map<String, Object> attributes;
 
 }
