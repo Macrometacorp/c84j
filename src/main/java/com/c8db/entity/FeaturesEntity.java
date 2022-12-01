@@ -33,6 +33,10 @@ public class FeaturesEntity implements Entity {
     private Boolean computeEnabled;
     @SerializedName("LOCAL_COLLECTIONS")
     private Boolean localCollectionsEnabled;
+    @SerializedName("STREAM_IO_CONNECTORS")
+    private Boolean streamConnectorsEnabled;
+    @SerializedName("DATA_MESH_INTEGRATION")
+    private Boolean dataMeshIntegrationsEnabled;
 
     public FeaturesEntity() {
         super();
@@ -82,4 +86,11 @@ public class FeaturesEntity implements Entity {
         return localCollectionsEnabled;
     }
 
+    public Boolean isStreamConnectorsEnabled() {
+        return streamConnectorsEnabled;
+    }
+
+    public Boolean isDataMeshIntegrationsEnabled() {
+        return dataMeshIntegrationsEnabled;
+    }
 }
