@@ -307,7 +307,7 @@ public class HttpConnection implements Connection {
 
         for (int currentWaitTime = INITIAL_SLEEP_TIME_SEC; currentWaitTime <= MAX_SLEEP_TIME_SEC; currentWaitTime *= SLEEP_TIME_MULTIPLIER) {
             try {
-                LOGGER.info(String.format("Retrying connection to C8DB in %d seconds...", currentWaitTime));
+                LOGGER.info(String.format("Retrying request to %s in %d seconds...", service.name(), currentWaitTime));
                 Thread.sleep(currentWaitTime * 1000);
                 response = buildResponse(client.execute(httpRequest));
                 checkError(response);
