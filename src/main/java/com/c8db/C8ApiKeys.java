@@ -70,6 +70,13 @@ public interface C8ApiKeys extends C8SerializationAccessor {
      */
     ApiKeyCreateEntity createApiKey(final String keyId);
 
+    /**
+     * Deletes an APIKey using given keyid.
+     *
+     * @param keyId Key id for the apiKey to be deleted.
+     */
+    void deleteApiKey(final String keyId);
+
     // TODO: Implement other required apikeys features.
 
 }

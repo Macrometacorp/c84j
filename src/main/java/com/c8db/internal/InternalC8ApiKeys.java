@@ -130,6 +130,10 @@ public abstract class InternalC8ApiKeys<A extends InternalC8DB<E>, D extends Int
         return request;
     }
 
+    protected Request deleteApiKeyRequest(final String keyId) {
+        return request(null, null, RequestType.DELETE, PATH_API_KEY, keyId);
+    }
+
     protected ResponseDeserializer<ApiKeyCreateEntity> createApiKeyResponseDeserializer() {
         return new ResponseDeserializer<ApiKeyCreateEntity>() {
             @Override
