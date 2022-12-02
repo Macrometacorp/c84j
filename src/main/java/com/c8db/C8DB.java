@@ -642,18 +642,18 @@ public interface C8DB extends C8SerializationAccessor {
             final int max = maxConnections != null ? Math.max(1, maxConnections) : protocolMaxConnections;
 
             final ConnectionFactory connectionFactory = (protocol == null || Protocol.VST == protocol)
-                    ? new VstConnectionFactorySync(host, timeout, connectionTtl, useSsl, sslContext)
+                    ? new VstConnectionFactorySync(timeout, connectionTtl, useSsl, sslContext)
                     : new HttpConnectionFactory(timeout, responseSizeLimit, user, password, email, jwtAuth, useSsl, sslContext, custom, protocol,
                             connectionTtl, httpCookieSpec, jwtToken, apiKey, hosts.get(Service.C8DB).get(0));
 
             final Map<Service, Collection<Host>> hostsMatrix = createHostMatrix(max, connectionFactory);
             final HostResolver hostResolver = createHostResolver(hostsMatrix, max, connectionFactory);
-            final HostHandler hostHandler = createHostHandler(hostResolver);
+            final Map<Service, HostHandler> hostHandlerMatrix = createHostHandlerMatrix(hostResolver);
             return new C8DBImpl(
-                    new VstCommunicationSync.Builder(hostHandler).timeout(timeout).user(user).password(password)
+                    new VstCommunicationSync.Builder(hostHandlerMatrix).timeout(timeout).user(user).password(password)
                             .useSsl(useSsl).sslContext(sslContext).chunksize(chunksize).maxConnections(maxConnections)
                             .connectionTtl(connectionTtl),
-                    new HttpCommunication.Builder(hostHandler), util, protocol, hostResolver, new C8Context());
+                    new HttpCommunication.Builder(hostHandlerMatrix), util, protocol, hostResolver, new C8Context());
         }
 
     }

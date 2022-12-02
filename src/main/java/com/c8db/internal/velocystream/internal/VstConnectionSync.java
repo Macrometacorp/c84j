@@ -24,6 +24,7 @@ import java.util.concurrent.TimeUnit;
 import javax.net.ssl.SSLContext;
 
 import com.c8db.C8DBException;
+import com.c8db.Service;
 import com.c8db.internal.net.HostDescription;
 
 /**
@@ -39,6 +40,7 @@ public class VstConnectionSync extends VstConnection {
         private Long ttl;
         private Boolean useSsl;
         private SSLContext sslContext;
+        private Service service;
 
         public Builder host(final HostDescription host) {
             this.host = host;
@@ -70,14 +72,19 @@ public class VstConnectionSync extends VstConnection {
             return this;
         }
 
+        public Builder service(final Service service) {
+            this.service = service;
+            return this;
+        }
+
         public VstConnectionSync build() {
-            return new VstConnectionSync(host, timeout, ttl, useSsl, sslContext, messageStore);
+            return new VstConnectionSync(host, timeout, ttl, useSsl, sslContext, messageStore, service);
         }
     }
 
     private VstConnectionSync(final HostDescription host, final Integer timeout, final Long ttl, final Boolean useSsl,
-            final SSLContext sslContext, final MessageStore messageStore) {
-        super(host, timeout, ttl, useSsl, sslContext, messageStore);
+            final SSLContext sslContext, final MessageStore messageStore, final Service service) {
+        super(host, timeout, ttl, useSsl, sslContext, messageStore, service);
     }
 
     public Message write(final Message message, final Collection<Chunk> chunks) throws C8DBException {
