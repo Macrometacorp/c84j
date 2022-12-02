@@ -93,6 +93,17 @@ public abstract class InternalC8ApiKeys<A extends InternalC8DB<E>, D extends Int
         return request;
     }
 
+    protected Request createApiKeyRequest(final String keyId) {
+        final Request request = request(null, null, RequestType.POST, PATH_API_KEY);
+        request.setBody(util(C8SerializationFactory.Serializer.CUSTOM).serialize(
+                OptionsBuilder.build(new ApiKeyCreateOptions(), keyId)));
+        return request;
+    }
+
+    protected Request deleteApiKeyRequest(final String keyId) {
+        return request(null, null, RequestType.DELETE, PATH_API_KEY, keyId);
+    }
+
     protected ResponseDeserializer<Permissions> streamAccessLevelResponseDeserializer() {
         return new ResponseDeserializer<Permissions>() {
             @Override
@@ -121,17 +132,6 @@ public abstract class InternalC8ApiKeys<A extends InternalC8DB<E>, D extends Int
                 return util().deserialize(result, new Type<Map<String, Permissions>>(){}.getType());
             }
         };
-    }
-
-    protected Request createApiKeyRequest(final String keyId) {
-        final Request request = request(null, null, RequestType.POST, PATH_API_KEY);
-        request.setBody(util(C8SerializationFactory.Serializer.CUSTOM).serialize(
-                OptionsBuilder.build(new ApiKeyCreateOptions(), keyId)));
-        return request;
-    }
-
-    protected Request deleteApiKeyRequest(final String keyId) {
-        return request(null, null, RequestType.DELETE, PATH_API_KEY, keyId);
     }
 
     protected ResponseDeserializer<ApiKeyCreateEntity> createApiKeyResponseDeserializer() {
