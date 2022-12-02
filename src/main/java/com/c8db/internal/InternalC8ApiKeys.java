@@ -7,11 +7,13 @@ package com.c8db.internal;
 import com.arangodb.velocypack.Type;
 import com.arangodb.velocypack.VPackSlice;
 import com.arangodb.velocypack.exception.VPackException;
+import com.c8db.entity.ApiKeyCreateEntity;
 import com.c8db.entity.ApiKeyJwtEntity;
 import com.c8db.entity.GeoFabricPermissions;
 import com.c8db.entity.Permissions;
 import com.c8db.internal.C8Executor.ResponseDeserializer;
 import com.c8db.internal.util.C8SerializationFactory;
+import com.c8db.model.ApiKeyCreateOptions;
 import com.c8db.model.ApiKeyOptions;
 import com.c8db.model.JwtOptions;
 import com.c8db.model.OptionsBuilder;
@@ -117,6 +119,23 @@ public abstract class InternalC8ApiKeys<A extends InternalC8DB<E>, D extends Int
             public Map<String, Permissions> deserialize(final Response response) throws VPackException {
                 final VPackSlice result = response.getBody().get(C8ResponseField.RESULT);
                 return util().deserialize(result, new Type<Map<String, Permissions>>(){}.getType());
+            }
+        };
+    }
+
+    protected Request createApiKeyRequest(final String keyId) {
+        final Request request = request(null, null, RequestType.POST, PATH_API_KEY);
+        request.setBody(util(C8SerializationFactory.Serializer.CUSTOM).serialize(
+                OptionsBuilder.build(new ApiKeyCreateOptions(), keyId)));
+        return request;
+    }
+
+    protected ResponseDeserializer<ApiKeyCreateEntity> createApiKeyResponseDeserializer() {
+        return new ResponseDeserializer<ApiKeyCreateEntity>() {
+            @Override
+            public ApiKeyCreateEntity deserialize(final Response response) throws VPackException {
+                final VPackSlice result = response.getBody();
+                return util().deserialize(result, new Type<ApiKeyCreateEntity>() {}.getType());
             }
         };
     }
