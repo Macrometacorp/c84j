@@ -49,4 +49,9 @@ public class C8ApiKeysImpl extends InternalC8ApiKeys<C8DBImpl, C8DatabaseImpl, C
         return executor.execute(createApiKeyRequest(keyId), createApiKeyResponseDeserializer());
     }
 
+    @Override
+    public void deleteApiKey(final String keyId) {
+        executor.execute(deleteApiKeyRequest(keyId), Void.class);
+    }
+
 }
