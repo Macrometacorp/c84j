@@ -12,16 +12,15 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
- *  Modifications copyright (c) 2022 Macrometa Corp All rights reserved.
- *
  */
 
 package com.c8db.internal.net;
 
-import com.c8db.Service;
 import java.io.IOException;
 
+/**
+ *
+ */
 public class DirtyReadHostHandler implements HostHandler {
 
     private final HostHandler master;
@@ -36,17 +35,11 @@ public class DirtyReadHostHandler implements HostHandler {
 
     private HostHandler determineHostHandler() {
         switch (currentAccessType) {
-        case DIRTY_READ:
-            return follower;
-        default:
-            return master;
+            case DIRTY_READ:
+                return follower;
+            default:
+                return master;
         }
-    }
-
-    @Override
-    public void applyService(Service service) {
-        follower.applyService(service);
-        master.applyService(service);
     }
 
     @Override

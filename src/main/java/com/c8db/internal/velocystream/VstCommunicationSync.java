@@ -18,6 +18,7 @@ package com.c8db.internal.velocystream;
 
 import javax.net.ssl.SSLContext;
 
+import com.c8db.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,6 +32,8 @@ import com.c8db.util.C8Serialization;
 import com.c8db.velocystream.Request;
 import com.c8db.velocystream.Response;
 
+import java.util.Map;
+
 /**
  *
  */
@@ -40,7 +43,7 @@ public class VstCommunicationSync extends VstCommunication<Response, VstConnecti
 
     public static class Builder {
 
-        private final HostHandler hostHandler;
+        private final Map<Service, HostHandler> hostHandlerMatrix;
         private Integer timeout;
         private Long connectionTtl;
         private String user;
@@ -50,13 +53,13 @@ public class VstCommunicationSync extends VstCommunication<Response, VstConnecti
         private Integer chunksize;
         private Integer maxConnections;
 
-        public Builder(final HostHandler hostHandler) {
+        public Builder(final Map<Service, HostHandler> hostHandlerMatrix) {
             super();
-            this.hostHandler = hostHandler;
+            this.hostHandlerMatrix = hostHandlerMatrix;
         }
 
         public Builder(final Builder builder) {
-            this(builder.hostHandler);
+            this(builder.hostHandlerMatrix);
             timeout(builder.timeout).user(builder.user).password(builder.password).useSsl(builder.useSsl)
                     .sslContext(builder.sslContext).chunksize(builder.chunksize).maxConnections(builder.maxConnections);
         }
@@ -102,16 +105,16 @@ public class VstCommunicationSync extends VstCommunication<Response, VstConnecti
         }
 
         public VstCommunication<Response, VstConnectionSync> build(final C8Serialization util) {
-            return new VstCommunicationSync(hostHandler, timeout, user, password, useSsl, sslContext, util, chunksize,
+            return new VstCommunicationSync(hostHandlerMatrix, timeout, user, password, useSsl, sslContext, util, chunksize,
                     maxConnections, connectionTtl);
         }
 
     }
 
-    protected VstCommunicationSync(final HostHandler hostHandler, final Integer timeout, final String user,
+    protected VstCommunicationSync(final Map<Service, HostHandler> hostHandlerMatrix, final Integer timeout, final String user,
             final String password, final Boolean useSsl, final SSLContext sslContext, final C8Serialization util,
             final Integer chunksize, final Integer maxConnections, final Long ttl) {
-        super(timeout, user, password, useSsl, sslContext, util, chunksize, hostHandler);
+        super(timeout, user, password, useSsl, sslContext, util, chunksize, hostHandlerMatrix);
     }
 
     @Override

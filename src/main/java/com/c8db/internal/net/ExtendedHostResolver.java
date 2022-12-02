@@ -107,13 +107,13 @@ public class ExtendedHostResolver implements HostResolver {
                     final String[] s = endpoint.replaceAll(".*://", "").split(":");
                     if (s.length == 2) {
                         final HostDescription description = new HostDescription(s[0], Integer.valueOf(s[1]));
-                        hosts.addHost(HostUtils.createHost(description, maxConnections, connectionFactory));
+                        hosts.addHost(HostUtils.createHost(description, maxConnections, connectionFactory, service));
                     } else if (s.length == 4) {
                         // IPV6 Address - TODO: we need a proper function to resolve AND support IPV4 &
                         // IPV6 functions
                         // globally
                         final HostDescription description = new HostDescription("127.0.0.1", Integer.valueOf(s[3]));
-                        hosts.addHost(HostUtils.createHost(description, maxConnections, connectionFactory));
+                        hosts.addHost(HostUtils.createHost(description, maxConnections, connectionFactory, service));
                     } else {
                         LOGGER.warn("Skip Endpoint (Missing Port)" + endpoint);
                     }

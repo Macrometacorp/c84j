@@ -19,6 +19,8 @@ package com.c8db.internal.http;
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.SocketException;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.c8db.Service;
 import org.slf4j.Logger;
@@ -46,43 +48,47 @@ public class HttpCommunication implements Closeable {
 
     public static class Builder {
 
-        private final HostHandler hostHandler;
+        private final Map<Service, HostHandler> hostHandlerMatrix;
 
-        public Builder(final HostHandler hostHandler) {
+        public Builder(final Map<Service, HostHandler> hostHandlerMatrix) {
             super();
-            this.hostHandler = hostHandler;
+            this.hostHandlerMatrix = hostHandlerMatrix;
         }
 
         public Builder(final Builder builder) {
-            this(builder.hostHandler);
+            this(builder.hostHandlerMatrix);
         }
 
         public HttpCommunication build(final C8Serialization util) {
-            return new HttpCommunication(hostHandler);
+            return new HttpCommunication(hostHandlerMatrix);
         }
     }
 
-    private final HostHandler hostHandler;
+    private final Map<Service, HostHandler> hostHandlerMatrix;
 
-    private HttpCommunication(final HostHandler hostHandler) {
+    private HttpCommunication(final Map<Service, HostHandler> hostHandlerMatrix) {
         super();
-        this.hostHandler = hostHandler;
+        this.hostHandlerMatrix = hostHandlerMatrix;
     }
 
     @Override
     public void close() throws IOException {
-        hostHandler.close();
+        for (HostHandler hostHandler : hostHandlerMatrix.values()) {
+            hostHandler.close();
+        }
     }
+
+    private AtomicInteger c = new AtomicInteger(0);
 
     public Response execute(final Request request, final HostHandle hostHandle, Service service) throws C8DBException, IOException {
         final AccessType accessType = RequestUtils.determineAccessType(request);
-        hostHandler.applyService(service);
+        HostHandler hostHandler = hostHandlerMatrix.get(service);
         Host host = hostHandler.get(hostHandle, accessType);
         try {
             while (true) {
                 try {
                     final HttpConnection connection = (HttpConnection) host.connection();
-                    final Response response = connection.execute(request, service);
+                    final Response response = connection.execute(request);
                     hostHandler.success();
                     hostHandler.confirm();
                     return response;
