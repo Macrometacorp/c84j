@@ -5,6 +5,7 @@
 package com.c8db.internal;
 
 import com.c8db.C8ApiKeys;
+import com.c8db.entity.ApiKeyCreateEntity;
 import com.c8db.entity.ApiKeyJwtEntity;
 import com.c8db.entity.GeoFabricPermissions;
 import com.c8db.entity.Permissions;
@@ -47,4 +48,15 @@ public class C8ApiKeysImpl extends InternalC8ApiKeys<C8DBImpl, C8DatabaseImpl, C
     public Permissions getStreamPermissions(String keyId, String stream) {
         return executor.execute(streamAccessLevelRequest(keyId, stream), streamAccessLevelResponseDeserializer());
     }
+
+    @Override
+    public ApiKeyCreateEntity createApiKey(final String keyId) {
+        return executor.execute(createApiKeyRequest(keyId), createApiKeyResponseDeserializer());
+    }
+
+    @Override
+    public void deleteApiKey(final String keyId) {
+        executor.execute(deleteApiKeyRequest(keyId), Void.class);
+    }
+
 }
