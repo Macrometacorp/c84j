@@ -58,8 +58,13 @@ public abstract class C8Executeable<E extends C8Executor> {
     }
 
     protected Request request(final String tenant, final String database, final RequestType requestType,
-            final String... path) {
-        final Request request = new Request(tenant, database, requestType, createPath(path));
+                              final String... path) {
+        return request(tenant, database, requestType, true, path);
+    }
+
+    protected Request request(final String tenant, final String database, final RequestType requestType,
+            final boolean retryEnabled, final String... path) {
+        final Request request = new Request(tenant, database, requestType, retryEnabled, createPath(path));
         for (final Entry<String, String> header : context.getHeaderParam().entrySet()) {
             request.putHeaderParam(header.getKey(), header.getValue());
         }

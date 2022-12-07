@@ -90,7 +90,7 @@ public abstract class InternalC8Compute<A extends InternalC8DB<E>, D extends Int
 
     protected Request executeFunctionRequest(String name, Map<String, Object> arguments) {
         final VPackSlice body = util().serialize(arguments);
-        final Request request = request(db.tenant(), db.name(), RequestType.POST, PATH_API_FX, INVOKE, name);
+        final Request request = request(db.tenant(), db.name(), RequestType.POST, false, PATH_API_FX, INVOKE, name);
         request.putQueryParam("params", body.toString());
         return request;
     }

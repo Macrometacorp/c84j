@@ -25,7 +25,6 @@ import org.apache.http.Header;
 import org.apache.http.HeaderElement;
 import org.apache.http.HeaderElementIterator;
 import org.apache.http.HttpEntity;
-import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.NoHttpResponseException;
@@ -75,8 +74,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
 import javax.net.ssl.SSLContext;
 
 public class HttpConnection implements Connection {
@@ -291,7 +288,10 @@ public class HttpConnection implements Connection {
                 response = buildResponse(client.execute(httpRequest));
                 checkError(response);
             } else if (ex.getResponseCode() >= 500) {
-                response = retryRequest(request, httpRequest);
+                if (request.isRetryEnabled()) {
+                    response = retryRequest(request, httpRequest);
+                }
+                checkError(response);
             } else if (ex.getResponseCode() >= 400) {
                 // Handle HTTP Error messages.
                 checkError(response);
