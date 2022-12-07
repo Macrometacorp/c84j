@@ -95,16 +95,16 @@ public abstract class InternalC8Compute<A extends InternalC8DB<E>, D extends Int
         return request;
     }
 
-    protected ResponseDeserializer<Collection<Object>> executeFunctionResponseDeserializer() {
-        return new ResponseDeserializer<Collection<Object>>() {
+    protected ResponseDeserializer<Object> executeFunctionResponseDeserializer() {
+        return new ResponseDeserializer<Object>() {
             @Override
-            public Collection<Object> deserialize(final Response response) throws VPackException {
+            public Object deserialize(final Response response) throws VPackException {
                 final VPackSlice result = response.getBody();
                 if (result.isArray()) {
                     return util().deserialize(result, new Type<Collection<Object>>(){}.getType());
                 } else {
                     Map<String, Object> map = util().deserialize(result, new Type<Map<String, Object>>(){}.getType());
-                    return Collections.singletonList(map);
+                    return map;
                 }
             }
         };
