@@ -40,7 +40,7 @@ public class C8ComputeImpl extends InternalC8Compute<C8DBImpl, C8DatabaseImpl, C
     }
 
     @Override
-    public Collection<Object> executeFunction(String name, Map<String, Object> arguments) throws C8DBException {
+    public Object executeFunction(String name, Map<String, Object> arguments) throws C8DBException {
         return executor.execute(executeFunctionRequest(name, arguments), executeFunctionResponseDeserializer(), null, Service.C8FUNCTION);
     }
 }
