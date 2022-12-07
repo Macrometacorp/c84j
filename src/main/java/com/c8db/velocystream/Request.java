@@ -32,6 +32,7 @@ public class Request {
     private final String tenant;
     private final String database;
     private final RequestType requestType;
+    private final boolean retryEnabled;
     private final String request;
     private final Map<String, String> queryParam;
     private final Map<String, String> headerParam;
@@ -39,14 +40,20 @@ public class Request {
     private VPackSlice body;
 
     public Request(final String tenant, final String database, final RequestType requestType, final String path) {
+        this(tenant, database, requestType, true, path);
+    }
+
+    public Request(final String tenant, final String database, final RequestType requestType, final boolean retryEnabled,
+                   final String path) {
         super();
         this.tenant = tenant;
         this.database = database;
-        this.requestType = requestType;
         this.request = path;
+        this.requestType = requestType;
         body = null;
         queryParam = new HashMap<String, String>();
         headerParam = new HashMap<String, String>();
+        this.retryEnabled = retryEnabled;
     }
 
     public int getVersion() {
@@ -96,6 +103,10 @@ public class Request {
 
     public Map<String, String> getHeaderParam() {
         return headerParam;
+    }
+
+    public boolean isRetryEnabled() {
+        return retryEnabled;
     }
 
     public Request putHeaderParam(final String key, final String value) {
