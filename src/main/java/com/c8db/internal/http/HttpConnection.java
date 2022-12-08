@@ -278,7 +278,10 @@ public class HttpConnection implements Connection {
                 response = ResponseUtils.buildResponse(util, client.execute(httpRequest), contentType);
                 ResponseUtils.checkError(util, response);
             } else if (ex.getResponseCode() >= 500) {
-                response = retryRequest(request, httpRequest);
+                if (request.isRetryEnabled()) {
+                    response = retryRequest(request, httpRequest);
+                }
+                ResponseUtils.checkError(util, response);
             } else if (ex.getResponseCode() >= 400) {
                 // Handle HTTP Error messages.
                 ResponseUtils.checkError(util, response);
