@@ -12,6 +12,7 @@ public class LimitsEntity implements Entity {
 	private Streams streamsLocal, streamsGlobal;
 	private Compute compute;
 	private CEP cep;
+	private DataMeshIntegrations dataMeshIntegration;
 
 	private boolean defaultsEnabled;
 	
@@ -68,5 +69,11 @@ public class LimitsEntity implements Entity {
 		private int maxWorkersThroughputOutMBPerMinute;
 		private int maxCpuSecondsPerMinutePerWorker;
 		private int maxLogsLengthKBPerMinutePerWorker;
+	}
+
+	@Data
+	public static class DataMeshIntegrations {
+		private int maxIntegrationsPerTenant;
+		private int maxConnectorWorkflowsPerTenant;
 	}
 }
