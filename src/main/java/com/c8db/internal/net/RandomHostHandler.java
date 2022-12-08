@@ -25,34 +25,27 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 
+/**
+ *
+ */
 public class RandomHostHandler implements HostHandler {
 
     private final HostResolver resolver;
     private final HostHandler fallback;
+    private final Service service;
     private Host origin;
     private Host current;
-    private Service service;
-    private boolean initialized;
 
-    public RandomHostHandler(final HostResolver resolver, final HostHandler fallback) {
+    public RandomHostHandler(final HostResolver resolver, final HostHandler fallback, final Service service) {
         super();
         this.resolver = resolver;
         this.fallback = fallback;
-    }
-
-    @Override
-    public void applyService(Service service) {
-        if (!initialized || this.service != service) {
-            this.service = service;
-            origin = current = getRandomHost(true, false);
-            initialized = true;
-        }
-        fallback.applyService(service);
+        this.service = service;
+        origin = current = getRandomHost(true, false);
     }
 
     @Override
     public Host get(final HostHandle hostHandle, AccessType accessType) {
-
         if (current == null) {
             origin = current = getRandomHost(false, true);
         }
@@ -88,7 +81,7 @@ public class RandomHostHandler implements HostHandler {
 
     @Override
     public void close() throws IOException {
-        final HostSet hosts = resolver.resolve(service, false, false);
+        final HostSet hosts = resolver.resolve(service,false, false);
         hosts.close();
     }
 

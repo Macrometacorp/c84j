@@ -23,26 +23,24 @@ import com.c8db.Service;
 
 import java.io.IOException;
 
+/**
+ *
+ */
 public class RoundRobinHostHandler implements HostHandler {
 
     private final HostResolver resolver;
-
+    private final Service service;
     private int current;
     private int fails;
     private Host currentHost;
-    private Service service;
 
-    public RoundRobinHostHandler(final HostResolver resolver) {
+    public RoundRobinHostHandler(final HostResolver resolver, final Service service) {
         super();
         this.resolver = resolver;
-        resolver.resolve(Service.C8DB, true, false);
+        this.service = service;
+        resolver.resolve(service, true, false);
         current = 0;
         fails = 0;
-    }
-
-    @Override
-    public void applyService(Service service) {
-        this.service = service;
     }
 
     @Override

@@ -63,7 +63,6 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.ReentrantLock;
 import javax.net.ssl.SSLContext;
 
 public class HttpConnection implements Connection {
@@ -87,13 +86,14 @@ public class HttpConnection implements Connection {
     private final String apiKey;
     private final HostDescription auxHost;
     private final SecretProvider secretProvider;
+    private final Service service;
 
     private HttpConnection(final HostDescription host, final Integer timeout, final Integer responseSizeLimit, final String user, final String password,
         final String email, final Boolean jwtAuthEnabled, final Boolean useSsl,
         final SSLContext sslContext, final C8Serialization util,
         final Protocol contentType, final Long ttl, final String httpCookieSpec,
         final String jwt, final String apiKey, final HostDescription auxHost,
-        final SecretProvider secretProvider) {
+        final SecretProvider secretProvider, final Service service) {
 
         super();
         this.host = host;
@@ -107,6 +107,7 @@ public class HttpConnection implements Connection {
         this.apiKey = apiKey;
         this.auxHost = auxHost;
         this.defaultJWT = jwt;
+        this.service = service;
 
         final RegistryBuilder<ConnectionSocketFactory> registryBuilder = RegistryBuilder
                 .create();
@@ -231,7 +232,7 @@ public class HttpConnection implements Connection {
         client.close();
     }
 
-    public Response execute(final Request request, final Service service) throws C8DBException, IOException {
+    public Response execute(final Request request) throws C8DBException, IOException {
         final String url = buildUrl(RequestUtils.buildBaseUrl(host, useSsl), request, service);
         final HttpRequestBase httpRequest = RequestUtils.buildHttpRequestBase(request, url, contentType);
         httpRequest.setHeader(HttpHeaders.USER_AGENT,
@@ -354,6 +355,7 @@ public class HttpConnection implements Connection {
         private String apiKey;
         private HostDescription auxHost;
         private SecretProvider secretProvider;
+        private Service service;
 
         public Builder user(final String user) {
             this.user = user;
@@ -440,9 +442,14 @@ public class HttpConnection implements Connection {
             return this;
         }
 
+        public Builder service(final Service service) {
+            this.service = service;
+            return this;
+        }
+
         public HttpConnection build() {
             return new HttpConnection(host, timeout, responseSizeLimit, user, password, email, jwtAuthEnabled, useSsl, sslContext, util,
-                    contentType, ttl, httpCookieSpec, jwt, apiKey, auxHost, secretProvider);
+                    contentType, ttl, httpCookieSpec, jwt, apiKey, auxHost, secretProvider, service);
         }
     }
 
