@@ -18,6 +18,7 @@ package com.c8db.internal.velocystream;
 
 import javax.net.ssl.SSLContext;
 
+import com.c8db.Service;
 import com.c8db.internal.net.Connection;
 import com.c8db.internal.net.ConnectionFactory;
 import com.c8db.internal.net.HostDescription;
@@ -31,7 +32,7 @@ public class VstConnectionFactorySync implements ConnectionFactory {
 
     private final VstConnectionSync.Builder builder;
 
-    public VstConnectionFactorySync(final HostDescription host, final Integer timeout, final Long connectionTtl,
+    public VstConnectionFactorySync(final Integer timeout, final Long connectionTtl,
             final Boolean useSsl, final SSLContext sslContext) {
         super();
         builder = new VstConnectionSync.Builder().timeout(timeout).ttl(connectionTtl).useSsl(useSsl)
@@ -39,8 +40,8 @@ public class VstConnectionFactorySync implements ConnectionFactory {
     }
 
     @Override
-    public Connection create(final HostDescription host) {
-        return builder.messageStore(new MessageStore()).host(host).build();
+    public Connection create(final HostDescription host, final Service service) {
+        return builder.messageStore(new MessageStore()).host(host).service(service).build();
     }
 
 }

@@ -16,11 +16,13 @@
 
 package com.c8db.internal.net;
 
+import com.c8db.Service;
+
 /**
  *
  */
 public interface ConnectionFactory {
 
-    Connection create(final HostDescription host);
+    Connection create(final HostDescription host, final Service service);
 
 }

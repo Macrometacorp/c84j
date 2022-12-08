@@ -654,19 +654,19 @@ public interface C8DB extends C8SerializationAccessor {
 
             final ConnectionFactory connectionFactory;
             if (protocol == null || Protocol.VST == protocol) {
-                connectionFactory = new VstConnectionFactorySync(host, timeout, connectionTtl, useSsl, sslContext);
+                connectionFactory = new VstConnectionFactorySync(timeout, connectionTtl, useSsl, sslContext);
             } else {
                 connectionFactory = new HttpConnectionFactory(timeout, responseSizeLimit, user, password, secretProvider, email, jwtAuth, jwtToken, useSsl,
                     sslContext, custom, protocol, connectionTtl, httpCookieSpec, apiKey, auxHost);
             }
             final Map<Service, Collection<Host>> hostsMatrix = createHostMatrix(max, connectionFactory);
             final HostResolver hostResolver = createHostResolver(hostsMatrix, max, connectionFactory);
-            final HostHandler hostHandler = createHostHandler(hostResolver);
+            final Map<Service, HostHandler> hostHandlerMatrix = createHostHandlerMatrix(hostResolver);
             return new C8DBImpl(
-                    new VstCommunicationSync.Builder(hostHandler).timeout(timeout).user(user).password(password)
+                    new VstCommunicationSync.Builder(hostHandlerMatrix).timeout(timeout).user(user).password(password)
                             .useSsl(useSsl).sslContext(sslContext).chunksize(chunksize).maxConnections(maxConnections)
                             .connectionTtl(connectionTtl),
-                    new HttpCommunication.Builder(hostHandler), util, protocol, hostResolver, new C8Context());
+                    new HttpCommunication.Builder(hostHandlerMatrix), util, protocol, hostResolver, new C8Context());
         }
 
     }

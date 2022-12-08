@@ -13,19 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Modifications copyright (c) 2022 Macrometa Corp All rights reserved.
- *
  */
 
 package com.c8db.internal.net;
 
-import com.c8db.Service;
-
 import java.io.IOException;
 
 public interface HostHandler {
-
-    void applyService(Service name);
 
     Host get(HostHandle hostHandle, AccessType accessType);
 

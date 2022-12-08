@@ -20,6 +20,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
 import javax.net.ssl.SSLContext;
@@ -63,21 +64,21 @@ public abstract class VstCommunication<R, C extends VstConnection> implements Cl
     protected final String password;
 
     protected final Integer chunksize;
-    private final HostHandler hostHandler;
+    private final Map<Service, HostHandler> hostHandlerMatrix;
 
     protected VstCommunication(final Integer timeout, final String user, final String password, final Boolean useSsl,
             final SSLContext sslContext, final C8Serialization util, final Integer chunksize,
-            final HostHandler hostHandler) {
+            final Map<Service, HostHandler> hostHandlerMatrix) {
         this.user = user;
         this.password = password;
         this.util = util;
-        this.hostHandler = hostHandler;
+        this.hostHandlerMatrix = hostHandlerMatrix;
         this.chunksize = chunksize != null ? chunksize : C8Defaults.CHUNK_DEFAULT_CONTENT_SIZE;
     }
 
     @SuppressWarnings("unchecked")
     protected synchronized C connect(final HostHandle hostHandle, final AccessType accessType, Service service) {
-        hostHandler.applyService(service);
+        HostHandler hostHandler = hostHandlerMatrix.get(service);
         Host host = hostHandler.get(hostHandle, accessType);
         while (true) {
             if (host == null) {
@@ -120,7 +121,9 @@ public abstract class VstCommunication<R, C extends VstConnection> implements Cl
 
     @Override
     public void close() throws IOException {
-        hostHandler.close();
+        for (HostHandler hostHandler : hostHandlerMatrix.values()) {
+            hostHandler.close();
+        }
     }
 
     public R execute(final Request request, final HostHandle hostHandle, Service service) throws C8DBException {
@@ -131,6 +134,7 @@ public abstract class VstCommunication<R, C extends VstConnection> implements Cl
             if (e instanceof C8DBRedirectException) {
                 final String location = C8DBRedirectException.class.cast(e).getLocation();
                 final HostDescription redirectHost = HostUtils.createFromLocation(location);
+                HostHandler hostHandler = hostHandlerMatrix.get(service);
                 hostHandler.closeCurrentOnError();
                 hostHandler.fail();
                 return execute(request, new HostHandle().setHost(redirectHost), service);
