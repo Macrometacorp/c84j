@@ -112,10 +112,6 @@ public class OptionsBuilder {
         return options.apiKey(apiKey);
     }
 
-    public static C8DynamoCreateOptions build(final C8DynamoCreateOptions options, final String tableName) {
-        return options.tableName(tableName);
-    }
-
     public static ApiKeyCreateOptions build(final ApiKeyCreateOptions options, final String keyId) {
         return options.keyId(keyId);
     }
