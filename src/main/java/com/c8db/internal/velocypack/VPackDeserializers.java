@@ -23,6 +23,8 @@ import java.util.Map;
 
 import com.c8db.entity.FxEntity;
 import com.c8db.entity.FxType;
+import com.c8db.model.C8DynamoAttributeType;
+import com.c8db.model.C8DynamoType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,6 +73,30 @@ public class VPackDeserializers {
         public CollectionType deserialize(final VPackSlice parent, final VPackSlice vpack,
                 final VPackDeserializationContext context) throws VPackException {
             return CollectionType.fromType(vpack.getAsInt());
+        }
+    };
+
+    public static final VPackDeserializer<C8DynamoType> C8_DYNAMO_TYPE = new VPackDeserializer<C8DynamoType>() {
+        @Override
+        public C8DynamoType deserialize(final VPackSlice parent, final VPackSlice vpack,
+                                          final VPackDeserializationContext context) throws VPackException {
+            return C8DynamoType.fromKey(vpack.getAsString());
+        }
+    };
+
+    public static final VPackDeserializer<C8DynamoAttributeType> C8_DYNAMO_ATTRIBUTE_TYPE = new VPackDeserializer<C8DynamoAttributeType>() {
+        @Override
+        public C8DynamoAttributeType deserialize(final VPackSlice parent, final VPackSlice vpack,
+                                        final VPackDeserializationContext context) throws VPackException {
+            return C8DynamoAttributeType.fromKey(vpack.getAsString());
+        }
+    };
+
+    public static final VPackDeserializer<C8DynamoAttributeType> C8_DYNAMO_ATTRIBUTE_VALUE = new VPackDeserializer<C8DynamoAttributeType>() {
+        @Override
+        public C8DynamoAttributeType deserialize(final VPackSlice parent, final VPackSlice vpack,
+                                                 final VPackDeserializationContext context) throws VPackException {
+            return C8DynamoAttributeType.fromKey(vpack.getAsString());
         }
     };
 
