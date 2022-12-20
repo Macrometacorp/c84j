@@ -3,17 +3,18 @@
  */
 package com.c8db;
 
+import com.c8db.entity.C8DynamoBatchWriteItemEntity;
 import com.c8db.entity.C8DynamoCreateTableEntity;
 import com.c8db.entity.C8DynamoDeleteItemEntity;
 import com.c8db.entity.C8DynamoGetItemEntity;
 import com.c8db.entity.C8DynamoGetItemsEntity;
-import com.c8db.entity.C8DynamoItemsWithAttributeValuesEntity;
 import com.c8db.entity.C8DynamoPutItemEntity;
 import com.c8db.entity.C8DynamoDescribeTableEntity;
 import com.c8db.entity.C8DynamoDeleteTableEntity;
 import com.c8db.model.C8DynamoCreateTableOptions;
 import com.c8db.model.C8DynamoGetItemsOptions;
 
+import java.util.Collection;
 import java.util.Map;
 
 public interface C8Dynamo {
@@ -51,12 +52,24 @@ public interface C8Dynamo {
 
     /**
      * This method inserts an item in the dynamo table
+     * Note: it rewrites item if it exists
      *
      * @param value of the item
-     * @return The result of created item
+     * @return The result of putted item
      * @throws C8DBException
      */
     C8DynamoPutItemEntity putItem(Map<String, Object> value) throws C8DBException;
+
+    /**
+     * This method inserts batch of item in the dynamo table
+     * Note: it doesn't rewrite item if it exists in the table.
+     * Item will be returned in map `unprocessedItems` of the response
+     *
+     * @param values a batch of items that need to write
+     * @return The result of written or unprocessed items
+     * @throws C8DBException
+     */
+    C8DynamoBatchWriteItemEntity batchWriteItems(Collection<Map<String, Object>> values) throws C8DBException;
 
     /**
      * This method updates attributes in an existing item

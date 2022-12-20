@@ -92,14 +92,6 @@ public class VPackDeserializers {
         }
     };
 
-    public static final VPackDeserializer<C8DynamoAttributeType> C8_DYNAMO_ATTRIBUTE_VALUE = new VPackDeserializer<C8DynamoAttributeType>() {
-        @Override
-        public C8DynamoAttributeType deserialize(final VPackSlice parent, final VPackSlice vpack,
-                                                 final VPackDeserializationContext context) throws VPackException {
-            return C8DynamoAttributeType.fromKey(vpack.getAsString());
-        }
-    };
-
     public static final VPackDeserializer<CollectionStatus> COLLECTION_STATUS = new VPackDeserializer<CollectionStatus>() {
         @Override
         public CollectionStatus deserialize(final VPackSlice parent, final VPackSlice vpack,

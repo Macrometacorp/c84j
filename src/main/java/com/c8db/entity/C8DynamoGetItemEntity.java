@@ -15,7 +15,7 @@ import java.util.Map;
 @Data
 public class C8DynamoGetItemEntity {
 
-    C8DynamoItemWithAttributeValuesEntity.C8DynamoConsumedCapacity consumedCapacity;
+    C8DynamoItemInternalEntity.C8DynamoConsumedCapacity consumedCapacity;
     Map<String, Object> item;
 
 }
