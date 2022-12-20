@@ -15,7 +15,7 @@ import java.util.Map;
  * Class for internal usage
  */
 @Data
-public class C8DynamoItemWithAttributeValuesEntity implements Entity {
+public class C8DynamoItemInternalEntity implements Entity {
 
     @SerializedName("ConsumedCapacity")
     C8DynamoConsumedCapacity consumedCapacity;

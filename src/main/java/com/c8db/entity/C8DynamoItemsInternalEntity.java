@@ -16,7 +16,7 @@ import java.util.Map;
  * Class for internal usage
  */
 @Data
-public class C8DynamoItemsWithAttributeValuesEntity implements Entity {
+public class C8DynamoItemsInternalEntity implements Entity {
 
     @SerializedName("Items")
     Collection<Map<String, C8DynamoAttributeValue>> items;

@@ -7,6 +7,8 @@ package com.c8db.internal;
 
 import com.c8db.C8DBException;
 import com.c8db.C8Dynamo;
+import com.c8db.entity.C8DynamoBatchWriteItemEntity;
+import com.c8db.entity.C8DynamoBatchWriteItemInternalEntity;
 import com.c8db.entity.C8DynamoCreateTableEntity;
 import com.c8db.entity.C8DynamoDeleteItemEntity;
 import com.c8db.entity.C8DynamoDescribeTableEntity;
@@ -17,6 +19,7 @@ import com.c8db.entity.C8DynamoDeleteTableEntity;
 import com.c8db.model.C8DynamoCreateTableOptions;
 import com.c8db.model.C8DynamoGetItemsOptions;
 
+import java.util.Collection;
 import java.util.Map;
 
 public class C8DynamoImpl extends InternalC8Dynamo<C8DBImpl, C8DatabaseImpl, C8ExecutorSync>
@@ -44,6 +47,11 @@ public class C8DynamoImpl extends InternalC8Dynamo<C8DBImpl, C8DatabaseImpl, C8E
     @Override
     public C8DynamoPutItemEntity putItem(Map<String, Object> value) throws C8DBException {
         return executor.execute(createPutItemRequest(value), C8DynamoPutItemEntity.class);
+    }
+
+    @Override
+    public C8DynamoBatchWriteItemEntity batchWriteItems(Collection<Map<String, Object>> values) throws C8DBException {
+        return executor.execute(createBatchWriteItemRequest(values), getC8DynamoBatchWriteItemResponseDeserializer());
     }
 
     @Override
