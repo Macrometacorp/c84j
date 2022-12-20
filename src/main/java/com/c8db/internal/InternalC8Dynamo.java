@@ -10,8 +10,8 @@ import com.amazonaws.protocol.json.JsonClientMetadata;
 import com.amazonaws.protocol.json.SdkJsonProtocolFactory;
 import com.amazonaws.services.dynamodbv2.document.ItemUtils;
 import com.amazonaws.services.dynamodbv2.model.AttributeDefinition;
-import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.dynamodbv2.model.AttributeValueUpdate;
+import com.amazonaws.services.dynamodbv2.model.BatchWriteItemRequest;
 import com.amazonaws.services.dynamodbv2.model.CreateTableRequest;
 import com.amazonaws.services.dynamodbv2.model.DeleteItemRequest;
 import com.amazonaws.services.dynamodbv2.model.DeleteTableRequest;
@@ -19,8 +19,11 @@ import com.amazonaws.services.dynamodbv2.model.DescribeTableRequest;
 import com.amazonaws.services.dynamodbv2.model.GetItemRequest;
 import com.amazonaws.services.dynamodbv2.model.KeySchemaElement;
 import com.amazonaws.services.dynamodbv2.model.PutItemRequest;
+import com.amazonaws.services.dynamodbv2.model.PutRequest;
 import com.amazonaws.services.dynamodbv2.model.ScanRequest;
 import com.amazonaws.services.dynamodbv2.model.UpdateItemRequest;
+import com.amazonaws.services.dynamodbv2.model.WriteRequest;
+import com.amazonaws.services.dynamodbv2.model.transform.BatchWriteItemRequestProtocolMarshaller;
 import com.amazonaws.services.dynamodbv2.model.transform.CreateTableRequestProtocolMarshaller;
 import com.amazonaws.services.dynamodbv2.model.transform.DeleteItemRequestProtocolMarshaller;
 import com.amazonaws.services.dynamodbv2.model.transform.DeleteTableRequestProtocolMarshaller;
@@ -31,11 +34,12 @@ import com.amazonaws.services.dynamodbv2.model.transform.ScanRequestProtocolMars
 import com.amazonaws.services.dynamodbv2.model.transform.UpdateItemRequestProtocolMarshaller;
 import com.arangodb.velocypack.Type;
 import com.arangodb.velocypack.VPackSlice;
-import com.arangodb.velocypack.exception.VPackException;
 import com.c8db.C8DBException;
+import com.c8db.entity.C8DynamoBatchWriteItemEntity;
+import com.c8db.entity.C8DynamoBatchWriteItemInternalEntity;
 import com.c8db.entity.C8DynamoGetItemEntity;
-import com.c8db.entity.C8DynamoItemWithAttributeValuesEntity;
-import com.c8db.entity.C8DynamoItemsWithAttributeValuesEntity;
+import com.c8db.entity.C8DynamoItemInternalEntity;
+import com.c8db.entity.C8DynamoItemsInternalEntity;
 import com.c8db.entity.C8DynamoGetItemsEntity;
 import com.c8db.internal.util.C8SerializationFactory;
 import com.c8db.internal.util.IOUtils;
@@ -45,7 +49,6 @@ import com.c8db.util.C8DynamoUtils;
 import com.c8db.util.C8Serializer;
 import com.c8db.velocystream.Request;
 import com.c8db.velocystream.RequestType;
-import com.c8db.velocystream.Response;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -59,6 +62,7 @@ public abstract class InternalC8Dynamo<A extends InternalC8DB<E>, D extends Inte
     public static final String C8_DYNAMO_DESCRIBE_TABLE_VAL = "DynamoDB_20120810.DescribeTable";
     public static final String C8_DYNAMO_GET_ITEM_VAL = "DynamoDB_20120810.GetItem";
     public static final String C8_DYNAMO_PUT_ITEM_VAL = "DynamoDB_20120810.PutItem";
+    public static final String C8_DYNAMO_BATCH_WRITE_ITEM_VAL = "DynamoDB_20120810.BatchWriteItem";
     public static final String C8_DYNAMO_UPDATE_ITEM_VAL = "DynamoDB_20120810.UpdateItem";
     public static final String C8_DYNAMO_DELETE_ITEM_VAL = "DynamoDB_20120810.DeleteItem";
     public static final String C8_DYNAMO_GET_ITEMS_VAL = "DynamoDB_20120810.Scan";
@@ -122,6 +126,42 @@ public abstract class InternalC8Dynamo<A extends InternalC8DB<E>, D extends Inte
         return request;
     }
 
+    protected Request createBatchWriteItemRequest(final Collection<Map<String, Object>> values) {
+        List<WriteRequest> writeRequests = values.stream()
+            .map(value -> new WriteRequest().withPutRequest(new PutRequest().withItem(C8DynamoUtils.toDynamoItem(value))))
+            .collect(Collectors.toList());
+        BatchWriteItemRequest batchWriteItemRequest = new BatchWriteItemRequest().withRequestItems(
+            Collections.singletonMap(tableName, writeRequests));
+        ImmutableRequest<BatchWriteItemRequest> awsRequest = new BatchWriteItemRequestProtocolMarshaller(protocolFactory)
+            .marshall(batchWriteItemRequest);
+        final Request request = setRequestParams(awsRequest);
+        request.putHeaderParam(C8_DYNAMO_HEADER_KEY, C8_DYNAMO_BATCH_WRITE_ITEM_VAL);
+        return request;
+    }
+
+    protected C8Executor.ResponseDeserializer<C8DynamoBatchWriteItemEntity> getC8DynamoBatchWriteItemResponseDeserializer() {
+        return response -> {
+            final VPackSlice result = response.getBody();
+            C8DynamoBatchWriteItemInternalEntity entityWithAttributeValues =
+                util().deserialize(result, new Type<C8DynamoBatchWriteItemInternalEntity>(){}.getType());
+            C8DynamoBatchWriteItemEntity entity = new C8DynamoBatchWriteItemEntity();
+            Map<String, Collection<Map<String, Object>>> unprocessedItems = null;
+            if (entityWithAttributeValues.getUnprocessedItems() != null) {
+                unprocessedItems = new HashMap<>();
+                for (Map.Entry<String, Collection<C8DynamoBatchWriteItemInternalEntity.C8DynamoPutRequest>> entry :
+                    entityWithAttributeValues.getUnprocessedItems().entrySet()) {
+                    if (entry.getValue() != null) {
+                        unprocessedItems.put(entry.getKey(), entry.getValue().stream()
+                            .map(value -> C8DynamoUtils.toOriginalItem(value.getPutRequest().getItem()))
+                            .collect(Collectors.toList()));
+                    }
+                }
+            }
+            entity.setUnprocessedItems(unprocessedItems);
+            return entity;
+        };
+    }
+
     // TODO: Issue on C8DB side. "AttributeUpdates" forbidden. Instead uses `createPutItemRequest`
     protected Request createUpdateItemRequest(final Map<String, Object> key, final Map<String, Object> updateAttributes) {
         Map<String, AttributeValueUpdate> attributeUpdates = updateAttributes.entrySet().stream()
@@ -151,8 +191,8 @@ public abstract class InternalC8Dynamo<A extends InternalC8DB<E>, D extends Inte
     protected C8Executor.ResponseDeserializer<C8DynamoGetItemEntity> getC8DynamoGetItemResponseDeserializer() {
         return response -> {
             final VPackSlice result = response.getBody();
-            C8DynamoItemWithAttributeValuesEntity entityWithAttributeValues =
-                util().deserialize(result, new Type<C8DynamoItemWithAttributeValuesEntity>(){}.getType());
+            C8DynamoItemInternalEntity entityWithAttributeValues =
+                util().deserialize(result, new Type<C8DynamoItemInternalEntity>(){}.getType());
             C8DynamoGetItemEntity entity = new C8DynamoGetItemEntity();
             entity.setItem(C8DynamoUtils.toOriginalItem(entityWithAttributeValues.getItem()));
             entity.setConsumedCapacity(entityWithAttributeValues.getConsumedCapacity());
@@ -174,8 +214,8 @@ public abstract class InternalC8Dynamo<A extends InternalC8DB<E>, D extends Inte
     protected C8Executor.ResponseDeserializer<C8DynamoGetItemsEntity> getC8DynamoGetItemsResponseDeserializer() {
         return response -> {
             final VPackSlice result = response.getBody();
-            C8DynamoItemsWithAttributeValuesEntity entityWithAttributeValues =
-                util().deserialize(result, new Type<C8DynamoItemsWithAttributeValuesEntity>(){}.getType());
+            C8DynamoItemsInternalEntity entityWithAttributeValues =
+                util().deserialize(result, new Type<C8DynamoItemsInternalEntity>(){}.getType());
             C8DynamoGetItemsEntity entity = new C8DynamoGetItemsEntity();
             entity.setItems(C8DynamoUtils.toOriginalListOfItems(entityWithAttributeValues.getItems()));
             entity.setLastEvaluatedKey(C8DynamoUtils.toOriginalItem(entityWithAttributeValues.getLastEvaluatedKey()));
