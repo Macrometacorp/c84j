@@ -34,6 +34,8 @@ import com.c8db.entity.MinReplicationFactor;
 import com.c8db.entity.Permissions;
 import com.c8db.entity.ReplicationFactor;
 import com.c8db.internal.velocystream.internal.AuthenticationRequest;
+import com.c8db.model.C8DynamoAttributeType;
+import com.c8db.model.C8DynamoType;
 import com.c8db.model.TraversalOptions;
 import com.c8db.model.TraversalOptions.Order;
 import com.c8db.velocystream.Request;
@@ -95,6 +97,28 @@ public class VPackSerializers {
                 final CollectionType value,
                 final VPackSerializationContext context) throws VPackException {
             builder.add(attribute, value.getType());
+        }
+    };
+
+    public static final VPackSerializer<C8DynamoType> C8_DYNAMO_TYPE = new VPackSerializer<C8DynamoType>() {
+        @Override
+        public void serialize(
+            final VPackBuilder builder,
+            final String attribute,
+            final C8DynamoType value,
+            final VPackSerializationContext context) throws VPackException {
+            builder.add(attribute, value.getKey());
+        }
+    };
+
+    public static final VPackSerializer<C8DynamoAttributeType> C8_DYNAMO_ATTRIBUTE_TYPE = new VPackSerializer<C8DynamoAttributeType>() {
+        @Override
+        public void serialize(
+            final VPackBuilder builder,
+            final String attribute,
+            final C8DynamoAttributeType value,
+            final VPackSerializationContext context) throws VPackException {
+            builder.add(attribute, value.getKey());
         }
     };
 

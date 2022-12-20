@@ -38,6 +38,8 @@ import com.c8db.entity.QueryEntity;
 import com.c8db.entity.QueryExecutionState;
 import com.c8db.entity.ReplicationFactor;
 import com.c8db.internal.velocystream.internal.AuthenticationRequest;
+import com.c8db.model.C8DynamoAttributeType;
+import com.c8db.model.C8DynamoType;
 import com.c8db.model.TraversalOptions;
 import com.c8db.velocystream.Request;
 import com.c8db.velocystream.Response;
@@ -62,6 +64,8 @@ public class VPackDriverModule implements VPackModule, VPackParserModule {
         context.registerSerializer(Request.class, VPackSerializers.REQUEST);
         context.registerSerializer(AuthenticationRequest.class, VPackSerializers.AUTH_REQUEST);
         context.registerSerializer(CollectionType.class, VPackSerializers.COLLECTION_TYPE);
+        context.registerSerializer(C8DynamoType.class, VPackSerializers.C8_DYNAMO_TYPE);
+        context.registerSerializer(C8DynamoAttributeType.class, VPackSerializers.C8_DYNAMO_ATTRIBUTE_TYPE);
         context.registerSerializer(BaseDocument.class, VPackSerializers.BASE_DOCUMENT);
         context.registerSerializer(BaseEdgeDocument.class, VPackSerializers.BASE_EDGE_DOCUMENT);
         context.registerSerializer(TraversalOptions.Order.class, VPackSerializers.TRAVERSAL_ORDER);
@@ -72,6 +76,8 @@ public class VPackDriverModule implements VPackModule, VPackParserModule {
 
         context.registerDeserializer(Response.class, VPackDeserializers.RESPONSE);
         context.registerDeserializer(CollectionType.class, VPackDeserializers.COLLECTION_TYPE);
+        context.registerDeserializer(C8DynamoType.class, VPackDeserializers.C8_DYNAMO_TYPE);
+        context.registerDeserializer(C8DynamoAttributeType.class, VPackDeserializers.C8_DYNAMO_ATTRIBUTE_TYPE);
         context.registerDeserializer(CollectionStatus.class, VPackDeserializers.COLLECTION_STATUS);
         context.registerDeserializer(BaseDocument.class, VPackDeserializers.BASE_DOCUMENT);
         context.registerDeserializer(BaseEdgeDocument.class, VPackDeserializers.BASE_EDGE_DOCUMENT);
