@@ -1,14 +1,11 @@
 /*
- *
- *  * Copyright (c) 2022 Macrometa Corp All rights reserved
- *
+ *  Copyright (c) 2022 Macrometa Corp All rights reserved.
  */
 package com.c8db.internal;
 
 import com.c8db.C8DBException;
 import com.c8db.C8Dynamo;
 import com.c8db.entity.C8DynamoBatchWriteItemEntity;
-import com.c8db.entity.C8DynamoBatchWriteItemInternalEntity;
 import com.c8db.entity.C8DynamoCreateTableEntity;
 import com.c8db.entity.C8DynamoDeleteItemEntity;
 import com.c8db.entity.C8DynamoDescribeTableEntity;
