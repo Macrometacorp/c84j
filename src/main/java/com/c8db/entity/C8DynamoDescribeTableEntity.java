@@ -8,7 +8,6 @@ import com.arangodb.velocypack.annotations.SerializedName;
 import lombok.Data;
 
 import java.util.Collection;
-import java.util.List;
 
 /**
  * Result describes table
