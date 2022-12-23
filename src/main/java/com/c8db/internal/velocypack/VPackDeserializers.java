@@ -24,6 +24,7 @@ import java.util.Map;
 import com.c8db.entity.FxEntity;
 import com.c8db.entity.FxType;
 import com.c8db.model.C8DynamoAttributeType;
+import com.c8db.model.C8DynamoProjectionType;
 import com.c8db.model.C8DynamoType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,6 +90,14 @@ public class VPackDeserializers {
         public C8DynamoAttributeType deserialize(final VPackSlice parent, final VPackSlice vpack,
                                         final VPackDeserializationContext context) throws VPackException {
             return C8DynamoAttributeType.fromKey(vpack.getAsString());
+        }
+    };
+
+    public static final VPackDeserializer<C8DynamoProjectionType> C8_DYNAMO_PROJECTION_TYPE = new VPackDeserializer<C8DynamoProjectionType>() {
+        @Override
+        public C8DynamoProjectionType deserialize(final VPackSlice parent, final VPackSlice vpack,
+                                        final VPackDeserializationContext context) throws VPackException {
+            return C8DynamoProjectionType.fromKey(vpack.getAsString());
         }
     };
 

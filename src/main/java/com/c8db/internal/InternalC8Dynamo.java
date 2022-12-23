@@ -17,9 +17,14 @@ import com.amazonaws.services.dynamodbv2.model.DeleteItemRequest;
 import com.amazonaws.services.dynamodbv2.model.DeleteTableRequest;
 import com.amazonaws.services.dynamodbv2.model.DescribeTableRequest;
 import com.amazonaws.services.dynamodbv2.model.GetItemRequest;
+import com.amazonaws.services.dynamodbv2.model.GlobalSecondaryIndex;
 import com.amazonaws.services.dynamodbv2.model.KeySchemaElement;
+import com.amazonaws.services.dynamodbv2.model.LocalSecondaryIndex;
+import com.amazonaws.services.dynamodbv2.model.Projection;
+import com.amazonaws.services.dynamodbv2.model.ProjectionType;
 import com.amazonaws.services.dynamodbv2.model.PutItemRequest;
 import com.amazonaws.services.dynamodbv2.model.PutRequest;
+import com.amazonaws.services.dynamodbv2.model.QueryRequest;
 import com.amazonaws.services.dynamodbv2.model.ScanRequest;
 import com.amazonaws.services.dynamodbv2.model.UpdateItemRequest;
 import com.amazonaws.services.dynamodbv2.model.WriteRequest;
@@ -30,6 +35,7 @@ import com.amazonaws.services.dynamodbv2.model.transform.DeleteTableRequestProto
 import com.amazonaws.services.dynamodbv2.model.transform.DescribeTableRequestProtocolMarshaller;
 import com.amazonaws.services.dynamodbv2.model.transform.GetItemRequestProtocolMarshaller;
 import com.amazonaws.services.dynamodbv2.model.transform.PutItemRequestProtocolMarshaller;
+import com.amazonaws.services.dynamodbv2.model.transform.QueryRequestProtocolMarshaller;
 import com.amazonaws.services.dynamodbv2.model.transform.ScanRequestProtocolMarshaller;
 import com.amazonaws.services.dynamodbv2.model.transform.UpdateItemRequestProtocolMarshaller;
 import com.arangodb.velocypack.Type;
@@ -41,10 +47,12 @@ import com.c8db.entity.C8DynamoGetItemEntity;
 import com.c8db.entity.C8DynamoItemInternalEntity;
 import com.c8db.entity.C8DynamoItemsInternalEntity;
 import com.c8db.entity.C8DynamoGetItemsEntity;
+import com.c8db.entity.C8DynamoSecondaryIndex;
 import com.c8db.internal.util.C8SerializationFactory;
 import com.c8db.internal.util.IOUtils;
 import com.c8db.model.C8DynamoCreateTableOptions;
-import com.c8db.model.C8DynamoGetItemsOptions;
+import com.c8db.model.C8DynamoQueryOptions;
+import com.c8db.model.C8DynamoScanOptions;
 import com.c8db.util.C8DynamoUtils;
 import com.c8db.util.C8Serializer;
 import com.c8db.velocystream.Request;
@@ -65,7 +73,8 @@ public abstract class InternalC8Dynamo<A extends InternalC8DB<E>, D extends Inte
     public static final String C8_DYNAMO_BATCH_WRITE_ITEM_VAL = "DynamoDB_20120810.BatchWriteItem";
     public static final String C8_DYNAMO_UPDATE_ITEM_VAL = "DynamoDB_20120810.UpdateItem";
     public static final String C8_DYNAMO_DELETE_ITEM_VAL = "DynamoDB_20120810.DeleteItem";
-    public static final String C8_DYNAMO_GET_ITEMS_VAL = "DynamoDB_20120810.Scan";
+    public static final String C8_DYNAMO_SCAN_VAL = "DynamoDB_20120810.Scan";
+    public static final String C8_DYNAMO_QUERY_VAL = "DynamoDB_20120810.Query";
     private final D db;
     protected volatile String tableName;
     protected SdkJsonProtocolFactory protocolFactory;
@@ -88,13 +97,54 @@ public abstract class InternalC8Dynamo<A extends InternalC8DB<E>, D extends Inte
         List<AttributeDefinition> attributeDefinitions = options.getAttributeDefinitions().stream()
             .map(def -> new AttributeDefinition(def.getAttributeName(), def.getAttributeType().getKey()))
             .collect(Collectors.toList());
-        CreateTableRequest createTableRequest = new CreateTableRequest().withTableName(tableName).withKeySchema(keySchema)
-            .withAttributeDefinitions(attributeDefinitions);
+        List<GlobalSecondaryIndex> globalSecondaryIndexes = null;
+        if (options.getGlobalSecondaryIndexes() != null) {
+            globalSecondaryIndexes = options.getGlobalSecondaryIndexes().stream()
+                .map(ind -> new GlobalSecondaryIndex()
+                    .withIndexName(ind.getIndexName())
+                    .withKeySchema(ind.getKeySchema().stream()
+                        .map(schema -> new KeySchemaElement(schema.getAttributeName(), schema.getKeyType().getKey()))
+                        .collect(Collectors.toList()))
+                    .withProjection(createAwsProjection(ind)))
+                .collect(Collectors.toList());
+        }
+        List<LocalSecondaryIndex> localSecondaryIndexes = null;
+        if (options.getLocalSecondaryIndexes() != null) {
+            localSecondaryIndexes= options.getLocalSecondaryIndexes().stream()
+                .map(ind -> new LocalSecondaryIndex()
+                    .withIndexName(ind.getIndexName())
+                    .withKeySchema(ind.getKeySchema().stream()
+                        .map(schema -> new KeySchemaElement(schema.getAttributeName(), schema.getKeyType().getKey()))
+                        .collect(Collectors.toList()))
+                    .withProjection(createAwsProjection(ind)))
+                .collect(Collectors.toList());
+        }
+        CreateTableRequest createTableRequest = new CreateTableRequest()
+            .withTableName(tableName)
+            .withKeySchema(keySchema)
+            .withAttributeDefinitions(attributeDefinitions)
+            .withGlobalSecondaryIndexes(globalSecondaryIndexes)
+            .withLocalSecondaryIndexes(localSecondaryIndexes);
         ImmutableRequest<CreateTableRequest> awsRequest = (new CreateTableRequestProtocolMarshaller(protocolFactory))
             .marshall(createTableRequest);
         final Request request = setRequestParams(awsRequest);
         request.putHeaderParam(C8_DYNAMO_HEADER_KEY, C8_DYNAMO_CREATE_TABLE_VAL);
         return request;
+    }
+
+    private Projection createAwsProjection(C8DynamoSecondaryIndex index) {
+        Projection projection = new Projection();
+        if (index.getProjection() != null) {
+            if (index.getProjection().getProjectionType() != null) {
+               projection.setProjectionType(index.getProjection().getProjectionType().getKey());
+            } else {
+               projection.setProjectionType(ProjectionType.ALL);
+            }
+            projection.setNonKeyAttributes(index.getProjection().getNonKeyAttributes());
+        } else {
+            projection.setProjectionType(ProjectionType.ALL);
+        }
+        return projection;
     }
 
     protected Request deleteTableRequest(final String tableName) {
@@ -168,7 +218,8 @@ public abstract class InternalC8Dynamo<A extends InternalC8DB<E>, D extends Inte
             .collect(Collectors.toMap(Map.Entry::getKey, entry ->
                 new AttributeValueUpdate().withValue(ItemUtils.toAttributeValue(entry.getValue()))));
 
-        UpdateItemRequest updateItemRequest = new UpdateItemRequest().withTableName(tableName)
+        UpdateItemRequest updateItemRequest = new UpdateItemRequest()
+            .withTableName(tableName)
             .withKey(C8DynamoUtils.toDynamoItem(key));
 
         ImmutableRequest<UpdateItemRequest> awsRequest = new UpdateItemRequestProtocolMarshaller(protocolFactory)
@@ -179,7 +230,8 @@ public abstract class InternalC8Dynamo<A extends InternalC8DB<E>, D extends Inte
     }
 
     protected Request getItemRequest(final Map<String, Object> key) {
-        GetItemRequest getItemRequest = new GetItemRequest().withTableName(tableName)
+        GetItemRequest getItemRequest = new GetItemRequest()
+            .withTableName(tableName)
             .withKey(C8DynamoUtils.toDynamoItem(key));
         ImmutableRequest<GetItemRequest> awsRequest = new GetItemRequestProtocolMarshaller(protocolFactory)
             .marshall(getItemRequest);
@@ -200,14 +252,34 @@ public abstract class InternalC8Dynamo<A extends InternalC8DB<E>, D extends Inte
         };
     }
 
-    protected Request getItemsRequest(final C8DynamoGetItemsOptions options) {
-        ScanRequest scanRequest = new ScanRequest().withTableName(tableName)
+    protected Request scanRequest(final C8DynamoScanOptions options) {
+        ScanRequest scanRequest = new ScanRequest()
+            .withTableName(tableName)
             .withLimit(options.getLimit())
-            .withExclusiveStartKey(C8DynamoUtils.toDynamoItem(options.getExclusiveStartKey()));
+            .withExclusiveStartKey(C8DynamoUtils.toDynamoItem(options.getExclusiveStartKey()))
+            .withIndexName(options.getIndexName())
+            .withFilterExpression(options.getFilterExpression())
+            .withExpressionAttributeValues(C8DynamoUtils.toDynamoItem(options.getExpressionAttribute()));
         ImmutableRequest<ScanRequest> awsRequest = new ScanRequestProtocolMarshaller(protocolFactory)
             .marshall(scanRequest);
+        final Request request = setRequestParams(awsRequest);
+        request.putHeaderParam(C8_DYNAMO_HEADER_KEY, C8_DYNAMO_SCAN_VAL);
+        return request;
+    }
+
+    protected Request queryRequest(final C8DynamoQueryOptions options) {
+        QueryRequest queryRequest = new QueryRequest()
+            .withTableName(tableName)
+            .withLimit(options.getLimit())
+            .withExclusiveStartKey(C8DynamoUtils.toDynamoItem(options.getExclusiveStartKey()))
+            .withIndexName(options.getIndexName())
+            .withKeyConditionExpression(options.getKeyConditionExpression())
+            .withExpressionAttributeValues(C8DynamoUtils.toDynamoItem(options.getExpressionAttribute()))
+            .withProjectionExpression(options.getProjectionExpression());
+        ImmutableRequest<QueryRequest> awsRequest = new QueryRequestProtocolMarshaller(protocolFactory)
+            .marshall(queryRequest);
         final Request request= setRequestParams(awsRequest);
-        request.putHeaderParam(C8_DYNAMO_HEADER_KEY, C8_DYNAMO_GET_ITEMS_VAL);
+        request.putHeaderParam(C8_DYNAMO_HEADER_KEY, C8_DYNAMO_QUERY_VAL);
         return request;
     }
 
