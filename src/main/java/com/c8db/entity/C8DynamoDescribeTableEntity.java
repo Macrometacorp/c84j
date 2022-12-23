@@ -27,6 +27,8 @@ public class C8DynamoDescribeTableEntity implements Entity {
         private long tableSizeBytes;
         @SerializedName("TableStatus")
         private String tableStatus;
+        @SerializedName("TableArn")
+        private String tableArn;
         @SerializedName("CreationDateTime")
         private long creationDateTime;
         @SerializedName("ItemCount")
