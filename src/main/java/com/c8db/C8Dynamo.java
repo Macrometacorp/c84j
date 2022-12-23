@@ -12,7 +12,8 @@ import com.c8db.entity.C8DynamoPutItemEntity;
 import com.c8db.entity.C8DynamoDescribeTableEntity;
 import com.c8db.entity.C8DynamoDeleteTableEntity;
 import com.c8db.model.C8DynamoCreateTableOptions;
-import com.c8db.model.C8DynamoGetItemsOptions;
+import com.c8db.model.C8DynamoQueryOptions;
+import com.c8db.model.C8DynamoScanOptions;
 
 import java.util.Collection;
 import java.util.Map;
@@ -99,12 +100,21 @@ public interface C8Dynamo {
     C8DynamoDeleteItemEntity deleteItem(Map<String, Object> key) throws C8DBException;
 
     /**
-     * This method returns list of items from the dynamo table
+     * This method scans the dynamo table
      *
      * @param options contains the request parameters
      * @return The Dynamo entity with response parameters
      * @throws C8DBException
      */
-    C8DynamoGetItemsEntity getItems(C8DynamoGetItemsOptions options) throws C8DBException;
+    C8DynamoGetItemsEntity scan(C8DynamoScanOptions options) throws C8DBException;
+
+    /**
+     * This method queries the dynamo table
+     *
+     * @param options contains the request parameters
+     * @return The Dynamo entity with response parameters
+     * @throws C8DBException
+     */
+    C8DynamoGetItemsEntity query(C8DynamoQueryOptions options) throws C8DBException;
 
 }
