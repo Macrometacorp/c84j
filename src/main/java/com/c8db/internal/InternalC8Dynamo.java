@@ -12,12 +12,15 @@ import com.amazonaws.services.dynamodbv2.document.ItemUtils;
 import com.amazonaws.services.dynamodbv2.model.AttributeDefinition;
 import com.amazonaws.services.dynamodbv2.model.AttributeValueUpdate;
 import com.amazonaws.services.dynamodbv2.model.BatchWriteItemRequest;
+import com.amazonaws.services.dynamodbv2.model.CreateGlobalSecondaryIndexAction;
 import com.amazonaws.services.dynamodbv2.model.CreateTableRequest;
+import com.amazonaws.services.dynamodbv2.model.DeleteGlobalSecondaryIndexAction;
 import com.amazonaws.services.dynamodbv2.model.DeleteItemRequest;
 import com.amazonaws.services.dynamodbv2.model.DeleteTableRequest;
 import com.amazonaws.services.dynamodbv2.model.DescribeTableRequest;
 import com.amazonaws.services.dynamodbv2.model.GetItemRequest;
 import com.amazonaws.services.dynamodbv2.model.GlobalSecondaryIndex;
+import com.amazonaws.services.dynamodbv2.model.GlobalSecondaryIndexUpdate;
 import com.amazonaws.services.dynamodbv2.model.KeySchemaElement;
 import com.amazonaws.services.dynamodbv2.model.LocalSecondaryIndex;
 import com.amazonaws.services.dynamodbv2.model.Projection;
@@ -26,7 +29,9 @@ import com.amazonaws.services.dynamodbv2.model.PutItemRequest;
 import com.amazonaws.services.dynamodbv2.model.PutRequest;
 import com.amazonaws.services.dynamodbv2.model.QueryRequest;
 import com.amazonaws.services.dynamodbv2.model.ScanRequest;
+import com.amazonaws.services.dynamodbv2.model.UpdateGlobalSecondaryIndexAction;
 import com.amazonaws.services.dynamodbv2.model.UpdateItemRequest;
+import com.amazonaws.services.dynamodbv2.model.UpdateTableRequest;
 import com.amazonaws.services.dynamodbv2.model.WriteRequest;
 import com.amazonaws.services.dynamodbv2.model.transform.BatchWriteItemRequestProtocolMarshaller;
 import com.amazonaws.services.dynamodbv2.model.transform.CreateTableRequestProtocolMarshaller;
@@ -38,21 +43,26 @@ import com.amazonaws.services.dynamodbv2.model.transform.PutItemRequestProtocolM
 import com.amazonaws.services.dynamodbv2.model.transform.QueryRequestProtocolMarshaller;
 import com.amazonaws.services.dynamodbv2.model.transform.ScanRequestProtocolMarshaller;
 import com.amazonaws.services.dynamodbv2.model.transform.UpdateItemRequestProtocolMarshaller;
+import com.amazonaws.services.dynamodbv2.model.transform.UpdateTableRequestProtocolMarshaller;
 import com.arangodb.velocypack.Type;
 import com.arangodb.velocypack.VPackSlice;
 import com.c8db.C8DBException;
+import com.c8db.entity.C8DynamoAttributeDefinition;
 import com.c8db.entity.C8DynamoBatchWriteItemEntity;
 import com.c8db.entity.C8DynamoBatchWriteItemInternalEntity;
 import com.c8db.entity.C8DynamoGetItemEntity;
 import com.c8db.entity.C8DynamoItemInternalEntity;
 import com.c8db.entity.C8DynamoItemsInternalEntity;
 import com.c8db.entity.C8DynamoGetItemsEntity;
+import com.c8db.entity.C8DynamoKeySchemaElement;
 import com.c8db.entity.C8DynamoSecondaryIndex;
 import com.c8db.internal.util.C8SerializationFactory;
 import com.c8db.internal.util.IOUtils;
 import com.c8db.model.C8DynamoCreateTableOptions;
 import com.c8db.model.C8DynamoQueryOptions;
 import com.c8db.model.C8DynamoScanOptions;
+import com.c8db.model.C8DynamoUpdateAction;
+import com.c8db.model.C8DynamoUpdateTableOptions;
 import com.c8db.util.C8DynamoUtils;
 import com.c8db.util.C8Serializer;
 import com.c8db.velocystream.Request;
@@ -66,6 +76,7 @@ public abstract class InternalC8Dynamo<A extends InternalC8DB<E>, D extends Inte
     protected static final String PATH_API_DYNAMO = "/_api/dynamo";
     public static final String C8_DYNAMO_HEADER_KEY = "X-Amz-Target";
     public static final String C8_DYNAMO_CREATE_TABLE_VAL = "DynamoDB_20120810.CreateTable";
+    public static final String C8_DYNAMO_UPDATE_TABLE_VAL = "DynamoDB_20120810.UpdateTable";
     public static final String C8_DYNAMO_DELETE_TABLE_VAL = "DynamoDB_20120810.DeleteTable";
     public static final String C8_DYNAMO_DESCRIBE_TABLE_VAL = "DynamoDB_20120810.DescribeTable";
     public static final String C8_DYNAMO_GET_ITEM_VAL = "DynamoDB_20120810.GetItem";
@@ -91,12 +102,39 @@ public abstract class InternalC8Dynamo<A extends InternalC8DB<E>, D extends Inte
     }
 
     protected Request createTableRequest(final String tableName, final C8DynamoCreateTableOptions options) {
-        List<KeySchemaElement> keySchema = options.getKeySchema().stream()
-            .map(schema -> new KeySchemaElement(schema.getAttributeName(), schema.getKeyType().getKey()))
-            .collect(Collectors.toList());
-        List<AttributeDefinition> attributeDefinitions = options.getAttributeDefinitions().stream()
+        CreateTableRequest createTableRequest = new CreateTableRequest()
+            .withTableName(tableName)
+            .withKeySchema(createAwsKeySchema(options.getKeySchema()))
+            .withAttributeDefinitions(createAwsAttributeDefinitions(options.getAttributeDefinitions()))
+            .withGlobalSecondaryIndexes(createAwsGlobalSecondaryIndexes(options))
+            .withLocalSecondaryIndexes(createAwsLocalSecondaryIndexes(options));
+        ImmutableRequest<CreateTableRequest> awsRequest = (new CreateTableRequestProtocolMarshaller(protocolFactory))
+            .marshall(createTableRequest);
+        final Request request = setRequestParams(awsRequest);
+        request.putHeaderParam(C8_DYNAMO_HEADER_KEY, C8_DYNAMO_CREATE_TABLE_VAL);
+        return request;
+    }
+
+    protected Request updateTableRequest(final String tableName, final C8DynamoUpdateTableOptions options) {
+        UpdateTableRequest createTableRequest = new UpdateTableRequest()
+            .withTableName(tableName)
+            .withAttributeDefinitions(createAwsAttributeDefinitions(options.getAttributeDefinitions()))
+            .withGlobalSecondaryIndexUpdates(createAwsUpdateGlobalSecondaryIndexes(options.getGlobalSecondaryIndexes()));
+        ImmutableRequest<UpdateTableRequest> awsRequest = (new UpdateTableRequestProtocolMarshaller(protocolFactory))
+            .marshall(createTableRequest);
+        final Request request = setRequestParams(awsRequest);
+        request.putHeaderParam(C8_DYNAMO_HEADER_KEY, C8_DYNAMO_UPDATE_TABLE_VAL);
+        return request;
+    }
+
+    private List<AttributeDefinition> createAwsAttributeDefinitions(final Collection<C8DynamoAttributeDefinition> value) {
+        List<AttributeDefinition> attributeDefinitions = value.stream()
             .map(def -> new AttributeDefinition(def.getAttributeName(), def.getAttributeType().getKey()))
             .collect(Collectors.toList());
+        return attributeDefinitions;
+    }
+
+    private List<GlobalSecondaryIndex> createAwsGlobalSecondaryIndexes(final C8DynamoCreateTableOptions options) {
         List<GlobalSecondaryIndex> globalSecondaryIndexes = null;
         if (options.getGlobalSecondaryIndexes() != null) {
             globalSecondaryIndexes = options.getGlobalSecondaryIndexes().stream()
@@ -108,6 +146,34 @@ public abstract class InternalC8Dynamo<A extends InternalC8DB<E>, D extends Inte
                     .withProjection(createAwsProjection(ind)))
                 .collect(Collectors.toList());
         }
+        return globalSecondaryIndexes;
+    }
+
+    private List<GlobalSecondaryIndexUpdate>
+    createAwsUpdateGlobalSecondaryIndexes(final Collection<C8DynamoUpdateAction> value) {
+        List<GlobalSecondaryIndexUpdate> globalSecondaryIndexes = null;
+        if (value!= null) {
+            globalSecondaryIndexes = value.stream()
+                .map(action -> {
+                    if (action.getType() == C8DynamoUpdateAction.C8DynamoUpdateType.CREATE) {
+                        return new GlobalSecondaryIndexUpdate()
+                            .withCreate(new CreateGlobalSecondaryIndexAction()
+                                .withIndexName(action.getIndex().getIndexName())
+                                .withKeySchema(createAwsKeySchema(action.getIndex().getKeySchema()))
+                                .withProjection(createAwsProjection(action.getIndex())));
+                    } else if (action.getType() == C8DynamoUpdateAction.C8DynamoUpdateType.DELETE) {
+                        return new GlobalSecondaryIndexUpdate()
+                            .withDelete(new DeleteGlobalSecondaryIndexAction()
+                                .withIndexName(action.getIndex().getIndexName()));
+                    }
+                    return null;
+                })
+                .collect(Collectors.toList());
+        }
+        return globalSecondaryIndexes;
+    }
+
+    private List<LocalSecondaryIndex> createAwsLocalSecondaryIndexes(final C8DynamoCreateTableOptions options) {
         List<LocalSecondaryIndex> localSecondaryIndexes = null;
         if (options.getLocalSecondaryIndexes() != null) {
             localSecondaryIndexes= options.getLocalSecondaryIndexes().stream()
@@ -119,17 +185,14 @@ public abstract class InternalC8Dynamo<A extends InternalC8DB<E>, D extends Inte
                     .withProjection(createAwsProjection(ind)))
                 .collect(Collectors.toList());
         }
-        CreateTableRequest createTableRequest = new CreateTableRequest()
-            .withTableName(tableName)
-            .withKeySchema(keySchema)
-            .withAttributeDefinitions(attributeDefinitions)
-            .withGlobalSecondaryIndexes(globalSecondaryIndexes)
-            .withLocalSecondaryIndexes(localSecondaryIndexes);
-        ImmutableRequest<CreateTableRequest> awsRequest = (new CreateTableRequestProtocolMarshaller(protocolFactory))
-            .marshall(createTableRequest);
-        final Request request = setRequestParams(awsRequest);
-        request.putHeaderParam(C8_DYNAMO_HEADER_KEY, C8_DYNAMO_CREATE_TABLE_VAL);
-        return request;
+        return localSecondaryIndexes;
+    }
+
+    private Collection<KeySchemaElement> createAwsKeySchema(Collection<C8DynamoKeySchemaElement> value) {
+        Collection<KeySchemaElement> keySchema = value.stream()
+            .map(schema -> new KeySchemaElement(schema.getAttributeName(), schema.getKeyType().getKey()))
+            .collect(Collectors.toList());
+        return keySchema;
     }
 
     private Projection createAwsProjection(C8DynamoSecondaryIndex index) {

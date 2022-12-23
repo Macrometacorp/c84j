@@ -14,6 +14,7 @@ import com.c8db.entity.C8DynamoDeleteTableEntity;
 import com.c8db.model.C8DynamoCreateTableOptions;
 import com.c8db.model.C8DynamoQueryOptions;
 import com.c8db.model.C8DynamoScanOptions;
+import com.c8db.model.C8DynamoUpdateTableOptions;
 
 import java.util.Collection;
 import java.util.Map;
@@ -35,6 +36,15 @@ public interface C8Dynamo {
      * @throws C8DBException
      */
     C8DynamoCreateTableEntity createTable(C8DynamoCreateTableOptions options) throws C8DBException;
+
+    /**
+     * Creates a dynamo table with the given {@code options}
+     *
+     * @param options contains the request parameters
+     * @return The Dynamo entity
+     * @throws C8DBException
+     */
+    C8DynamoCreateTableEntity updateTable(C8DynamoUpdateTableOptions options) throws C8DBException;
 
     /**
      * This method deletes the dynamo table
