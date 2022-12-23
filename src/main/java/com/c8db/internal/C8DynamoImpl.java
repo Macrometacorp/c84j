@@ -16,6 +16,7 @@ import com.c8db.entity.C8DynamoDeleteTableEntity;
 import com.c8db.model.C8DynamoCreateTableOptions;
 import com.c8db.model.C8DynamoQueryOptions;
 import com.c8db.model.C8DynamoScanOptions;
+import com.c8db.model.C8DynamoUpdateTableOptions;
 
 import java.util.Collection;
 import java.util.Map;
@@ -30,6 +31,11 @@ public class C8DynamoImpl extends InternalC8Dynamo<C8DBImpl, C8DatabaseImpl, C8E
     @Override
     public C8DynamoCreateTableEntity createTable(C8DynamoCreateTableOptions options) throws C8DBException {
         return executor.execute(createTableRequest(tableName, options), C8DynamoCreateTableEntity.class);
+    }
+
+    @Override
+    public C8DynamoCreateTableEntity updateTable(C8DynamoUpdateTableOptions options) throws C8DBException {
+        return executor.execute(updateTableRequest(tableName, options), C8DynamoCreateTableEntity.class);
     }
 
     @Override
