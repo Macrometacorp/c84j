@@ -14,7 +14,8 @@ import com.c8db.entity.C8DynamoGetItemsEntity;
 import com.c8db.entity.C8DynamoPutItemEntity;
 import com.c8db.entity.C8DynamoDeleteTableEntity;
 import com.c8db.model.C8DynamoCreateTableOptions;
-import com.c8db.model.C8DynamoGetItemsOptions;
+import com.c8db.model.C8DynamoQueryOptions;
+import com.c8db.model.C8DynamoScanOptions;
 
 import java.util.Collection;
 import java.util.Map;
@@ -67,8 +68,13 @@ public class C8DynamoImpl extends InternalC8Dynamo<C8DBImpl, C8DatabaseImpl, C8E
     }
 
     @Override
-    public C8DynamoGetItemsEntity getItems(C8DynamoGetItemsOptions options) throws C8DBException {
-        return executor.execute(getItemsRequest(options), getC8DynamoGetItemsResponseDeserializer());
+    public C8DynamoGetItemsEntity scan(C8DynamoScanOptions options) throws C8DBException {
+        return executor.execute(scanRequest(options), getC8DynamoGetItemsResponseDeserializer());
+    }
+
+    @Override
+    public C8DynamoGetItemsEntity query(C8DynamoQueryOptions options) throws C8DBException {
+        return executor.execute(queryRequest(options), getC8DynamoGetItemsResponseDeserializer());
     }
 
 }

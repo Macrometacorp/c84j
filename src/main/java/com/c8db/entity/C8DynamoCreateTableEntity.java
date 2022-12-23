@@ -36,6 +36,10 @@ public class C8DynamoCreateTableEntity implements Entity {
         private Collection<C8DynamoAttributeDefinition> attributeDefinitions;
         @SerializedName("KeySchema")
         private Collection<C8DynamoKeySchemaElement> keySchema;
+        @SerializedName("GlobalSecondaryIndexes")
+        private Collection<C8DynamoSecondaryIndex> globalSecondaryIndexes;
+        @SerializedName("LocalSecondaryIndexes")
+        private Collection<C8DynamoSecondaryIndex> localSecondaryIndexes;
 
     }
 }

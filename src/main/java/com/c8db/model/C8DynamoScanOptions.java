@@ -14,9 +14,12 @@ import java.util.Map;
 @Getter
 @Builder
 @ToString
-public class C8DynamoGetItemsOptions extends CollectionCreateOptions {
+public class C8DynamoScanOptions {
 
-    private int limit;
+    private Integer limit;
     private Map<String, Object> exclusiveStartKey;
+    private String indexName;
+    private String filterExpression;
+    private Map<String, Object> expressionAttribute;
 
 }
