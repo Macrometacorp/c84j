@@ -27,8 +27,6 @@ public class C8DynamoDescribeTableEntity implements Entity {
         private long tableSizeBytes;
         @SerializedName("TableStatus")
         private String tableStatus;
-        @SerializedName("TableArn")
-        private String tableArn;
         @SerializedName("CreationDateTime")
         private long creationDateTime;
         @SerializedName("ItemCount")
@@ -37,6 +35,10 @@ public class C8DynamoDescribeTableEntity implements Entity {
         private Collection<C8DynamoAttributeDefinition> attributeDefinitions;
         @SerializedName("KeySchema")
         private Collection<C8DynamoKeySchemaElement> keySchema;
+        @SerializedName("GlobalSecondaryIndexes")
+        private Collection<C8DynamoSecondaryIndex> globalSecondaryIndexes;
+        @SerializedName("LocalSecondaryIndexes")
+        private Collection<C8DynamoSecondaryIndex> localSecondaryIndexes;
 
     }
 }
