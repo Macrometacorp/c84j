@@ -751,6 +751,13 @@ public interface C8Database extends C8SerializationAccessor {
     C8Dynamo dynamo(final String tableName);
 
     /**
+     * Returns a {@code C8Redis} instance.
+     * @param  name The name of the Redis collection
+     * @return C8Redis handler
+     */
+    C8Redis redis(final String name);
+
+    /**
      * Returns a {@code C8Compute} instance.
      * @return C8Compute handler
      */
