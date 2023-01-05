@@ -27,6 +27,7 @@ import com.arangodb.velocypack.VPackSetupContext;
 import com.c8db.entity.BaseDocument;
 import com.c8db.entity.BaseEdgeDocument;
 import com.c8db.entity.C8DynamoProjection;
+import com.c8db.entity.CollectionModel;
 import com.c8db.entity.CollectionStatus;
 import com.c8db.entity.CollectionType;
 import com.c8db.entity.DocumentField;
@@ -66,6 +67,7 @@ public class VPackDriverModule implements VPackModule, VPackParserModule {
         context.registerSerializer(Request.class, VPackSerializers.REQUEST);
         context.registerSerializer(AuthenticationRequest.class, VPackSerializers.AUTH_REQUEST);
         context.registerSerializer(CollectionType.class, VPackSerializers.COLLECTION_TYPE);
+        context.registerSerializer(CollectionModel.class, VPackSerializers.COLLECTION_MODEL);
         context.registerSerializer(C8DynamoType.class, VPackSerializers.C8_DYNAMO_TYPE);
         context.registerSerializer(C8DynamoAttributeType.class, VPackSerializers.C8_DYNAMO_ATTRIBUTE_TYPE);
         context.registerSerializer(C8DynamoProjectionType.class, VPackSerializers.C8_DYNAMO_PROJECTION_TYPE);
@@ -79,6 +81,7 @@ public class VPackDriverModule implements VPackModule, VPackParserModule {
 
         context.registerDeserializer(Response.class, VPackDeserializers.RESPONSE);
         context.registerDeserializer(CollectionType.class, VPackDeserializers.COLLECTION_TYPE);
+        context.registerDeserializer(CollectionModel.class, VPackDeserializers.COLLECTION_MODEL);
         context.registerDeserializer(C8DynamoType.class, VPackDeserializers.C8_DYNAMO_TYPE);
         context.registerDeserializer(C8DynamoAttributeType.class, VPackDeserializers.C8_DYNAMO_ATTRIBUTE_TYPE);
         context.registerDeserializer(C8DynamoProjectionType.class, VPackDeserializers.C8_DYNAMO_PROJECTION_TYPE);
