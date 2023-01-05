@@ -21,6 +21,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 
+import com.c8db.entity.CollectionModel;
 import com.c8db.entity.FxType;
 import com.c8db.model.C8DynamoAttributeType;
 import com.c8db.model.C8DynamoProjectionType;
@@ -73,6 +74,14 @@ public class VPackDeserializers {
         public CollectionType deserialize(final VPackSlice parent, final VPackSlice vpack,
                 final VPackDeserializationContext context) throws VPackException {
             return CollectionType.fromType(vpack.getAsInt());
+        }
+    };
+
+    public static final VPackDeserializer<CollectionModel> COLLECTION_MODEL = new VPackDeserializer<CollectionModel>() {
+        @Override
+        public CollectionModel deserialize(final VPackSlice parent, final VPackSlice vpack,
+                                          final VPackDeserializationContext context) throws VPackException {
+            return CollectionModel.fromType(vpack.getAsString());
         }
     };
 

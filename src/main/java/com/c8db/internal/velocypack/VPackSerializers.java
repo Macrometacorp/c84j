@@ -28,6 +28,7 @@ import com.arangodb.velocypack.exception.VPackException;
 import com.c8db.entity.BaseDocument;
 import com.c8db.entity.BaseEdgeDocument;
 import com.c8db.entity.C8DynamoProjection;
+import com.c8db.entity.CollectionModel;
 import com.c8db.entity.CollectionType;
 import com.c8db.entity.DocumentField;
 import com.c8db.entity.LogLevel;
@@ -98,6 +99,17 @@ public class VPackSerializers {
                 final String attribute,
                 final CollectionType value,
                 final VPackSerializationContext context) throws VPackException {
+            builder.add(attribute, value.getType());
+        }
+    };
+
+    public static final VPackSerializer<CollectionModel> COLLECTION_MODEL = new VPackSerializer<CollectionModel>() {
+        @Override
+        public void serialize(
+            final VPackBuilder builder,
+            final String attribute,
+            final CollectionModel value,
+            final VPackSerializationContext context) throws VPackException {
             builder.add(attribute, value.getType());
         }
     };
