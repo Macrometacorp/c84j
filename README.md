@@ -1,13 +1,12 @@
-# C8 Java Driver
+# C8 Java SDK
 
-The official C8 Java Driver.
+> Note: This SDK is not being maintained anymore.
 
-## Compile Java Driver
+## Compile Java SDK
 
 ```
 mvn clean install -DskipTests=true -Dmaven.javadoc.skip=true -B
 ```
-
 
 ## Reference
 
