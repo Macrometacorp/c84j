@@ -1,6 +1,6 @@
 # C8 Java SDK
 
-> Note: This SDK is not being maintained anymore.
+> Note: This SDK is not being actively maintained.
 
 ## Compile Java SDK
 
