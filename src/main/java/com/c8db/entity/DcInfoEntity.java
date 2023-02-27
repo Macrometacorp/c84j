@@ -13,15 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
+ * Modifications copyright (c) 2023 Macrometa Corp All rights reserved.
  */
 
 package com.c8db.entity;
 
 import com.arangodb.velocypack.annotations.SerializedName;
 
-/**
- *
- */
 public class DcInfoEntity implements Entity {
 
     @SerializedName("_id")
