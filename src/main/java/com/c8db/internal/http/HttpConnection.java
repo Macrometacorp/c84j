@@ -25,7 +25,6 @@ import org.apache.http.Header;
 import org.apache.http.HeaderElement;
 import org.apache.http.HeaderElementIterator;
 import org.apache.http.HttpEntity;
-import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.NoHttpResponseException;
@@ -75,8 +74,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
 import javax.net.ssl.SSLContext;
 
 public class HttpConnection implements Connection {
@@ -103,13 +100,14 @@ public class HttpConnection implements Connection {
     private volatile String defaultJWT;
     private final String apiKey;
     private final HostDescription auxHost;
+    private final Service service;
 
     private HttpConnection(final HostDescription host, final Integer timeout, final Integer responseSizeLimit,
                            final String user, final String password,
                            final String email, final Boolean jwtAuthEnabled, final Boolean useSsl,
                            final SSLContext sslContext, final C8Serialization util,
                            final Protocol contentType, final Long ttl, final String httpCookieSpec,
-                           final String jwt, final String apiKey, final HostDescription auxHost) {
+                           final String jwt, final String apiKey, final HostDescription auxHost, final Service service) {
 
         super();
         this.host = host;
@@ -124,6 +122,7 @@ public class HttpConnection implements Connection {
         this.defaultJWT = jwt;
         this.apiKey = apiKey;
         this.auxHost = auxHost;
+        this.service = service;
         final RegistryBuilder<ConnectionSocketFactory> registryBuilder = RegistryBuilder
                 .create();
         if (Boolean.TRUE == useSsl) {
@@ -177,7 +176,7 @@ public class HttpConnection implements Connection {
         client = builder.build();
     }
 
-    private static String buildUrl(final String baseUrl, final Request request, Service service) throws UnsupportedEncodingException {
+    private static String buildUrl(final String baseUrl, final Request request, final Service service) throws UnsupportedEncodingException {
         final StringBuilder sb = new StringBuilder().append(baseUrl);
         final String database = request.getDatabase();
         final String tenant = request.getTenant();
@@ -240,7 +239,7 @@ public class HttpConnection implements Connection {
         client.close();
     }
 
-    public Response execute(final Request request, final Service service) throws C8DBException, IOException {
+    public Response execute(final Request request) throws C8DBException, IOException {
         final String url = buildUrl(buildBaseUrl(host), request, service);
         final HttpRequestBase httpRequest = buildHttpRequestBase(request, url);
         httpRequest.setHeader("User-Agent", "Mozilla/5.0 (compatible; C8DB-JavaDriver/1.1; +http://mt.orz.at/)");
@@ -261,7 +260,7 @@ public class HttpConnection implements Connection {
                 LOGGER.debug("Using API Key for authenication.");
                 httpRequest.addHeader("Authorization", "apikey " + apiKey);
             } else if (jwt == null) { //Generate JWT using user credentials if jwt and apikey are absent
-                addJWT(request, service);
+                addJWT(request);
                 LOGGER.debug("Using JWT for authentication.");
                 httpRequest.addHeader("Authorization", "bearer " + jwt);
             } else { //Add Header when JWT is provided
@@ -283,13 +282,16 @@ public class HttpConnection implements Connection {
         } catch (C8DBException ex) {
             if (ex.getResponseCode().equals(401)) {
                 // jwt might has expired refresh it
-                addJWT(request, service);
+                addJWT(request);
                 httpRequest.removeHeaders("Authorization");
                 httpRequest.addHeader("Authorization", "bearer " + jwt);
                 response = buildResponse(client.execute(httpRequest));
                 checkError(response);
             } else if (ex.getResponseCode() >= 500) {
-                response = retryRequest(request, httpRequest, service);
+                if (request.isRetryEnabled()) {
+                    response = retryRequest(request, httpRequest);
+                }
+                checkError(response);
             } else if (ex.getResponseCode() >= 400) {
                 // Handle HTTP Error messages.
                 checkError(response);
@@ -297,12 +299,12 @@ public class HttpConnection implements Connection {
                 checkError(response);
             }
         } catch (UnknownHostException | NoHttpResponseException ex) {
-            response = retryRequest(request, httpRequest, service);
+            response = retryRequest(request, httpRequest);
         }
         return response;
     }
 
-    private Response retryRequest(final Request request, HttpRequestBase httpRequest, Service service) throws IOException {
+    private Response retryRequest(final Request request, HttpRequestBase httpRequest) throws IOException {
         Response response = null;
 
         for (int currentWaitTime = INITIAL_SLEEP_TIME_SEC; currentWaitTime <= MAX_SLEEP_TIME_SEC; currentWaitTime *= SLEEP_TIME_MULTIPLIER) {
@@ -317,7 +319,7 @@ public class HttpConnection implements Connection {
             } catch (Exception e) {
                 if (e instanceof C8DBException && ((C8DBException) e).getResponseCode().equals(401)) {
                     // jwt might has expired refresh it
-                    addJWT(request, service);
+                    addJWT(request);
                     httpRequest.removeHeaders("Authorization");
                     httpRequest.addHeader("Authorization", "bearer " + jwt);
                 }
@@ -336,7 +338,7 @@ public class HttpConnection implements Connection {
         }
     }
 
-    private synchronized void addJWT(final Request request, Service service) throws IOException {
+    private synchronized void addJWT(final Request request) throws IOException {
         addServiceJWT();
         if(StringUtils.isNotEmpty(user) && !host.getHost().equals(auxHost.getHost()) && service != Service.C8FUNCTION) {
             addUserJWT(request.getTenant(), user);
@@ -501,6 +503,7 @@ public class HttpConnection implements Connection {
         private String jwt;
         private String apiKey;
         private HostDescription auxHost;
+        private Service service;
 
         public Builder user(final String user) {
             this.user = user;
@@ -582,9 +585,14 @@ public class HttpConnection implements Connection {
             return this;
         }
 
+        public Builder service(final Service service) {
+            this.service = service;
+            return this;
+        }
+
         public HttpConnection build() {
             return new HttpConnection(host, timeout, responseSizeLimit, user, password, email, jwtAuthEnabled, useSsl, sslContext, util,
-                    contentType, ttl, httpCookieSpec, jwt, apiKey, auxHost);
+                    contentType, ttl, httpCookieSpec, jwt, apiKey, auxHost, service);
         }
     }
 

@@ -21,8 +21,12 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 
+import com.c8db.entity.CollectionModel;
 import com.c8db.entity.FxEntity;
 import com.c8db.entity.FxType;
+import com.c8db.model.C8DynamoAttributeType;
+import com.c8db.model.C8DynamoProjectionType;
+import com.c8db.model.C8DynamoType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,6 +75,38 @@ public class VPackDeserializers {
         public CollectionType deserialize(final VPackSlice parent, final VPackSlice vpack,
                 final VPackDeserializationContext context) throws VPackException {
             return CollectionType.fromType(vpack.getAsInt());
+        }
+    };
+
+    public static final VPackDeserializer<CollectionModel> COLLECTION_MODEL = new VPackDeserializer<CollectionModel>() {
+        @Override
+        public CollectionModel deserialize(final VPackSlice parent, final VPackSlice vpack,
+                                          final VPackDeserializationContext context) throws VPackException {
+            return CollectionModel.fromType(vpack.getAsString());
+        }
+    };
+
+    public static final VPackDeserializer<C8DynamoType> C8_DYNAMO_TYPE = new VPackDeserializer<C8DynamoType>() {
+        @Override
+        public C8DynamoType deserialize(final VPackSlice parent, final VPackSlice vpack,
+                                          final VPackDeserializationContext context) throws VPackException {
+            return C8DynamoType.fromKey(vpack.getAsString());
+        }
+    };
+
+    public static final VPackDeserializer<C8DynamoAttributeType> C8_DYNAMO_ATTRIBUTE_TYPE = new VPackDeserializer<C8DynamoAttributeType>() {
+        @Override
+        public C8DynamoAttributeType deserialize(final VPackSlice parent, final VPackSlice vpack,
+                                        final VPackDeserializationContext context) throws VPackException {
+            return C8DynamoAttributeType.fromKey(vpack.getAsString());
+        }
+    };
+
+    public static final VPackDeserializer<C8DynamoProjectionType> C8_DYNAMO_PROJECTION_TYPE = new VPackDeserializer<C8DynamoProjectionType>() {
+        @Override
+        public C8DynamoProjectionType deserialize(final VPackSlice parent, final VPackSlice vpack,
+                                        final VPackDeserializationContext context) throws VPackException {
+            return C8DynamoProjectionType.fromKey(vpack.getAsString());
         }
     };
 

@@ -49,8 +49,8 @@ public final class HostUtils {
     }
 
     public static Host createHost(final HostDescription description, final int maxConnections,
-            final ConnectionFactory factory) {
-        return new HostImpl(new ConnectionPoolImpl(description, maxConnections, factory), description);
+            final ConnectionFactory factory, final Service service) {
+        return new HostImpl(new ConnectionPoolImpl(description, maxConnections, factory, service), description);
     }
 
     public static Map<Service, List<Host>> cloneHostMatrix(final Map<Service, Collection<Host>> hostsMatrix) {

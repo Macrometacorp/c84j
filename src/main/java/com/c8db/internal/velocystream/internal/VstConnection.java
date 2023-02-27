@@ -36,6 +36,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
+import com.c8db.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,13 +66,14 @@ public abstract class VstConnection implements Connection {
     private InputStream inputStream;
 
     private final HostDescription host;
+    private final Service service;
 
     private HashMap<Long, Long> sendTimestamps = new HashMap<Long, Long>();
 
     private String connectionName;
 
     protected VstConnection(final HostDescription host, final Integer timeout, final Long ttl, final Boolean useSsl,
-            final SSLContext sslContext, final MessageStore messageStore) {
+            final SSLContext sslContext, final MessageStore messageStore, final Service service) {
         super();
         this.host = host;
         this.timeout = timeout;
@@ -79,6 +81,7 @@ public abstract class VstConnection implements Connection {
         this.useSsl = useSsl;
         this.sslContext = sslContext;
         this.messageStore = messageStore;
+        this.service = service;
 
         connectionName = "conenction_" + System.currentTimeMillis() + "_" + Math.random();
         LOGGER.debug("Connection " + connectionName + " created");

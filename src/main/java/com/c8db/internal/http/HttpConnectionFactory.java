@@ -22,6 +22,7 @@ package com.c8db.internal.http;
 import javax.net.ssl.SSLContext;
 
 import com.c8db.Protocol;
+import com.c8db.Service;
 import com.c8db.internal.net.Connection;
 import com.c8db.internal.net.ConnectionFactory;
 import com.c8db.internal.net.HostDescription;
@@ -44,8 +45,8 @@ public class HttpConnectionFactory implements ConnectionFactory {
     }
 
     @Override
-    public Connection create(final HostDescription host) {
-        return builder.host(host).build();
+    public Connection create(final HostDescription host, final Service service) {
+        return builder.host(host).service(service).build();
     }
 
 }

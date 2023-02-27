@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.c8db.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,20 +39,22 @@ public class ConnectionPoolImpl implements ConnectionPool {
     private final List<Connection> connections;
     private int current;
     private final ConnectionFactory factory;
+    private final Service service;
 
     public ConnectionPoolImpl(final HostDescription host, final Integer maxConnections,
-            final ConnectionFactory factory) {
+            final ConnectionFactory factory, Service service) {
         super();
         this.host = host;
         this.maxConnections = maxConnections;
         this.factory = factory;
+        this.service = service;
         connections = new ArrayList<Connection>();
         current = 0;
     }
 
     @Override
     public Connection createConnection(final HostDescription host) {
-        return factory.create(host);
+        return factory.create(host, service);
     }
 
     @Override

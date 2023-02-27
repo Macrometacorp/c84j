@@ -3,18 +3,21 @@
  */
 package com.c8db;
 
-import com.c8db.entity.C8DynamoEntity;
-import com.c8db.entity.C8DynamoItemEntity;
-import com.c8db.entity.DynamoAttributeDefinition;
-import com.c8db.entity.DynamoKeySchemaElement;
-import com.c8db.entity.MultiDocumentEntity;
-import com.c8db.entity.DocumentCreateEntity;
-import com.c8db.entity.C8DynamoDescribeEntity;
-import com.c8db.entity.C8DynamoDeleteEntity;
-import com.c8db.model.C8DynamoCreateOptions;
+import com.c8db.entity.C8DynamoBatchWriteItemEntity;
+import com.c8db.entity.C8DynamoCreateTableEntity;
+import com.c8db.entity.C8DynamoDeleteItemEntity;
+import com.c8db.entity.C8DynamoGetItemEntity;
+import com.c8db.entity.C8DynamoGetItemsEntity;
+import com.c8db.entity.C8DynamoPutItemEntity;
+import com.c8db.entity.C8DynamoDescribeTableEntity;
+import com.c8db.entity.C8DynamoDeleteTableEntity;
+import com.c8db.model.C8DynamoCreateTableOptions;
+import com.c8db.model.C8DynamoQueryOptions;
+import com.c8db.model.C8DynamoScanOptions;
+import com.c8db.model.C8DynamoUpdateTableOptions;
 
 import java.util.Collection;
-import java.util.List;
+import java.util.Map;
 
 public interface C8Dynamo {
 
@@ -26,76 +29,102 @@ public interface C8Dynamo {
     public C8Database db();
 
     /**
-     * Creates a DynamoDb table with the given {@code options}
-     * @param tableName The name of Dynamo like collection
-     * @param attributeDefinitionList List containing schema
-     * @param keySchema The schema for the primary and composite key
+     * Creates a dynamo table with the given {@code options}
+     *
+     * @param options contains the request parameters
      * @return The Dynamo entity
      * @throws C8DBException
      */
-    C8DynamoEntity createTable(String tableName, List<DynamoAttributeDefinition> attributeDefinitionList,
-                               List<DynamoKeySchemaElement> keySchema) throws C8DBException;
+    C8DynamoCreateTableEntity createTable(C8DynamoCreateTableOptions options) throws C8DBException;
 
     /**
-     * This method deletes a dynomo table
+     * Creates a dynamo table with the given {@code options}
+     *
      * @param options contains the request parameters
+     * @return The Dynamo entity
+     * @throws C8DBException
+     */
+    C8DynamoCreateTableEntity updateTable(C8DynamoUpdateTableOptions options) throws C8DBException;
+
+    /**
+     * This method deletes the dynamo table
      * @return C8DynamoDeleteEntity as response
      * @throws C8DBException
      */
-    C8DynamoDeleteEntity deleteTable(C8DynamoCreateOptions options) throws C8DBException;
+    C8DynamoDeleteTableEntity deleteTable() throws C8DBException;
 
     /**
      * This method describes the schema of the dynamo table
+     *
      * @return The Dynamo entity
      * @throws C8DBException
      */
-    C8DynamoDescribeEntity describeTable(C8DynamoCreateOptions options) throws C8DBException;
+    C8DynamoDescribeTableEntity describeTable() throws C8DBException;
 
     /**
-     * This method inserts an item in the dynamo like table
-     * @param values The request params
+     * This method inserts an item in the dynamo table
+     * Note: it rewrites item if it exists
+     *
+     * @param value of the item
+     * @return The result of putted item
+     * @throws C8DBException
+     */
+    C8DynamoPutItemEntity putItem(Map<String, Object> value) throws C8DBException;
+
+    /**
+     * This method inserts batch of item in the dynamo table
+     * Note: it doesn't rewrite item if it exists in the table.
+     * Item will be returned in map `unprocessedItems` of the response
+     *
+     * @param values a batch of items that need to write
+     * @return The result of written or unprocessed items
+     * @throws C8DBException
+     */
+    C8DynamoBatchWriteItemEntity batchWriteItems(Collection<Map<String, Object>> values) throws C8DBException;
+
+    /**
+     * This method updates attributes in an existing item
+     *
+     * @param value of the item
+     * @return The result of updated item
+     * @throws C8DBException
+     */
+    C8DynamoPutItemEntity updateItem(Map<String, Object> value) throws C8DBException;
+
+    /**
+     * This method returns an existing item from the dynamo table
+     *
+     * @param key of the item
+     * @return the item
+     * @throws C8DBException
+     */
+    C8DynamoGetItemEntity getItem(Map<String, Object> key) throws C8DBException;
+
+    /**
+     * This method deletes item in the dynamo table
+     *
+     * @param key of the item
      * @return The Dynamo entity
      * @throws C8DBException
      */
-    <T> MultiDocumentEntity<DocumentCreateEntity<T>> putItem(Collection<T> values) throws C8DBException;
+    C8DynamoDeleteItemEntity deleteItem(Map<String, Object> key) throws C8DBException;
 
     /**
-     * This method updates an existing item in the dynamo like table
-     * @param values The request params
-     * @return The Dynamo entity
-     * @throws C8DBException
-     */
-    <T> MultiDocumentEntity<DocumentCreateEntity<T>> updateItem(Collection<T> values) throws C8DBException;
-
-    /**
-     * This method returns an existing item from the dynamo like table
-     * @param values The request params
-     * @return The Dynamo entity
-     * @throws C8DBException
-     */
-    <T> MultiDocumentEntity<DocumentCreateEntity<T>> getItem(Collection<T> values) throws C8DBException;
-
-    /**
-     * This method returns an existing item from the dynamo like table
-     * @param values The request params
-     * @return The Dynamo entity
-     * @throws C8DBException
-     */
-    <T> MultiDocumentEntity<DocumentCreateEntity<T>> deleteItem(Collection<T> values) throws C8DBException;
-
-    /**
-     * This method returns an existing item from the dynamo like table
-     * @param values The request params
+     * This method scans the dynamo table
+     *
+     * @param options contains the request parameters
      * @return The Dynamo entity with response parameters
      * @throws C8DBException
      */
-    <T> MultiDocumentEntity<DocumentCreateEntity<T>> getItems(Collection<T> values) throws C8DBException;
+    C8DynamoGetItemsEntity scan(C8DynamoScanOptions options) throws C8DBException;
 
     /**
-     * This method writes multiple items (or records) to the dynamo-like collection.
-     * @param values List of items to be written in dynamo collection
+     * This method queries the dynamo table
+     *
+     * @param options contains the request parameters
      * @return The Dynamo entity with response parameters
      * @throws C8DBException
      */
-    <T> MultiDocumentEntity<DocumentCreateEntity<T>> batchWriteItem(Collection<T> values) throws C8DBException;;
+    C8DynamoGetItemsEntity query(C8DynamoQueryOptions options) throws C8DBException;
+
 }

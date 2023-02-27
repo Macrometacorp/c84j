@@ -48,6 +48,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -233,30 +234,38 @@ public abstract class InternalC8DBBuilder {
         this.serializer = serializer;
     }
 
-    protected HostHandler createHostHandler(final HostResolver hostResolver) {
+    protected Map<Service, HostHandler> createHostHandlerMatrix(final HostResolver hostResolver) {
+        Map<Service, HostHandler> matrix = new HashMap<Service, HostHandler>();
+        for (Service service : Service.values()) {
+            matrix.put(service, createHostHandler(hostResolver, service));
+        }
+        return Collections.unmodifiableMap(matrix);
+    }
+
+    protected HostHandler createHostHandler(final HostResolver hostResolver, final Service service) {
 
         final HostHandler hostHandler;
 
         if (loadBalancingStrategy != null) {
             switch (loadBalancingStrategy) {
                 case ONE_RANDOM:
-                    hostHandler = new RandomHostHandler(hostResolver, new FallbackHostHandler(hostResolver));
+                    hostHandler = new RandomHostHandler(hostResolver, new FallbackHostHandler(hostResolver, service), service);
                     break;
                 case ROUND_ROBIN:
-                    hostHandler = new RoundRobinHostHandler(hostResolver);
+                    hostHandler = new RoundRobinHostHandler(hostResolver, service);
                     break;
                 case NONE:
                 default:
-                    hostHandler = new FallbackHostHandler(hostResolver);
+                    hostHandler = new FallbackHostHandler(hostResolver, service);
                     break;
             }
         } else {
-            hostHandler = new FallbackHostHandler(hostResolver);
+            hostHandler = new FallbackHostHandler(hostResolver, service);
         }
 
         LOG.debug("HostHandler is " + hostHandler.getClass().getSimpleName());
 
-        return new DirtyReadHostHandler(hostHandler, new RoundRobinHostHandler(hostResolver));
+        return new DirtyReadHostHandler(hostHandler, new RoundRobinHostHandler(hostResolver, service));
     }
 
     protected void deserializer(final C8Deserializer deserializer) {
@@ -410,12 +419,12 @@ public abstract class InternalC8DBBuilder {
                                                               final ConnectionFactory connectionFactory) {
         final Map matrix = new HashMap();
 
-        for (Service keys : Service.values()) {
+        for (Service service : Service.values()) {
             final Collection<Host> hostList = new ArrayList<>();
-            for (final HostDescription host : hosts.get(keys)) {
-                hostList.add(HostUtils.createHost(host, maxConnections, connectionFactory));
+            for (final HostDescription host : hosts.get(service)) {
+                hostList.add(HostUtils.createHost(host, maxConnections, connectionFactory, service));
             }
-            matrix.put(keys, hostList);
+            matrix.put(service, hostList);
         }
 
         return matrix;

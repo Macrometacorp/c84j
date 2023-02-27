@@ -52,7 +52,13 @@ public final class ResponseUtils {
 
                 if (response.getBody() != null) {
                     final ErrorEntity errorEntity = util.deserialize(response.getBody(), ErrorEntity.class);
-                    throw new C8DBException(errorEntity);
+                    if (errorEntity.getException() != null || errorEntity.getErrorMessage() != null ||
+                        errorEntity.getCode() != 0 || errorEntity.getErrorNum() != 0) {
+                        // it means that response meets ErrorEntity class
+                        throw new C8DBException(errorEntity);
+                    } else {
+                        throw new C8DBException(response.getBody().toString(), responseCode);
+                    }
                 } else {
                     throw new C8DBException(String.format("Response Code: %s", responseCode), responseCode);
                 }

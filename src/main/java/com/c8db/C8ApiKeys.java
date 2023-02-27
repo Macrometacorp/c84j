@@ -4,6 +4,7 @@
 
 package com.c8db;
 
+import com.c8db.entity.ApiKeyCreateEntity;
 import com.c8db.entity.ApiKeyEntity;
 import com.c8db.entity.GeoFabricPermissions;
 import com.c8db.entity.Permissions;
@@ -52,6 +53,21 @@ public interface C8ApiKeys extends C8SerializationAccessor {
      * @return result of access level.
      */
     Permissions getStreamPermissions(final String keyId, final String stream);
+
+    /**
+     * Creates an APIKey using given keyid.
+     *
+     * @param keyId Key id for the apiKey.
+     * @return The api key properties.
+     */
+    ApiKeyCreateEntity createApiKey(final String keyId);
+
+    /**
+     * Deletes an APIKey using given keyid.
+     *
+     * @param keyId Key id for the apiKey to be deleted.
+     */
+    void deleteApiKey(final String keyId);
 
     // TODO: Implement other required apikeys features.
 
