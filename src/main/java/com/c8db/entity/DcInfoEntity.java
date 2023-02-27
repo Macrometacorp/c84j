@@ -149,8 +149,8 @@ public class DcInfoEntity implements Entity {
         private String countryCode;
         @SerializedName("countryname")
         private String countryName;
-        private String latitude;
-        private String longitude;
+        private Double latitude;
+        private Double longitude;
         private String name;
 
         /**
@@ -198,14 +198,14 @@ public class DcInfoEntity implements Entity {
         /**
          * @return the latitude
          */
-        public String getLatitude() {
+        public Double getLatitude() {
             return latitude;
         }
 
         /**
          * @return the longitude
          */
-        public String getLongitude() {
+        public Double getLongitude() {
             return longitude;
         }
 
