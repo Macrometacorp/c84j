@@ -53,15 +53,12 @@ import com.c8db.model.StreamTransactionOptions;
 import com.c8db.model.TraversalOptions;
 import com.c8db.model.UserAccessOptions;
 import com.c8db.util.C8Serializer;
+import com.c8db.velocystream.MultipartRequest;
 import com.c8db.velocystream.Request;
 import com.c8db.velocystream.RequestType;
 import com.c8db.velocystream.Response;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
 /**
  *
@@ -623,6 +620,34 @@ public abstract class InternalC8Database<A extends InternalC8DB<E>, E extends C8
                 : request(tenant, name, RequestType.POST, PATH_API_USER_QUERIES, "execute", userName, restqlName);
         request.setBody(util().serialize(bindVars == null ? new HashMap<String, Object>() : bindVars));
         return request;
+    }
+
+    protected Request batchQueryRequest(final List<String> queryList, final List<Map<String, Object>> varBindsList) {
+
+        MultipartRequest multipartRequest = new MultipartRequest(tenant, name);
+
+        for(int index = 0 ; index < queryList.size(); index++){
+
+            C8qlQueryOptions opt = new C8qlQueryOptions();
+
+            VPackSlice varsSlice = null;
+
+            if(null != varBindsList
+                    && !varBindsList.isEmpty()
+                    && null != varBindsList.get(index)){
+                varsSlice = util(C8SerializationFactory.Serializer.CUSTOM)
+                        .serialize(varBindsList.get(index), new C8Serializer.Options().serializeNullValues(true));
+            }
+
+
+            Request request = request(tenant, name, RequestType.POST, PATH_API_CURSOR)
+                    .setBody(util().serialize(OptionsBuilder.build(opt, queryList.get(index),
+                                            varsSlice)));
+
+            multipartRequest.addPart(request);
+        }
+
+        return multipartRequest;
     }
 
 }

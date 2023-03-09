@@ -21,8 +21,11 @@ import com.c8db.Protocol;
 import com.c8db.internal.http.HttpDeleteWithBody;
 import com.c8db.internal.net.AccessType;
 import com.c8db.internal.net.HostDescription;
+import com.c8db.velocystream.MultipartRequest;
 import com.c8db.velocystream.Request;
 import com.c8db.velocystream.RequestType;
+
+import java.io.ByteArrayInputStream;
 import java.util.Arrays;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpGet;
@@ -31,9 +34,12 @@ import org.apache.http.client.methods.HttpPatch;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.entity.BasicHttpEntity;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+
+import static com.c8db.velocystream.MultipartRequest.BATCH_CONTENT_TYPE;
 
 /**
  *
@@ -86,8 +92,17 @@ public final class RequestUtils {
 
     private static HttpRequestBase requestWithBody(final HttpEntityEnclosingRequestBase httpRequest,
         final Request request, final Protocol contentType) {
-        final VPackSlice body = request.getBody();
 
+        if(request instanceof MultipartRequest){
+            MultipartRequest multipartRequest = (MultipartRequest)request;
+            BasicHttpEntity basicHttpEntity = new BasicHttpEntity();
+            basicHttpEntity.setContentType(BATCH_CONTENT_TYPE);
+            basicHttpEntity.setContent(new ByteArrayInputStream(multipartRequest.buildRequestBody().getBytes()));
+            httpRequest.setEntity(basicHttpEntity);
+            return httpRequest;
+        }
+
+        final VPackSlice body = request.getBody();
         if (body != null) {
             if (contentType == Protocol.HTTP_VPACK) {
                 httpRequest.setEntity(new ByteArrayEntity(

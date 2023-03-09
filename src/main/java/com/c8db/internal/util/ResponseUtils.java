@@ -23,16 +23,35 @@ import com.arangodb.velocypack.VPackSlice;
 import com.arangodb.velocypack.exception.VPackParserException;
 import com.c8db.C8DBException;
 import com.c8db.Protocol;
+import com.c8db.entity.CursorEntity;
 import com.c8db.entity.ErrorEntity;
 import com.c8db.internal.net.C8DBRedirectException;
 import com.c8db.util.C8Serialization;
 import com.c8db.util.C8Serializer.Options;
+import com.c8db.velocystream.MultipartRequest;
+import com.c8db.velocystream.MultipartResponse;
 import com.c8db.velocystream.Response;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.entity.BasicHttpEntity;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+
+import javax.mail.BodyPart;
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMultipart;
+import javax.mail.util.ByteArrayDataSource;
 
 /**
  *
@@ -78,11 +97,27 @@ public final class ResponseUtils {
 
     public static Response buildResponse(final C8Serialization util, final CloseableHttpResponse httpResponse,
         final Protocol contentType) throws UnsupportedOperationException, IOException {
-        final Response response = new Response();
+        Response response = new Response();
         response.setResponseCode(httpResponse.getStatusLine().getStatusCode());
         final HttpEntity entity = httpResponse.getEntity();
 
-        if (entity != null && entity.getContent() != null) {
+        if(null != entity.getContentType()
+                && MultipartRequest.BATCH_CONTENT_TYPE.equals(entity.getContentType().getValue())){
+
+            /*
+                    Mutipart response
+                    ---------------------------
+                   1. create class MutipartResponse
+                   2. MutipartResponse should extend Response object
+                   3. multipart object should have list of HttpResponseEntity
+                   4. From each  HttpResponseEntity, create CursorEntity
+                   5. i.e. create a list of CursorEntity from MutipartResponse
+                   6. create List<C8Cursor<T>> from CursorEntity
+             */
+
+
+
+        } else if (entity != null && entity.getContent() != null) {
             if (contentType == Protocol.HTTP_VPACK) {
                 final byte[] content = IOUtils.toByteArray(entity.getContent());
                 if (content.length > 0) {
@@ -110,4 +145,37 @@ public final class ResponseUtils {
         }
         return response;
     }
+
+    static String convertStreamToString(java.io.InputStream is) {
+        java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
+        return s.hasNext() ? s.next() : "";
+    }
+
+//    private static List<CursorEntity> parseMultipartResponse(String multipartResponse) {
+//        List<CursorEntity> resultList = new ArrayList<>();
+//        String[] parts = multipartResponse.split("--C8_BATCH_QUERY_PART\r\n");
+//        for (String part : parts) {
+//            if (!part.trim().isEmpty()) {
+//                ObjectMapper objectMapper = new ObjectMapper();
+//                String jsonStr = part.substring(part.indexOf("{"), part.lastIndexOf("}") + 1);
+//                try {
+//                    //CursorEntity cursor = objectMapper.readValue(jsonStr, CursorEntity.class);
+//                    JsonParser parser = new JsonParser();
+//                    JsonElement element = parser.parse(json);
+//                    JsonObject obj = element.getAsJsonObject();
+//                    JsonElement result = obj.get("result");
+//
+//                    // Convert result to VPackSlice
+//                    VPack vpack = new VPack();
+//                    VPackParser vpackParser = new VPackParser(vpack);
+//                    VPackSlice slice = vpackParser.fromJson(result.toString());
+//
+//                   // resultList.add(cursor);
+//                } catch (Exception e) {
+//                    System.err.println("Error parsing JSON: " + e.getMessage());
+//                }
+//            }
+//        }
+//        return resultList;
+//    }
 }

@@ -58,6 +58,7 @@ import com.c8db.util.C8CursorInitializer;
 import com.c8db.velocystream.Request;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import static com.c8db.internal.InternalC8Variables.GLOBAL_STREAM_PREFIX;
@@ -228,6 +229,16 @@ public class C8DatabaseImpl extends InternalC8Database<C8DBImpl, C8ExecutorSync>
     @Override
     public <T> C8Cursor<T> query(final String query, final Class<T> type) throws C8DBException {
         return query(query, null, null, type);
+    }
+
+    @Override
+    public C8Cursor<?> executeBatchQueries(List<String> queryList, List<Map<String, Object>> varBindsList, List<Class<?>> classTypes) throws C8DBException {
+
+        final Request request = batchQueryRequest(queryList, varBindsList);
+        final HostHandle hostHandle = new HostHandle();
+        final CursorEntity result = executor.execute(request, CursorEntity.class, hostHandle);
+        //return createCursor(result, type, hostHandle);
+        return null;
     }
 
     @Override

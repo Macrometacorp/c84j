@@ -34,6 +34,7 @@ import com.c8db.model.StreamTransactionOptions;
 import com.c8db.model.TraversalOptions;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -342,6 +343,9 @@ public interface C8Database extends C8SerializationAccessor {
      * Documentation</a>
      */
     <T> C8Cursor<T> query(String query, Class<T> type) throws C8DBException;
+
+
+    C8Cursor<?> executeBatchQueries(List<String> queryList, List<Map<String, Object>> varBindsList, List<Class<?>> classTypes) throws C8DBException;
 
     /**
      * Return an cursor from the given cursor-ID if still existing
