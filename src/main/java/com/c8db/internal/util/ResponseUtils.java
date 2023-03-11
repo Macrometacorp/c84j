@@ -104,6 +104,12 @@ public final class ResponseUtils {
         if(null != entity.getContentType()
                 && MultipartRequest.BATCH_CONTENT_TYPE.equals(entity.getContentType().getValue())){
 
+            MultipartResponse mutipartResponse = new MultipartResponse(util);
+
+            mutipartResponse.parseMultipartResponse(entity.getContent());
+
+
+
             /*
                     Mutipart response
                     ---------------------------

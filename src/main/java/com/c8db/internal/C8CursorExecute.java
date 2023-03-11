@@ -26,7 +26,7 @@ import com.c8db.entity.CursorEntity;
  */
 public interface C8CursorExecute {
 
-	CursorEntity next(String id, Map<String, String> meta) throws C8DBException;
+	CursorEntity<T> next(String id, Map<String, String> meta) throws C8DBException;
 
 	void close(String id, Map<String, String> meta) throws C8DBException;
 

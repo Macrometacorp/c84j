@@ -80,21 +80,19 @@ public class MultiTest extends InternalC8Database<C8DBImpl, C8ExecutorSync>{
 
         List<String> qs = new ArrayList<>();
         List<Map<String, Object>> vs = new ArrayList<>();
-        List<Class<?>> tys = new ArrayList<>();
 
         for(int i = 0 ; i<2;i++){
             String query = "FOR doc IN @@collection FILTER (doc.product == @product )  UPDATE doc WITH { quantity: @quantity } IN @@collection";
             Map<String, Object> bindVars = new HashMap<>();
             bindVars.put("@collection", "inventory");
             bindVars.put("product", "ram");
-            bindVars.put("quantity", String.valueOf(100));
+            //bindVars.put("quantity", String.valueOf(100));
             qs.add(query);
             vs.add(bindVars);
-            tys.add(String.class);
         }
 
 
-        c8database.executeBatchQueries(qs, vs,  tys);
+        c8database.executeBatchQueries(qs, vs,  String.class);
 
     }
 }

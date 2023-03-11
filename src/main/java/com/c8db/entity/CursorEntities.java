@@ -12,21 +12,28 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
-
-package com.c8db.util;
-
-import com.c8db.C8Cursor;
-import com.c8db.entity.CursorEntity;
-import com.c8db.internal.C8CursorExecute;
-import com.c8db.internal.InternalC8Database;
-
-/**
  *
  */
-public interface C8CursorInitializer {
 
-    <T> C8Cursor<T> createInstance(final InternalC8Database<?, ?> db, final C8CursorExecute execute,
-            final Class<T> type, final CursorEntity<T> result);
+package com.c8db.entity;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static java.util.Collections.unmodifiableList;
+
+/**
+ */
+public class CursorEntities<T> {
+
+    private List<CursorEntity<T>> cursorEntityList = new ArrayList<>();
+
+    public CursorEntities(List<CursorEntity<T>> cursorEntityList){
+        this.cursorEntityList = cursorEntityList;
+    }
+
+    public List<CursorEntity<T>> getCursorEntityList(){
+        return unmodifiableList(this.cursorEntityList);
+    }
 
 }

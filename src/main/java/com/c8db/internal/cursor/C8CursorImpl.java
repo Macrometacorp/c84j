@@ -41,7 +41,7 @@ public class C8CursorImpl<T> extends AbstractC8Iterable<T> implements C8Cursor<T
 	private final C8CursorExecute execute;
 
 	public C8CursorImpl(final InternalC8Database<?, ?> db, final C8CursorExecute execute,
-		final Class<T> type, final CursorEntity result) {
+		final Class<T> type, final CursorEntity<T> result) {
 		super();
 		this.execute = execute;
 		this.type = type;
@@ -53,7 +53,7 @@ public class C8CursorImpl<T> extends AbstractC8Iterable<T> implements C8Cursor<T
 		final C8Cursor<T> cursor,
 		final InternalC8Database<?, ?> db,
 		final C8CursorExecute execute,
-		final CursorEntity result) {
+		final CursorEntity<T> result) {
 		return new C8CursorIterator<T>(cursor, execute, db, result);
 	}
 

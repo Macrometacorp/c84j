@@ -9,8 +9,10 @@ import com.c8db.entity.C8StreamEntity;
 import com.c8db.entity.C8qlExecutionExplainEntity;
 import com.c8db.entity.C8qlParseEntity;
 import com.c8db.entity.CollectionEntity;
+import com.c8db.entity.CursorEntities;
 import com.c8db.entity.DatabaseEntity;
 import com.c8db.entity.EdgeDefinition;
+import com.c8db.entity.Entity;
 import com.c8db.entity.GeoFabricPermissions;
 import com.c8db.entity.GraphEntity;
 import com.c8db.entity.IndexEntity;
@@ -345,7 +347,7 @@ public interface C8Database extends C8SerializationAccessor {
     <T> C8Cursor<T> query(String query, Class<T> type) throws C8DBException;
 
 
-    C8Cursor<?> executeBatchQueries(List<String> queryList, List<Map<String, Object>> varBindsList, List<Class<?>> classTypes) throws C8DBException;
+    <T> CursorEntities<T> executeBatchQueries(List<String> queryList, List<Map<String, Object>> bindVarsList, Class<T> type) throws C8DBException;
 
     /**
      * Return an cursor from the given cursor-ID if still existing

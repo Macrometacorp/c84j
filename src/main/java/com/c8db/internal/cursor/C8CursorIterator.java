@@ -32,7 +32,7 @@ import com.c8db.internal.util.C8SerializationFactory.Serializer;
  */
 public class C8CursorIterator<T> implements C8Iterator<T> {
 
-    private CursorEntity result;
+    private CursorEntity<T> result;
     private int pos;
 
     private final C8Cursor<T> cursor;
@@ -40,7 +40,7 @@ public class C8CursorIterator<T> implements C8Iterator<T> {
     private final C8CursorExecute execute;
 
     protected C8CursorIterator(final C8Cursor<T> cursor, final C8CursorExecute execute,
-            final InternalC8Database<?, ?> db, final CursorEntity result) {
+            final InternalC8Database<?, ?> db, final CursorEntity<T> result) {
         super();
         this.cursor = cursor;
         this.execute = execute;
@@ -49,7 +49,7 @@ public class C8CursorIterator<T> implements C8Iterator<T> {
         pos = 0;
     }
 
-    public CursorEntity getResult() {
+    public CursorEntity<T> getResult() {
         return result;
     }
 

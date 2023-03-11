@@ -18,8 +18,17 @@ package com.c8db.internal;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.List;
 
+import com.amazonaws.services.dynamodbv2.xspec.M;
 import com.c8db.Service;
+import com.c8db.entity.CursorEntities;
+import com.c8db.entity.CursorEntity;
+import com.c8db.entity.Entity;
+import com.c8db.entity.ErrorEntity;
+import com.c8db.velocystream.MultipartRequest;
+import com.c8db.velocystream.MultipartResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,6 +63,22 @@ public class C8ExecutorSync extends C8Executor {
     public <T> T execute(final Request request, final Type type, final HostHandle hostHandle) throws C8DBException {
         return execute(request, type, hostHandle, Service.C8DB);
     }
+
+    public <T> CursorEntities<T> execute(final MultipartRequest request, final Type type, final HostHandle hostHandle) throws C8DBException {
+        return execute(request, new ResponseDeserializer<CursorEntities> () {
+            final List<CursorEntity<T>> entities = new ArrayList<>();
+            @Override
+            public T deserialize(final Response response) throws VPackException {
+                MultipartResponse multipartResponse = (MultipartResponse) response;
+                List<Response> responseList = multipartResponse.geResponseList();
+                for(Response resp : responseList){
+                    entities.add(createResult(type, resp));
+                }
+                return new CursorEntities<>(entities);
+            }
+        }, hostHandle);
+    }
+
 
     public <T> T execute(final Request request, final Type type, final HostHandle hostHandle, Service service) throws C8DBException {
         return execute(request, new ResponseDeserializer<T>() {

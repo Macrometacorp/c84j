@@ -17,6 +17,7 @@
 package com.c8db.internal;
 
 import java.lang.reflect.Type;
+import java.util.List;
 
 import com.arangodb.velocypack.exception.VPackException;
 import com.c8db.entity.Entity;

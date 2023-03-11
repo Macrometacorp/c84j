@@ -27,9 +27,11 @@ import com.c8db.entity.C8StreamEntity;
 import com.c8db.entity.C8qlExecutionExplainEntity;
 import com.c8db.entity.C8qlParseEntity;
 import com.c8db.entity.CollectionEntity;
+import com.c8db.entity.CursorEntities;
 import com.c8db.entity.CursorEntity;
 import com.c8db.entity.DatabaseEntity;
 import com.c8db.entity.EdgeDefinition;
+import com.c8db.entity.Entity;
 import com.c8db.entity.GeoFabricPermissions;
 import com.c8db.entity.GraphEntity;
 import com.c8db.entity.IndexEntity;
@@ -55,6 +57,7 @@ import com.c8db.model.GraphCreateOptions;
 import com.c8db.model.StreamTransactionOptions;
 import com.c8db.model.TraversalOptions;
 import com.c8db.util.C8CursorInitializer;
+import com.c8db.velocystream.MultipartRequest;
 import com.c8db.velocystream.Request;
 
 import java.util.Collection;
@@ -208,7 +211,7 @@ public class C8DatabaseImpl extends InternalC8Database<C8DBImpl, C8ExecutorSync>
 
         final Request request = queryRequest(query, bindVars, options);
         final HostHandle hostHandle = new HostHandle();
-        final CursorEntity result = executor.execute(request, CursorEntity.class, hostHandle);
+        final CursorEntity<T> result = executor.execute(request, CursorEntity.class, hostHandle);
 
         return createCursor(result, type, options, hostHandle);
 
@@ -232,11 +235,11 @@ public class C8DatabaseImpl extends InternalC8Database<C8DBImpl, C8ExecutorSync>
     }
 
     @Override
-    public C8Cursor<?> executeBatchQueries(List<String> queryList, List<Map<String, Object>> varBindsList, List<Class<?>> classTypes) throws C8DBException {
+    public <T> CursorEntities<T> executeBatchQueries(final List<String> queryList, final List<Map<String, Object>> varBindList, final Class<T> type) throws C8DBException {
 
-        final Request request = batchQueryRequest(queryList, varBindsList);
+        final MultipartRequest request = batchQueryRequest(queryList, varBindList);
         final HostHandle hostHandle = new HostHandle();
-        final CursorEntity result = executor.execute(request, CursorEntity.class, hostHandle);
+        final List<Entity> result = executor.execute(request, Entity.class, hostHandle);
         //return createCursor(result, type, hostHandle);
         return null;
     }
@@ -244,17 +247,17 @@ public class C8DatabaseImpl extends InternalC8Database<C8DBImpl, C8ExecutorSync>
     @Override
     public <T> C8Cursor<T> cursor(final String cursorId, final Class<T> type) throws C8DBException {
         final HostHandle hostHandle = new HostHandle();
-        final CursorEntity result = executor.execute(queryNextRequest(cursorId, null), CursorEntity.class,
+        final CursorEntity<T> result = executor.execute(queryNextRequest(cursorId, null), CursorEntity.class,
                 hostHandle);
         return createCursor(result, type, null, hostHandle);
     }
 
-    private <T> C8Cursor<T> createCursor(final CursorEntity result, final Class<T> type,
+    private <T> C8Cursor<T> createCursor(final CursorEntity<T> result, final Class<T> type,
                                          final C8qlQueryOptions options, final HostHandle hostHandle) {
 
         final C8CursorExecute execute = new C8CursorExecute() {
             @Override
-            public CursorEntity next(final String id, Map<String, String> meta) {
+            public CursorEntity<T> next(final String id, Map<String, String> meta) {
                 return executor.execute(queryNextRequest(id, meta), CursorEntity.class, hostHandle);
             }
 
@@ -476,7 +479,7 @@ public class C8DatabaseImpl extends InternalC8Database<C8DBImpl, C8ExecutorSync>
             throws C8DBException {
         final Request request = userQueryRequest(userName, name, bindVars);
         final HostHandle hostHandle = new HostHandle();
-        final CursorEntity result = executor.execute(request, CursorEntity.class, hostHandle);
+        final CursorEntity<T> result = executor.execute(request, CursorEntity.class, hostHandle);
         return createCursor(result, type, null, hostHandle);
     }
 

@@ -622,7 +622,7 @@ public abstract class InternalC8Database<A extends InternalC8DB<E>, E extends C8
         return request;
     }
 
-    protected Request batchQueryRequest(final List<String> queryList, final List<Map<String, Object>> varBindsList) {
+    protected MultipartRequest batchQueryRequest(final List<String> queryList, final List<Map<String, Object>> varBindsList) {
 
         MultipartRequest multipartRequest = new MultipartRequest(tenant, name);
 

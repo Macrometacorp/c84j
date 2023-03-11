@@ -26,7 +26,7 @@ import com.arangodb.velocypack.VPackSlice;
 
 /**
  */
-public class CursorEntity implements Entity, MetaAware {
+public class CursorEntity<T> implements Entity, MetaAware {
 
     private String id;
     private Integer count;
