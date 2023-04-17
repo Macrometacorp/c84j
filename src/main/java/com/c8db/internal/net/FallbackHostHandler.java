@@ -45,7 +45,7 @@ public class FallbackHostHandler implements HostHandler {
             return current;
         } else {
             reset();
-            throw new C8DBException("Cannot contact any host!");
+            throw new C8DBException("Cannot contact any host!", 503);
         }
     }
 
