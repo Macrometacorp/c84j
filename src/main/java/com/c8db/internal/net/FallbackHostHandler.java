@@ -22,6 +22,8 @@ import com.c8db.Service;
 import java.io.IOException;
 import java.util.List;
 
+import static org.apache.http.HttpStatus.SC_SERVICE_UNAVAILABLE;
+
 public class FallbackHostHandler implements HostHandler {
 
     private Host current;
@@ -45,7 +47,7 @@ public class FallbackHostHandler implements HostHandler {
             return current;
         } else {
             reset();
-            throw new C8DBException("Cannot contact any host!");
+            throw new C8DBException("Cannot contact any host!", SC_SERVICE_UNAVAILABLE);
         }
     }
 
