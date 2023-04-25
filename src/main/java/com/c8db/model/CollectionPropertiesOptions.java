@@ -21,7 +21,8 @@ package com.c8db.model;
 public class CollectionPropertiesOptions {
 
 	private Boolean waitForSync;
-	private Long journalSize;
+	private Boolean hasStream;
+	private Boolean cacheEnabled;
 
 	public CollectionPropertiesOptions() {
 		super();
@@ -41,20 +42,29 @@ public class CollectionPropertiesOptions {
 		return this;
 	}
 
-	public Long getJournalSize() {
-		return journalSize;
+	public Boolean getHasStream() {
+		return hasStream;
 	}
 
 	/**
-	 * @param journalSize
-	 *            The maximal size of a journal or datafile in bytes. The value must be at least 1048576 (1 MB). Note
-	 *            that when changing the journalSize value, it will only have an effect for additional journals or
-	 *            datafiles that are created. Already existing journals or datafiles will not be affected.
+	 * @param hasStream True if a local stream is associated with the collection.
 	 * @return options
 	 */
-	public CollectionPropertiesOptions journalSize(final Long journalSize) {
-		this.journalSize = journalSize;
+	public CollectionPropertiesOptions hasStream(Boolean hasStream) {
+		this.hasStream = hasStream;
 		return this;
 	}
 
+	public Boolean getCacheEnabled() {
+		return cacheEnabled;
+	}
+
+	/**
+	 * @param cacheEnabled True if collection has cache enabled.
+	 * @return options
+	 */
+	public CollectionPropertiesOptions cacheEnabled(Boolean cacheEnabled) {
+		this.cacheEnabled = cacheEnabled;
+		return this;
+	}
 }

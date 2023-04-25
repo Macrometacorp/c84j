@@ -145,7 +145,6 @@ public class C8CollectionTest extends BaseTest {
             assertThat(properties.getWaitForSync(), is(notNullValue()));
             final CollectionPropertiesOptions options = new CollectionPropertiesOptions();
             options.waitForSync(!properties.getWaitForSync());
-            options.journalSize(2000000L);
             final CollectionPropertiesEntity changedProperties = db.collection(collection).changeProperties(options);
             assertThat(changedProperties.getWaitForSync(), is(notNullValue()));
             assertThat(changedProperties.getWaitForSync(), is(not(properties.getWaitForSync())));
