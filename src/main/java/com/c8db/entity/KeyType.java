@@ -21,5 +21,5 @@ package com.c8db.entity;
  *
  */
 public enum KeyType {
-    traditional, autoincrement
+    traditional, autoincrement, uuid64
 }
