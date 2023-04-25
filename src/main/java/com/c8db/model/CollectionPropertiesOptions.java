@@ -21,6 +21,7 @@ package com.c8db.model;
 public class CollectionPropertiesOptions {
 
 	private Boolean waitForSync;
+	private Long journalSize;
 	private Boolean hasStream;
 	private Boolean cacheEnabled;
 
@@ -39,6 +40,22 @@ public class CollectionPropertiesOptions {
 	 */
 	public CollectionPropertiesOptions waitForSync(final Boolean waitForSync) {
 		this.waitForSync = waitForSync;
+		return this;
+	}
+
+	public Long getJournalSize() {
+		return journalSize;
+	}
+
+	/**
+	 * @param journalSize
+	 *            The maximal size of a journal or datafile in bytes. The value must be at least 1048576 (1 MB). Note
+	 *            that when changing the journalSize value, it will only have an effect for additional journals or
+	 *            datafiles that are created. Already existing journals or datafiles will not be affected.
+	 * @return options
+	 */
+	public CollectionPropertiesOptions journalSize(final Long journalSize) {
+		this.journalSize = journalSize;
 		return this;
 	}
 
