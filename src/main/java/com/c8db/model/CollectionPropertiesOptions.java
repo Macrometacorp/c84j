@@ -22,6 +22,8 @@ public class CollectionPropertiesOptions {
 
 	private Boolean waitForSync;
 	private Long journalSize;
+	private Boolean hasStream;
+	private Boolean cacheEnabled;
 
 	public CollectionPropertiesOptions() {
 		super();
@@ -57,4 +59,29 @@ public class CollectionPropertiesOptions {
 		return this;
 	}
 
+	public Boolean getHasStream() {
+		return hasStream;
+	}
+
+	/**
+	 * @param hasStream True if a local stream is associated with the collection.
+	 * @return options
+	 */
+	public CollectionPropertiesOptions hasStream(Boolean hasStream) {
+		this.hasStream = hasStream;
+		return this;
+	}
+
+	public Boolean getCacheEnabled() {
+		return cacheEnabled;
+	}
+
+	/**
+	 * @param cacheEnabled True if collection has cache enabled.
+	 * @return options
+	 */
+	public CollectionPropertiesOptions cacheEnabled(Boolean cacheEnabled) {
+		this.cacheEnabled = cacheEnabled;
+		return this;
+	}
 }
