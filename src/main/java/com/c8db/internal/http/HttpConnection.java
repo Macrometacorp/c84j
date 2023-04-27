@@ -65,6 +65,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import javax.net.ssl.SSLContext;
 
+import static org.apache.http.HttpStatus.SC_SERVICE_UNAVAILABLE;
+
 public class HttpConnection implements Connection {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpConnection.class);
@@ -290,6 +292,9 @@ public class HttpConnection implements Connection {
             }
         } catch (UnknownHostException | NoHttpResponseException ex) {
             response = retryRequest(request, httpRequest);
+            if(response == null){
+                throw new C8DBException("c84j exhausted all retries.", SC_SERVICE_UNAVAILABLE, ex);
+            }
         }
         return response;
     }
