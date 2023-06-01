@@ -5,6 +5,7 @@
 package com.c8db.internal;
 
 import com.c8db.C8CEP;
+import com.c8db.Service;
 import com.c8db.entity.C8StreamWorkerEntity;
 import com.c8db.model.C8StreamWorkerOptions;
 
@@ -20,55 +21,57 @@ public class C8CEPImpl extends InternalC8StreamWorker<C8DBImpl, C8DatabaseImpl, 
     @Override
     public C8StreamWorkerEntity create(C8StreamWorkerOptions streamWorkerOptions) {
         return executor.execute(createStreamWorkerRequest(streamWorkerOptions),
-                streamWorkerEntityResponseDeserializer());
+                streamWorkerEntityResponseDeserializer(), null, Service.C8CEP);
     }
 
     @Override
     public C8StreamWorkerEntity get(String streamWorkerName) {
         return executor.execute(getStreamWorkerRequest(streamWorkerName, EMPTY, false),
-                streamWorkerEntityResponseDeserializer());
+                streamWorkerEntityResponseDeserializer(), null, Service.C8CEP);
     }
 
     @Override
     public C8StreamWorkerEntity get(String streamWorkerName, String onBehalfOfUser, boolean isSystem) {
         return executor.execute(getStreamWorkerRequest(streamWorkerName, onBehalfOfUser, isSystem),
-                streamWorkerEntityResponseDeserializer());
+                streamWorkerEntityResponseDeserializer(), null, Service.C8CEP);
     }
 
     @Override
     public C8StreamWorkerEntity update(String streamWorkerName, C8StreamWorkerOptions streamWorkerOptions) {
         return executor.execute(updateStreamWorkerRequest(streamWorkerName, streamWorkerOptions, EMPTY, false),
-                streamWorkerEntityResponseDeserializer());
+                streamWorkerEntityResponseDeserializer(), null, Service.C8CEP);
     }
 
     @Override
     public C8StreamWorkerEntity update(String streamWorkerName, C8StreamWorkerOptions streamWorkerOptions,
                                        String onBehalfOfUser, boolean isSystem) {
         return executor.execute(updateStreamWorkerRequest(streamWorkerName, streamWorkerOptions, onBehalfOfUser,
-                isSystem), streamWorkerEntityResponseDeserializer());
+                isSystem), streamWorkerEntityResponseDeserializer(), null, Service.C8CEP);
     }
 
     @Override
     public void delete(String streamWorkerName) {
-        executor.execute(deleteStreamWorkerRequest(streamWorkerName, EMPTY, false), Void.class);
+        executor.execute(deleteStreamWorkerRequest(streamWorkerName, EMPTY, false), Void.class, null,
+                Service.C8CEP);
     }
 
     @Override
     public void delete(String streamWorkerName, String onBehalfOfUser, boolean isSystem) {
-        executor.execute(deleteStreamWorkerRequest(streamWorkerName, onBehalfOfUser, isSystem), Void.class);
+        executor.execute(deleteStreamWorkerRequest(streamWorkerName, onBehalfOfUser, isSystem), Void.class, null,
+                Service.C8CEP);
     }
 
     @Override
     public C8StreamWorkerEntity activate(String streamWorkerName, Boolean isActive) {
         return executor.execute(activateStreamWorkerRequest(streamWorkerName, isActive, EMPTY, false),
-                streamWorkerEntityResponseDeserializer());
+                streamWorkerEntityResponseDeserializer(), null, Service.C8CEP);
     }
 
     @Override
     public C8StreamWorkerEntity activate(String streamWorkerName, Boolean isActive,
                                          String onBehalfOfUser, boolean isSystem) {
         return executor.execute(activateStreamWorkerRequest(streamWorkerName, isActive, onBehalfOfUser, isSystem),
-                streamWorkerEntityResponseDeserializer());
+                streamWorkerEntityResponseDeserializer(), null, Service.C8CEP);
     }
 
 }
