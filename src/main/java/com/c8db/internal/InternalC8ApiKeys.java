@@ -6,7 +6,6 @@ package com.c8db.internal;
 
 import com.arangodb.velocypack.Type;
 import com.arangodb.velocypack.VPackSlice;
-import com.arangodb.velocypack.exception.VPackException;
 import com.c8db.entity.ApiKeyCreateEntity;
 import com.c8db.entity.ApiKeyEntity;
 import com.c8db.entity.GeoFabricPermissions;
@@ -18,7 +17,6 @@ import com.c8db.model.ApiKeyOptions;
 import com.c8db.model.OptionsBuilder;
 import com.c8db.velocystream.Request;
 import com.c8db.velocystream.RequestType;
-import com.c8db.velocystream.Response;
 
 import java.util.Map;
 
@@ -27,11 +25,13 @@ import static com.c8db.internal.InternalC8Database.QUERY_PARAM_FULL;
 /**
  * Internal request/response related functions.
  */
-public abstract class InternalC8ApiKeys<A extends InternalC8DB<E>, D extends InternalC8Database<A, E>, E extends C8Executor>
-        extends C8Executeable<E> {
+public abstract class InternalC8ApiKeys<A extends InternalC8DB<E>, D extends InternalC8Database<A, E>,
+        E extends C8Executor> extends C8Executeable<E> {
 
     protected static final String PATH_API_KEY_VALIDATE = "/_api/key/validate";
     protected static final String PATH_API_KEY = "/_api/key";
+    private static final String PARAM_USER = "user";
+    private static final String PARAM_IS_SYSTEM = "isSystem";
 
     private final D db;
 
@@ -41,12 +41,10 @@ public abstract class InternalC8ApiKeys<A extends InternalC8DB<E>, D extends Int
     }
 
     protected ResponseDeserializer<ApiKeyEntity> validateApiKeyResponseDeserializer() {
-        return new ResponseDeserializer<ApiKeyEntity>() {
-            @Override
-            public ApiKeyEntity deserialize(final Response response) throws VPackException {
-                final VPackSlice result = response.getBody().get(C8ResponseField.RESULT);
-                return util().deserialize(result,  new Type<ApiKeyEntity>(){}.getType());
-            }
+        return response -> {
+            final VPackSlice result = response.getBody().get(C8ResponseField.RESULT);
+            return util().deserialize(result, new Type<ApiKeyEntity>() {
+            }.getType());
         };
     }
 
@@ -59,20 +57,22 @@ public abstract class InternalC8ApiKeys<A extends InternalC8DB<E>, D extends Int
 
     protected Request geoFabricsAccessLevelRequest(final String keyId, boolean full) {
         final Request request = request(null, null, RequestType.GET, PATH_API_KEY,
-            String.join("." ,db.tenant(), keyId), C8RequestParam.DATABASE);
+                String.join(".", db.tenant(), keyId), C8RequestParam.DATABASE);
         request.putQueryParam(QUERY_PARAM_FULL, full);
         return request;
     }
 
     protected Request geoFabricAccessLevelRequest(final String keyId) {
         final Request request = request(null, null, RequestType.GET, PATH_API_KEY,
-            String.join("." ,db.tenant(), keyId), C8RequestParam.DATABASE, String.join("." ,db.tenant(), db.name()));
+                String.join(".", db.tenant(), keyId), C8RequestParam.DATABASE,
+                String.join(".", db.tenant(), db.name()));
         return request;
     }
 
     protected Request streamsAccessLevelRequest(final String keyId, final boolean full) {
         final Request request = request(null, null, RequestType.GET, PATH_API_KEY,
-            String.join("." ,db.tenant(), keyId), C8RequestParam.DATABASE, String.join("." ,db.tenant(), db.name()), C8RequestParam.STREAM);
+                String.join(".", db.tenant(), keyId), C8RequestParam.DATABASE,
+                String.join(".", db.tenant(), db.name()), C8RequestParam.STREAM);
         if (full) {
             request.putQueryParam(QUERY_PARAM_FULL, true);
         }
@@ -81,58 +81,56 @@ public abstract class InternalC8ApiKeys<A extends InternalC8DB<E>, D extends Int
 
     protected Request streamAccessLevelRequest(final String keyId, final String stream) {
         final Request request = request(db.tenant(), db.name(), RequestType.GET, PATH_API_KEY,
-            String.join("." ,db.tenant(), keyId), C8RequestParam.DATABASE, String.join("." ,db.tenant(), db.name()), C8RequestParam.STREAM, stream);
+                String.join(".", db.tenant(), keyId), C8RequestParam.DATABASE,
+                String.join(".", db.tenant(), db.name()), C8RequestParam.STREAM, stream);
         return request;
     }
 
-    protected Request createApiKeyRequest(final String keyId) {
+    protected Request createApiKeyRequest(final String keyId, String onBehalfOfUser, boolean isSystem) {
         final Request request = request(null, null, RequestType.POST, PATH_API_KEY);
-        request.setBody(util(C8SerializationFactory.Serializer.CUSTOM).serialize(
-                OptionsBuilder.build(new ApiKeyCreateOptions(), keyId)));
+        request.setBody(util(C8SerializationFactory.Serializer.CUSTOM)
+                .serialize(new ApiKeyCreateOptions(keyId, onBehalfOfUser, isSystem)));
         return request;
     }
 
-    protected Request deleteApiKeyRequest(final String keyId) {
-        return request(null, null, RequestType.DELETE, PATH_API_KEY, keyId);
+    protected Request deleteApiKeyRequest(final String keyId, String onBehalfOfUser, boolean isSystem) {
+        final Request request = request(null, null, RequestType.DELETE, PATH_API_KEY, keyId);
+        if (onBehalfOfUser != null) {
+            request.putQueryParam(PARAM_USER, onBehalfOfUser);
+            request.putQueryParam(PARAM_IS_SYSTEM, isSystem);
+        }
+        return request;
     }
 
     protected ResponseDeserializer<Permissions> streamAccessLevelResponseDeserializer() {
-        return new ResponseDeserializer<Permissions>() {
-            @Override
-            public Permissions deserialize(final Response response) throws VPackException {
-                final VPackSlice result = response.getBody().get(C8ResponseField.RESULT);
-                return util().deserialize(result,  new Type<Permissions>(){}.getType());
-            }
+        return response -> {
+            final VPackSlice result = response.getBody().get(C8ResponseField.RESULT);
+            return util().deserialize(result, new Type<Permissions>() {
+            }.getType());
         };
     }
 
     protected ResponseDeserializer<Map<String, GeoFabricPermissions>> gatResourcesAccessResponseDeserializer() {
-        return new ResponseDeserializer<Map<String, GeoFabricPermissions>>() {
-            @Override
-            public Map<String, GeoFabricPermissions> deserialize(final Response response) throws VPackException {
-                final VPackSlice result = response.getBody().get(C8ResponseField.RESULT);
-                return util().deserialize(result, new Type<Map<String, GeoFabricPermissions>>(){}.getType());
-            }
+        return response -> {
+            final VPackSlice result = response.getBody().get(C8ResponseField.RESULT);
+            return util().deserialize(result, new Type<Map<String, GeoFabricPermissions>>() {
+            }.getType());
         };
     }
 
     protected ResponseDeserializer<Map<String, Permissions>> listAccessesResponseDeserializer() {
-        return new ResponseDeserializer<Map<String, Permissions>>() {
-            @Override
-            public Map<String, Permissions> deserialize(final Response response) throws VPackException {
-                final VPackSlice result = response.getBody().get(C8ResponseField.RESULT);
-                return util().deserialize(result, new Type<Map<String, Permissions>>(){}.getType());
-            }
+        return response -> {
+            final VPackSlice result = response.getBody().get(C8ResponseField.RESULT);
+            return util().deserialize(result, new Type<Map<String, Permissions>>() {
+            }.getType());
         };
     }
 
     protected ResponseDeserializer<ApiKeyCreateEntity> createApiKeyResponseDeserializer() {
-        return new ResponseDeserializer<ApiKeyCreateEntity>() {
-            @Override
-            public ApiKeyCreateEntity deserialize(final Response response) throws VPackException {
-                final VPackSlice result = response.getBody();
-                return util().deserialize(result, new Type<ApiKeyCreateEntity>() {}.getType());
-            }
+        return response -> {
+            final VPackSlice result = response.getBody();
+            return util().deserialize(result, new Type<ApiKeyCreateEntity>() {
+            }.getType());
         };
     }
 

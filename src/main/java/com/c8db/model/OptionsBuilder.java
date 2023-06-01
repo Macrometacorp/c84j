@@ -4,14 +4,13 @@
 
 package com.c8db.model;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-
 import com.arangodb.velocypack.VPackSlice;
 import com.c8db.entity.EdgeDefinition;
 import com.c8db.entity.Permissions;
 import com.c8db.entity.UserQueryOptions;
+
+import java.util.Collection;
+import java.util.HashMap;
 
 /**
  *
@@ -63,7 +62,7 @@ public class OptionsBuilder {
     }
 
     public static C8qlQueryExplainOptions build(final C8qlQueryExplainOptions options, final String query,
-            final VPackSlice bindVars) {
+                                                final VPackSlice bindVars) {
         return options.query(query).bindVars(bindVars);
     }
 
@@ -72,7 +71,7 @@ public class OptionsBuilder {
     }
 
     public static GraphCreateOptions build(final GraphCreateOptions options, final String name,
-            final Collection<EdgeDefinition> edgeDefinitions) {
+                                           final Collection<EdgeDefinition> edgeDefinitions) {
         return options.name(name).edgeDefinitions(edgeDefinitions);
     }
 
@@ -85,7 +84,7 @@ public class OptionsBuilder {
     }
 
     public static DBCreateOptions build(final DBCreateOptions options, final String tenant, final String name, final String spotDc,
-            final String dcList) {
+                                        final String dcList) {
         return options.geoFabric(tenant, name).options(spotDc, dcList);
     }
 
@@ -98,13 +97,13 @@ public class OptionsBuilder {
     }
 
     public static VertexCollectionCreateOptions build(final VertexCollectionCreateOptions options,
-            final String collection) {
+                                                      final String collection) {
         return options.collection(collection);
     }
 
     public static UserQueryOptions build(final UserQueryOptions options, final String name) {
-        if (options.getParameter() == null) 
-            options.parameter(new HashMap<String,Object> ());
+        if (options.getParameter() == null)
+            options.parameter(new HashMap<String, Object>());
         return options.name(name);
     }
 
@@ -112,8 +111,14 @@ public class OptionsBuilder {
         return options.apiKey(apiKey);
     }
 
-    public static ApiKeyCreateOptions build(final ApiKeyCreateOptions options, final String keyId) {
-        return options.keyId(keyId);
+    public static ApiKeyCreateOptions build(final ApiKeyCreateOptions options, final String keyId,
+                                            String onBehalfOfUser, boolean isSystem) {
+        options.setKeyid(keyId);
+        if (onBehalfOfUser != null) {
+            options.setUser(onBehalfOfUser);
+            options.setIsSystem(isSystem);
+        }
+        return options;
     }
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Macrometa Corp All rights reserved
+ * Copyright (c) 2021-2023 Macrometa Corp All rights reserved
  */
 
 package com.c8db.internal;
@@ -21,7 +21,7 @@ public class C8ApiKeysImpl extends InternalC8ApiKeys<C8DBImpl, C8DatabaseImpl, C
 
     @Override
     public ApiKeyEntity validateApiKey(String apikey) {
-	    return executor.execute(validateApiKeyRequest(apikey), validateApiKeyResponseDeserializer());
+        return executor.execute(validateApiKeyRequest(apikey), validateApiKeyResponseDeserializer());
     }
 
     @Override
@@ -46,12 +46,22 @@ public class C8ApiKeysImpl extends InternalC8ApiKeys<C8DBImpl, C8DatabaseImpl, C
 
     @Override
     public ApiKeyCreateEntity createApiKey(final String keyId) {
-        return executor.execute(createApiKeyRequest(keyId), createApiKeyResponseDeserializer());
+        return executor.execute(createApiKeyRequest(keyId, null, false), createApiKeyResponseDeserializer());
+    }
+
+    @Override
+    public ApiKeyCreateEntity createApiKey(String keyId, String onBehalfOfUser, boolean isSystem) {
+        return executor.execute(createApiKeyRequest(keyId, onBehalfOfUser, isSystem), createApiKeyResponseDeserializer());
     }
 
     @Override
     public void deleteApiKey(final String keyId) {
-        executor.execute(deleteApiKeyRequest(keyId), Void.class);
+        executor.execute(deleteApiKeyRequest(keyId, null, false), Void.class);
+    }
+
+    @Override
+    public void deleteApiKey(String keyId, String onBehalfOfUser, boolean isSystem) {
+        executor.execute(deleteApiKeyRequest(keyId, onBehalfOfUser, isSystem), Void.class);
     }
 
 }
