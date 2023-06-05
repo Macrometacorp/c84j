@@ -182,6 +182,7 @@ public class HttpConnection implements Connection {
         final StringBuilder sb = new StringBuilder().append(baseUrl);
         final String database = request.getDatabase();
         final String tenant = request.getTenant();
+
         if (tenant != null && !tenant.isEmpty() && service != Service.C8FUNCTION) {
             sb.append("/_tenant/").append(tenant);
         }
@@ -345,7 +346,10 @@ public class HttpConnection implements Connection {
 
     private synchronized void addJWT(final Request request) throws IOException {
         addServiceJWT();
-        if(StringUtils.isNotEmpty(user) && !host.getHost().equals(auxHost.getHost()) && service != Service.C8FUNCTION) {
+        if(StringUtils.isNotEmpty(user)
+                && !host.getHost().equals(auxHost.getHost())
+                && service != Service.C8FUNCTION
+                && service != Service.C8CEP) {
             addUserJWT(request.getTenant(), user);
         }
     }
@@ -432,7 +436,8 @@ public class HttpConnection implements Connection {
     }
 
     private String buildBaseUrl(final HostDescription host) {
-        return (Boolean.TRUE == useSsl ? "https://" : "http://") + host.getHost() + ":" + host.getPort();
+        return (Boolean.TRUE == useSsl ? "https://" : "http://") + host.getHost() + ":" + host.getPort()
+                + (host.getPath() != null ? host.getPath() : "");
     }
 
     public Credentials addCredentials(final HttpRequestBase httpRequest) {

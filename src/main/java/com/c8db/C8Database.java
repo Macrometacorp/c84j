@@ -763,4 +763,11 @@ public interface C8Database extends C8SerializationAccessor {
      */
     C8Compute compute();
 
+    /**
+     * Returns a {@code C8StreamWorker} instance.
+     *
+     * @return C8StreamWorker handler
+     */
+    C8CEP cep();
+
 }

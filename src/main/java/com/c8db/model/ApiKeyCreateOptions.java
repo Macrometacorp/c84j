@@ -3,24 +3,18 @@
  */
 package com.c8db.model;
 
-import lombok.Getter;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
+/**
+ * Attributes of an Api Key.
+ */
+@Data
+@AllArgsConstructor
 public class ApiKeyCreateOptions {
 
-    @Getter
     private String keyid;
-
-    public ApiKeyCreateOptions() {
-        super();
-    }
-
-    /**
-     * @param keyId Key id for the apiKey.
-     * @return options.
-     */
-    protected ApiKeyCreateOptions keyId(final String keyId) {
-        this.keyid = keyId;
-        return this;
-    }
+    private String user;
+    private Boolean isSystem;
 
 }

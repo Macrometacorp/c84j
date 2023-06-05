@@ -138,6 +138,20 @@ public interface C8DB extends C8SerializationAccessor {
         }
 
         /**
+         * Adds a service host to connect to. Multiple hosts can be added to provide fallbacks.
+         * if service host is empty then it uses regular host from method `host(final String host, final int port)`
+         *
+         * @param host address of the host
+         * @param port port of the host
+         * @param path for the API
+         * @return {@link C8DB.Builder}
+         */
+        public Builder serviceHost(Service service, final String host, final int port, final String path) {
+            setHost(service, host, port, path);
+            return this;
+        }
+
+        /**
          * Sets the connection and request timeout in milliseconds.
          *
          * @param timeout timeout in milliseconds
@@ -623,6 +637,9 @@ public interface C8DB extends C8SerializationAccessor {
             }
             if (hosts.get(Service.C8FUNCTION).isEmpty()) {
                 hosts.get(Service.C8FUNCTION).addAll(hosts.get(Service.C8DB));
+            }
+            if (hosts.get(Service.C8CEP).isEmpty()) {
+                hosts.get(Service.C8CEP).addAll(hosts.get(Service.C8DB));
             }
 
             final VPack vpacker = vpackBuilder.serializeNullValues(false).build();
