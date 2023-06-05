@@ -17,6 +17,7 @@ import com.c8db.model.ApiKeyCreateOptions;
 import com.c8db.model.ApiKeyOptions;
 import com.c8db.model.JwtOptions;
 import com.c8db.model.OptionsBuilder;
+import com.c8db.model.UserAccessOptions;
 import com.c8db.velocystream.Request;
 import com.c8db.velocystream.RequestType;
 import com.c8db.velocystream.Response;
@@ -33,8 +34,9 @@ public abstract class InternalC8ApiKeys<A extends InternalC8DB<E>, D extends Int
 
     protected static final String PATH_API_KEY_VALIDATE = "/_api/key/validate";
     protected static final String PATH_API_KEY = "/_api/key";
-    private static final String PARAM_USER = "user";
-    private static final String PARAM_IS_SYSTEM = "isSystem";
+    public static final String SYSTEM_TENANT = "_mm";
+    public static final String MM_ROOT = "_mm.root";
+    public static final String ROOT = "root";
 
     private final D db;
 
@@ -99,19 +101,23 @@ public abstract class InternalC8ApiKeys<A extends InternalC8DB<E>, D extends Int
     }
 
     protected Request createApiKeyRequest(final String keyId, String onBehalfOfUser, boolean isSystem) {
+        String user = MM_ROOT.equalsIgnoreCase(onBehalfOfUser) ? ROOT : onBehalfOfUser;
         final Request request = request(null, null, RequestType.POST, PATH_API_KEY);
         request.setBody(util(C8SerializationFactory.Serializer.CUSTOM)
-                .serialize(new ApiKeyCreateOptions(keyId, onBehalfOfUser, isSystem)));
+                .serialize(new ApiKeyCreateOptions(keyId, user, isSystem)));
         return request;
     }
 
-    protected Request deleteApiKeyRequest(final String keyId, String onBehalfOfUser, boolean isSystem) {
-        final Request request = request(null, null, RequestType.DELETE, PATH_API_KEY, keyId);
-        if (onBehalfOfUser != null) {
-            request.putQueryParam(PARAM_USER, onBehalfOfUser);
-            request.putQueryParam(PARAM_IS_SYSTEM, isSystem);
-        }
-        return request;
+    protected Request deleteApiKeyRequest(final String keyId, String tenant) {
+        String key = (SYSTEM_TENANT.equalsIgnoreCase(tenant)) ? keyId : String.join(".", tenant, keyId);
+        return request(null, null, RequestType.DELETE, PATH_API_KEY, key);
+    }
+
+    protected Request grantDatabasePermissionRequest(final String keyId, final String tenant,
+                                                     final String fabric, final Permissions permissions) {
+        String key = (SYSTEM_TENANT.equalsIgnoreCase(tenant)) ? keyId : String.join(".", tenant, keyId);
+        return request(null, null, RequestType.PUT, PATH_API_KEY, key, C8RequestParam.DATABASE,
+                fabric).setBody(util().serialize(OptionsBuilder.build(new UserAccessOptions(), permissions)));
     }
 
     protected ResponseDeserializer<Permissions> streamAccessLevelResponseDeserializer() {

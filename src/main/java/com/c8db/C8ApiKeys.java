@@ -93,14 +93,24 @@ public interface C8ApiKeys extends C8SerializationAccessor {
     void deleteApiKey(final String keyId);
 
     /**
-     * Deletes an APIKey using given keyid on behalf of a different user.
+     * Deletes an APIKey using given keyid on a different tenant.
      * Note: This can be invoked only by _mm or service user.
      *
-     * @param keyId          Key id for the apiKey to be deleted.
-     * @param onBehalfOfUser Username in "tenant.user" format.
-     * @param isSystem       Whether the apiKey is a system apiKey.
+     * @param keyId  Key id for the apiKey to be deleted.
+     * @param tenant Tenant which the key belongs to.
      */
-    void deleteApiKey(final String keyId, final String onBehalfOfUser, final boolean isSystem);
+    void deleteApiKey(final String keyId, final String tenant);
+
+    /**
+     * Grant given permission to a database for a given API keyid.
+     *
+     * @param keyId       Api keyid to grant permissions.
+     * @param tenant      Tenant of the database.
+     * @param fabric      Database to grant permissions to.
+     * @param permissions Permissions to be grant (r, rw, etc...).
+     */
+    void grantDatabasePermissions(final String keyId, final String tenant, final String fabric,
+                                  final Permissions permissions);
 
     // TODO: Implement other required apikeys features.
 

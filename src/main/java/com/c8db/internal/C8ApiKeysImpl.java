@@ -61,12 +61,17 @@ public class C8ApiKeysImpl extends InternalC8ApiKeys<C8DBImpl, C8DatabaseImpl, C
 
     @Override
     public void deleteApiKey(final String keyId) {
-        executor.execute(deleteApiKeyRequest(keyId, null, false), Void.class);
+        executor.execute(deleteApiKeyRequest(keyId, null), Void.class);
     }
 
     @Override
-    public void deleteApiKey(String keyId, String onBehalfOfUser, boolean isSystem) {
-        executor.execute(deleteApiKeyRequest(keyId, onBehalfOfUser, isSystem), Void.class);
+    public void deleteApiKey(String keyId, String tenant) {
+        executor.execute(deleteApiKeyRequest(keyId, tenant), Void.class);
+    }
+
+    @Override
+    public void grantDatabasePermissions(String keyId, String tenant, String fabric, Permissions permissions) {
+        executor.execute(grantDatabasePermissionRequest(keyId, tenant, fabric, permissions), Void.class);
     }
 
 }
