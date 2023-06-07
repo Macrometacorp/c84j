@@ -104,8 +104,9 @@ public abstract class InternalC8ApiKeys<A extends InternalC8DB<E>, D extends Int
     protected Request grantDatabasePermissionRequest(final String keyId, final String tenant,
                                                      final String fabric, final Permissions permissions) {
         String key = (SYSTEM_TENANT.equalsIgnoreCase(tenant)) ? keyId : String.join(".", tenant, keyId);
+        String database = (SYSTEM_TENANT.equalsIgnoreCase(tenant)) ? fabric : String.join(".", tenant, fabric);
         return request(null, null, RequestType.PUT, PATH_API_KEY, key, C8RequestParam.DATABASE,
-                fabric).setBody(util().serialize(OptionsBuilder.build(new UserAccessOptions(), permissions)));
+                database).setBody(util().serialize(OptionsBuilder.build(new UserAccessOptions(), permissions)));
     }
 
     protected ResponseDeserializer<Permissions> streamAccessLevelResponseDeserializer() {
