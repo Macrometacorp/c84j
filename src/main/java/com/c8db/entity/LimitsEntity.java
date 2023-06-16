@@ -73,7 +73,7 @@ public class LimitsEntity implements Entity {
 
 	@Data
 	public static class DataMeshIntegrations {
-		private int maxIntegrationsPerTenant;
-		private int maxConnectorWorkflowsPerTenant;
+		private int maxConnections;
+		private int maxWorkflows;
 	}
 }
