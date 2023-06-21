@@ -172,6 +172,10 @@ public abstract class InternalC8DBBuilder {
         hosts.get(service).add(new HostDescription(host, port));
     }
 
+    protected void setHost(final Service service, final String host, final int port, final String path) {
+        hosts.get(service).add(new HostDescription(host, port, path));
+    }
+
     protected void setEmail(String email) {
         this.email = email;
     }

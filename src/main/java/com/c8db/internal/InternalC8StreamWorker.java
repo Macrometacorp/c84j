@@ -75,7 +75,7 @@ public abstract class InternalC8StreamWorker<A extends InternalC8DB<E>, D extend
 
     protected Request activateStreamWorkerRequest(final String streamWorkerName, final boolean isActive,
                                                   final String onBehalfOfUser, final boolean isSystem) {
-        final Request request = request(db.tenant(), db.name(), RequestType.GET, PATH_API_STREAM_APPS,
+        final Request request = request(db.tenant(), db.name(), RequestType.PATCH, PATH_API_STREAM_APPS,
                 streamWorkerName, PARAM_ACTIVE);
         request.putQueryParam(PARAM_ACTIVE, isActive);
         request.putQueryParam(PARAM_USER, onBehalfOfUser);

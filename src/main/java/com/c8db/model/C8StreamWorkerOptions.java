@@ -6,7 +6,7 @@ package com.c8db.model;
 
 import lombok.Data;
 
-import java.util.List;
+import java.util.Set;
 
 /**
  * Attributes of a stream worker.
@@ -15,7 +15,7 @@ import java.util.List;
 public class C8StreamWorkerOptions {
 
     private String definition;
-    private List<String> regions;
+    private Set<String> regions;
     private String user;
     private Boolean isSystem;
 

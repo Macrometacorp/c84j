@@ -55,7 +55,8 @@ public final class RequestUtils {
     }
 
     public static String buildBaseUrl(final HostDescription host, boolean useSsl) {
-        return (Boolean.TRUE == useSsl ? "https://" : "http://") + host.getHost() + ":" + host.getPort();
+        return (Boolean.TRUE == useSsl ? "https://" : "http://") + host.getHost() + ":" + host.getPort()
+                + (host.getPath() != null ? host.getPath() : "");
     }
 
     public static HttpRequestBase buildHttpRequestBase(final Request request, final String url, Protocol contentType) {
