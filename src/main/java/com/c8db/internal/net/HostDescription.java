@@ -23,11 +23,20 @@ public class HostDescription {
 
     private final String host;
     private final int port;
+    private final String path;
 
     public HostDescription(final String host, final int port) {
         super();
         this.host = host;
         this.port = port;
+        this.path = null;
+    }
+
+    public HostDescription(final String host, final int port, final String path) {
+        super();
+        this.host = host;
+        this.port = port;
+        this.path = path;
     }
 
     public String getHost() {
@@ -38,9 +47,13 @@ public class HostDescription {
         return port;
     }
 
+    public String getPath() {
+        return path;
+    }
+
     @Override
     public String toString() {
-        return String.format("host[addr=%s,port=%s]", host, port);
+        return String.format("host[addr=%s,port=%s,path=%s]", host, port, path);
     }
 
     @Override
@@ -49,6 +62,7 @@ public class HostDescription {
         int result = 1;
         result = prime * result + ((host == null) ? 0 : host.hashCode());
         result = prime * result + port;
+        result = prime * result + ((path == null) ? 0 : path.hashCode());
         return result;
     }
 
@@ -72,6 +86,13 @@ public class HostDescription {
             return false;
         }
         if (port != other.port) {
+            return false;
+        }
+        if (path == null) {
+            if (other.path != null) {
+                return false;
+            }
+        } else if (!path.equals(other.path)) {
             return false;
         }
         return true;
