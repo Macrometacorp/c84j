@@ -87,6 +87,8 @@ public class HttpConnection implements Connection {
     private static final int INITIAL_SLEEP_TIME_SEC = 4;
     private static final int SLEEP_TIME_MULTIPLIER = 2;
     private static final int MAX_SLEEP_TIME_SEC = 128;
+    // It is temporary solution until jwt-rotation comes.
+    private static final String SERVICE_USER_EMAIL = "service@macrometa.io";
     private final PoolingHttpClientConnectionManager cm;
     private final CloseableHttpClient client;
     private final Integer responseSizeLimit;
@@ -356,7 +358,8 @@ public class HttpConnection implements Connection {
     }
 
     private synchronized void addServiceJWT() throws IOException {
-        String authUrl = buildBaseUrl(auxHost) + "/_open/auth/internal";
+        String suffix = SERVICE_USER_EMAIL.equals(email) ? "/_open/auth/internal" : "/_open/auth";
+        String authUrl = buildBaseUrl(auxHost) + suffix;
         Map<String, String> credentials = new HashMap<String, String>();
 
         credentials.put("username", user);
