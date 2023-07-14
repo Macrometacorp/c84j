@@ -349,7 +349,8 @@ public class HttpConnection implements Connection {
         if(StringUtils.isNotEmpty(user)
                 && !host.getHost().equals(auxHost.getHost())
                 && service != Service.C8FUNCTION
-                && service != Service.C8CEP) {
+                && service != Service.C8CEP
+                && service != Service.C8KMS) {
             addUserJWT(request.getTenant(), user);
         }
     }

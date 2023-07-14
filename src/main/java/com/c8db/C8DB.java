@@ -641,6 +641,9 @@ public interface C8DB extends C8SerializationAccessor {
             if (hosts.get(Service.C8CEP).isEmpty()) {
                 hosts.get(Service.C8CEP).addAll(hosts.get(Service.C8DB));
             }
+            if (hosts.get(Service.C8KMS).isEmpty()) {
+                hosts.get(Service.C8KMS).addAll(hosts.get(Service.C8DB));
+            }
 
             final VPack vpacker = vpackBuilder.serializeNullValues(false).build();
             final VPack vpackerNull = vpackBuilder.serializeNullValues(true).build();
