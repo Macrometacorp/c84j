@@ -23,6 +23,8 @@ public class FeaturesEntity implements Entity {
     private Boolean searchEnabled;
     @SerializedName("CEP")
     private Boolean cepEnabled;
+    @SerializedName("KMS")
+    private Boolean kmsEnabled;
     @SerializedName("KV")
     private Boolean kvEnabled;
     @SerializedName("DOCS")
@@ -64,6 +66,10 @@ public class FeaturesEntity implements Entity {
 
     public Boolean isCepEnabled() {
         return cepEnabled;
+    }
+
+    public Boolean isKmsEnabled() {
+        return kmsEnabled;
     }
 
     public Boolean isKvEnabled() {
