@@ -5,20 +5,16 @@
 package com.c8db.internal;
 
 import com.arangodb.velocypack.VPackSlice;
-import com.arangodb.velocypack.exception.VPackException;
-import com.c8db.entity.ErrorEntity;
-import com.c8db.entity.DocumentCreateEntity;
-import com.c8db.entity.MultiDocumentEntity;
-import com.c8db.entity.BaseKeyValue;
-import com.c8db.entity.DocumentDeleteEntity;
+import com.c8db.C8KeyValue;
+import com.c8db.entity.*;
 import com.c8db.internal.C8Executor.ResponseDeserializer;
 import com.c8db.internal.util.C8SerializationFactory.Serializer;
-import com.c8db.internal.util.DocumentUtil;
 import com.c8db.model.*;
 import com.c8db.util.C8Serializer;
 import com.c8db.velocystream.Request;
 import com.c8db.velocystream.RequestType;
-import com.c8db.velocystream.Response;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
 
@@ -31,7 +27,10 @@ public abstract class InternalC8KeyValue<A extends InternalC8DB<E>, D extends In
 
     private static final String OFFSET = "offset";
     private static final String LIMIT = "limit";
+    private static final String ORDER = "order";
     private static final String EXPIRATION = "expiration";
+    private static final String GROUP_ID = "groupID";
+    private static final String GROUP = "group";
 
     private static final String NEW = "new";
     private static final String OLD = "old";
@@ -53,7 +52,7 @@ public abstract class InternalC8KeyValue<A extends InternalC8DB<E>, D extends In
         return name;
     }
 
-    protected  <T> Request insertKVPairsRequest(final Collection<T> values, final DocumentCreateOptions params) {
+    protected  <T> Request insertKVPairsRequest(final Collection<T> values) {
         final Request request = request(db.tenant(), db.name(), RequestType.PUT, PATH_API_KV, name, "value");
         request.setBody(util(Serializer.CUSTOM).serialize(values,
                 new C8Serializer.Options().serializeNullValues(false).stringAsJson(true)));
@@ -61,17 +60,10 @@ public abstract class InternalC8KeyValue<A extends InternalC8DB<E>, D extends In
     }
 
     @SuppressWarnings("unchecked")
-    protected  <T> ResponseDeserializer<MultiDocumentEntity<DocumentCreateEntity<T>>> insertKVPairsResponseDeserializer(
-            final Collection<T> values, final DocumentCreateOptions params) {
+    protected  ResponseDeserializer<MultiDocumentEntity<DocumentCreateEntity<BaseKeyValue>>> insertKVPairsResponseDeserializer() {
         return response -> {
-            Class<T> type = null;
-            if (Boolean.TRUE == params.getReturnNew()) {
-                if (!values.isEmpty()) {
-                    type = (Class<T>) values.iterator().next().getClass();
-                }
-            }
-            final MultiDocumentEntity<DocumentCreateEntity<T>> multiDocument = new MultiDocumentEntity<>();
-            final Collection<DocumentCreateEntity<T>> docs = new ArrayList<>();
+            final MultiDocumentEntity<DocumentCreateEntity<BaseKeyValue>> multiDocument = new MultiDocumentEntity<>();
+            final Collection<DocumentCreateEntity<BaseKeyValue>> docs = new ArrayList<>();
             final Collection<ErrorEntity> errors = new ArrayList<>();
             final Collection<Object> documentsAndErrors = new ArrayList<>();
             final VPackSlice body = response.getBody();
@@ -79,18 +71,18 @@ public abstract class InternalC8KeyValue<A extends InternalC8DB<E>, D extends In
                 for (final Iterator<VPackSlice> iterator = body.arrayIterator(); iterator.hasNext();) {
                     final VPackSlice next = iterator.next();
                     if (next.get(C8ResponseField.ERROR).isTrue()) {
-                        final ErrorEntity error = (ErrorEntity) util().deserialize(next, ErrorEntity.class);
+                        final ErrorEntity error = util().deserialize(next, ErrorEntity.class);
                         errors.add(error);
                         documentsAndErrors.add(error);
                     } else {
-                        final DocumentCreateEntity<T> doc = util().deserialize(next, DocumentCreateEntity.class);
+                        final DocumentCreateEntity<BaseKeyValue> doc = util().deserialize(next, DocumentCreateEntity.class);
                         final VPackSlice newDoc = next.get(NEW);
                         if (newDoc.isObject()) {
-                            doc.setNew((T) util(Serializer.CUSTOM).deserialize(newDoc, type));
+                            doc.setNew(util(Serializer.CUSTOM).deserialize(newDoc, BaseKeyValue.class));
                         }
                         final VPackSlice oldDoc = next.get(OLD);
                         if (oldDoc.isObject()) {
-                            doc.setOld((T) util(Serializer.CUSTOM).deserialize(oldDoc, type));
+                            doc.setOld(util(Serializer.CUSTOM).deserialize(oldDoc, BaseKeyValue.class));
                         }
                         docs.add(doc);
                         documentsAndErrors.add(doc);
@@ -110,12 +102,46 @@ public abstract class InternalC8KeyValue<A extends InternalC8DB<E>, D extends In
         return request;
     }
 
-    protected Request getKVPairsRequest(final Collection<String> keys, final C8KVPairReadOptions options) {
-        final C8KVPairReadOptions params = (options != null ? options : new C8KVPairReadOptions());
+    protected Request getAllCollections() {
+        return request(db.tenant(), db.name(), RequestType.GET, PATH_API_KV);
+    }
+
+    protected ResponseDeserializer<Collection<C8KVCollectionEntity>> getAllCollectionsResponseDeserializer() {
+        return response -> {
+            Collection<C8KVCollectionEntity> coll = new ArrayList<>();
+            final VPackSlice kvs = response.getBody().get("result");
+            for (final Iterator<VPackSlice> iterator = kvs.arrayIterator(); iterator.hasNext();) {
+                final VPackSlice next = iterator.next();
+                final C8KVCollectionEntity entity = util(Serializer.CUSTOM).deserialize(next, C8KVCollectionEntity.class);
+                coll.add(entity);
+            }
+            return coll;
+        };
+    }
+
+    protected Request countKVPairsRequest(C8KeyValue.C8KVCountPairsOptions options) {
+        final Request request =  request(db.tenant(), db.name(), RequestType.GET, PATH_API_KV, name, "count");
+        if (options != null && StringUtils.isNotEmpty(options.getGroup())) {
+            request.putQueryParam(GROUP_ID, options.getGroup());
+        }
+        return request;
+    }
+
+    protected ResponseDeserializer<Long> countKVPairsResponseDeserializer() {
+        return response ->  response.getBody().get("count").getAsLong();
+    }
+
+    protected Request getKVPairsRequest(final C8KeyValue.C8KVReadValuesOptions options) {
+        final C8KeyValue.C8KVReadValuesOptions params = (options != null ? options : new C8KeyValue.C8KVReadValuesOptions());
         final Request request = request(db.tenant(), db.name(), RequestType.POST, PATH_API_KV, name, "values")
                 .putQueryParam(OFFSET, params.getOffset())
-                .putQueryParam(LIMIT, params.getLimit())
-                .setBody(util().serialize(keys));
+                .putQueryParam(LIMIT, params.getLimit());
+        if (params.getKeys() != null && !params.getKeys().isEmpty()) {
+            request.setBody(util().serialize(params.getKeys()));
+        }
+        if (StringUtils.isNotEmpty(params.getGroup())) {
+            request.putQueryParam(GROUP_ID, params.getGroup());
+        }
         return request;
     }
 
@@ -145,7 +171,31 @@ public abstract class InternalC8KeyValue<A extends InternalC8DB<E>, D extends In
         };
     }
 
-    protected Request deleteKVPairRequest(final String key, final DocumentDeleteOptions options) {
+    protected Request getKVKeysRequest(final C8KeyValue.C8KVReadKeysOptions options) {
+        final C8KeyValue.C8KVReadKeysOptions params = (options != null ? options : new C8KeyValue.C8KVReadKeysOptions());
+        Request request = request(db.tenant(), db.name(), RequestType.GET, PATH_API_KV, name, "keys")
+                .putQueryParam(OFFSET, params.getOffset())
+                .putQueryParam(LIMIT, params.getLimit())
+                .putQueryParam(ORDER, params.getOrder());
+        if (StringUtils.isNotEmpty(params.getGroup())) {
+            request.putQueryParam(GROUP_ID, params.getGroup());
+        }
+        return request;
+    }
+
+    protected ResponseDeserializer<Collection<String>> getKVKeysResponseDeserializer() {
+        return response -> {
+            Collection<String> coll = new ArrayList<>();
+            final VPackSlice kvs = response.getBody().get("result");
+            for (final Iterator<VPackSlice> iterator = kvs.arrayIterator(); iterator.hasNext();) {
+                final VPackSlice next = iterator.next();
+                coll.add(next.getAsString());
+            }
+            return coll;
+        };
+    }
+
+    protected Request deleteKVPairRequest(final String key) {
         final Request request = request(db.tenant(), db.name(), RequestType.DELETE, PATH_API_KV, name, "value",
                 key);
         return request;
@@ -164,7 +214,7 @@ public abstract class InternalC8KeyValue<A extends InternalC8DB<E>, D extends In
         };
     }
 
-    protected <T> Request deleteKVPairsRequest(final Collection<T> keys, final DocumentDeleteOptions options) {
+    protected <T> Request deleteKVPairsRequest(final Collection<T> keys) {
         final Request request = request(db.tenant(), db.name(), RequestType.DELETE, PATH_API_KV, name, "values");
         request.setBody(util().serialize(keys));
         return request;
@@ -203,19 +253,24 @@ public abstract class InternalC8KeyValue<A extends InternalC8DB<E>, D extends In
         };
     }
 
-    protected Request createRequest(final String name, final Boolean expiration, final CollectionCreateOptions options) {
-
+    protected Request createRequest(final String name, final C8KeyValue.C8KVCreateOptions options) {
         VPackSlice body = util()
-                .serialize(OptionsBuilder.build(options != null ? options : new CollectionCreateOptions(), name));
+                .serialize(options != null ? OptionsBuilder.build(options) : new C8KVCreateBodyOptions());
 
         final Request request = request(db.tenant(), db.name(), RequestType.POST, PATH_API_KV, name);
-        request.putQueryParam(EXPIRATION, expiration);
+        request.putQueryParam(EXPIRATION, options != null && options.hasExpiration());
+        request.putQueryParam(GROUP, options != null && options.hasGroup());
         request.setBody(body);
         return request;
     }
 
-    protected Request truncateRequest() {
-        return request(db.tenant(), db.name(), RequestType.PUT, PATH_API_KV, name, "truncate");
+    protected Request truncateRequest(C8KeyValue.C8KVTruncateOptions options) {
+        final Request request = request(db.tenant(), db.name(), RequestType.PUT, PATH_API_KV, name, "truncate");
+
+        if (options != null && StringUtils.isNotEmpty(options.getGroup())) {
+            request.putQueryParam(GROUP_ID, options.getGroup());
+        }
+        return request;
     }
 
     protected Request dropRequest() {
