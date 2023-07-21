@@ -32,7 +32,7 @@ public @interface DocumentField {
         KEY("_key"),
         REV("_rev"),
         FROM("_from"), TO("_to"),
-        VALUE("value"), EXPIRE_AT("expireAt");
+        VALUE("value"), EXPIRE_AT("expireAt"), GROUP_ID("groupID");
 
         private final String serializeName;
 
