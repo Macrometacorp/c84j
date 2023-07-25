@@ -13,6 +13,7 @@ public class LimitsEntity implements Entity {
 	private Compute compute;
 	private CEP cep;
 	private DataMeshIntegrations dataMeshIntegration;
+	private KMS kms;
 
 	private boolean defaultsEnabled;
 	
@@ -75,5 +76,12 @@ public class LimitsEntity implements Entity {
 	public static class DataMeshIntegrations {
 		private int maxConnections;
 		private int maxWorkflows;
+	}
+
+	@Data
+	public static class KMS {
+		private int maxManagedKeys;
+		private int maxSecrets;
+		private int maxSecretSize;
 	}
 }
