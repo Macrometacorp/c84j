@@ -5,20 +5,14 @@ package com.c8db.internal;
 
 import com.c8db.C8DBException;
 import com.c8db.C8KeyValue;
-import com.c8db.entity.MultiDocumentEntity;
-import com.c8db.entity.BaseKeyValue;
-import com.c8db.entity.C8KVEntity;
-import com.c8db.entity.DocumentCreateEntity;
-import com.c8db.entity.DocumentDeleteEntity;
+import com.c8db.entity.*;
 import com.c8db.internal.util.DocumentUtil;
-import com.c8db.model.C8KVPairReadOptions;
-import com.c8db.model.CollectionCreateOptions;
-import com.c8db.model.DocumentCreateOptions;
-import com.c8db.model.DocumentDeleteOptions;
+import com.c8db.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
+import java.util.List;
 
 public class C8KeyValueImpl extends InternalC8KeyValue<C8DBImpl, C8DatabaseImpl, C8ExecutorSync>
         implements C8KeyValue {
@@ -30,8 +24,18 @@ public class C8KeyValueImpl extends InternalC8KeyValue<C8DBImpl, C8DatabaseImpl,
     }
 
     @Override
-    public C8KVEntity create(final Boolean expiration, CollectionCreateOptions options) throws C8DBException {
-        return executor.execute(createRequest(name, expiration, options), C8KVEntity.class);
+    public Collection<C8KVCollectionEntity> all() throws C8DBException {
+        return executor.execute(getAllCollections(), getAllCollectionsResponseDeserializer());
+    }
+
+    @Override
+    public C8KVEntity create(C8KVCreateOptions options) throws C8DBException {
+        return executor.execute(createRequest(name, options), C8KVEntity.class);
+    }
+
+    @Override
+    public C8KVEntity create() throws C8DBException {
+        return executor.execute(createRequest(name, null), C8KVEntity.class);
     }
 
     @Override
@@ -40,31 +44,34 @@ public class C8KeyValueImpl extends InternalC8KeyValue<C8DBImpl, C8DatabaseImpl,
     }
 
     @Override
-    public C8KVEntity truncate() throws C8DBException {
-        return executor.execute(truncateRequest(), Void.class);
+    public void truncate() throws C8DBException {
+        truncate(null);
     }
 
     @Override
-    public  <T> MultiDocumentEntity<DocumentCreateEntity<T>> insertKVPairs(final Collection<T>  values,
-                                                                                 DocumentCreateOptions options)
+    public void truncate(C8KVTruncateOptions options) throws C8DBException {
+        executor.execute(truncateRequest(options), Void.class);
+    }
+
+    @Override
+    public  MultiDocumentEntity<DocumentCreateEntity<BaseKeyValue>> insertKVPairs(final Collection<BaseKeyValue>  values)
             throws C8DBException {
-        return executor.execute(insertKVPairsRequest(values, options), insertKVPairsResponseDeserializer(values, options));
+        return executor.execute(insertKVPairsRequest(values), insertKVPairsResponseDeserializer());
     }
 
     @Override
     public DocumentDeleteEntity<Void> deleteKVPair(String key) throws C8DBException {
-        return executor.execute(deleteKVPairRequest(key, new DocumentDeleteOptions()),
+        return executor.execute(deleteKVPairRequest(key),
                 deleteKVPairResponseDeserializer(Void.class));
     }
 
     @Override
     public MultiDocumentEntity<DocumentDeleteEntity<Void>> deleteKVPairs(Collection<?> values) throws C8DBException {
-        return executor.execute(deleteKVPairsRequest(values, new DocumentDeleteOptions()),
-                deleteKVPairsResponseDeserializer(Void.class));
+        return executor.execute(deleteKVPairsRequest(values), deleteKVPairsResponseDeserializer(Void.class));
     }
 
     @Override
-    public <T> T getKVPair(String key) throws C8DBException {
+    public BaseKeyValue getKVPair(String key) throws C8DBException {
         DocumentUtil.validateDocumentKey(key);
         try {
             return executor.execute(getKVPairRequest(key), BaseKeyValue.class);
@@ -87,8 +94,34 @@ public class C8KeyValueImpl extends InternalC8KeyValue<C8DBImpl, C8DatabaseImpl,
     }
 
     @Override
-    public <T> MultiDocumentEntity<T> getKVPairs(final Collection<String> keys, final C8KVPairReadOptions options)
+    public MultiDocumentEntity<BaseKeyValue> getKVPairs()
             throws C8DBException {
-        return executor.execute(getKVPairsRequest(keys, options), getKVPairsResponseDeserializer());
+        return getKVPairs(null);
+    }
+
+    @Override
+    public MultiDocumentEntity<BaseKeyValue> getKVPairs(final C8KVReadValuesOptions options)
+            throws C8DBException {
+        return executor.execute(getKVPairsRequest(options), getKVPairsResponseDeserializer());
+    }
+
+    @Override
+    public Collection<String> getKVKeys() throws C8DBException {
+        return getKVKeys(null);
+    }
+
+    @Override
+    public Collection<String> getKVKeys(C8KVReadKeysOptions options) throws C8DBException {
+        return executor.execute(getKVKeysRequest(options), getKVKeysResponseDeserializer());
+    }
+
+    @Override
+    public long countKVPairs(C8KVCountPairsOptions options) throws C8DBException {
+        return executor.execute(countKVPairsRequest(options), countKVPairsResponseDeserializer());
+    }
+
+    @Override
+    public long countKVPairs() throws C8DBException {
+        return countKVPairs(null);
     }
 }

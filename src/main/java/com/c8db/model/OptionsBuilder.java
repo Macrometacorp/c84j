@@ -5,6 +5,7 @@
 package com.c8db.model;
 
 import com.arangodb.velocypack.VPackSlice;
+import com.c8db.C8KeyValue;
 import com.c8db.entity.EdgeDefinition;
 import com.c8db.entity.Permissions;
 import com.c8db.entity.UserQueryOptions;
@@ -53,8 +54,13 @@ public class OptionsBuilder {
         return options.name(name);
     }
 
-    public static C8KVCreateOptions build(final C8KVCreateOptions options, final String name) {
-        return options.name(name);
+    public static C8KVCreateBodyOptions build(final C8KeyValue.C8KVCreateOptions options) {
+        return new C8KVCreateBodyOptions()
+                .stream(options.hasStream())
+                .enableShards(options.isEnableShards())
+                .waitForSync(options.isWaitForSync())
+                .blobs(options.isBlobs())
+                .shardKeys(options.getShardKeys());
     }
 
     public static C8qlQueryOptions build(final C8qlQueryOptions options, final String query, final VPackSlice bindVars) {
