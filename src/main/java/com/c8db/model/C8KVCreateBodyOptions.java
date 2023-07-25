@@ -1,33 +1,22 @@
 /*
- * Copyright (c) 2022 Macrometa Corp All rights reserved.
+ * Copyright (c) 2023 Macrometa Corp All rights reserved.
  */
 
 package com.c8db.model;
 
-public class C8KVCreateOptions {
+/**
+ * Internal class
+ */
+public class C8KVCreateBodyOptions {
 
-    private String name;
     private Boolean stream;
-    private Boolean isLocal;
     private Boolean enableShards;
     private Boolean waitForSync;
+    private Boolean blobs;
     private String[] shardKeys;
 
-    public C8KVCreateOptions() {
+    public C8KVCreateBodyOptions() {
         super();
-    }
-
-    protected String getName() {
-        return name;
-    }
-
-    /**
-     * @param name The name of the collection
-     * @return options
-     */
-    protected C8KVCreateOptions name(final String name) {
-        this.name = name;
-        return this;
     }
 
     public String[] getShardKeys() {
@@ -45,7 +34,7 @@ public class C8KVCreateOptions {
      *                  set. This option is meaningless in a single server setup.
      * @return options
      */
-    public C8KVCreateOptions shardKeys(final String... shardKeys) {
+    public C8KVCreateBodyOptions shardKeys(final String... shardKeys) {
         this.shardKeys = shardKeys;
         return this;
     }
@@ -56,23 +45,23 @@ public class C8KVCreateOptions {
 
     /**
      * @param stream If true an associated stream will be created
-     * @return {@link C8KVCreateOptions}
+     * @return {@link C8KVCreateBodyOptions}
      */
-    public C8KVCreateOptions stream(final Boolean stream) {
+    public C8KVCreateBodyOptions stream(final Boolean stream) {
         this.stream = stream;
         return this;
     }
 
-    public Boolean getLocal() {
-        return isLocal;
+    public Boolean isBlobs() {
+        return blobs;
     }
 
     /**
-     * @param isLocal If true replication type of the collection will be set as local (default: false)
-     * @return {@link CollectionCreateOptions}
+     * @param blobs true if collection is a blob-only collection (default: false)
+     * @return {@link C8KVCreateBodyOptions}
      */
-    public C8KVCreateOptions isLocal(final Boolean isLocal) {
-        this.isLocal = isLocal;
+    public C8KVCreateBodyOptions blobs(final Boolean blobs) {
+        this.blobs = blobs;
         return this;
     }
 
@@ -87,9 +76,9 @@ public class C8KVCreateOptions {
 
     /**
      * @param enableShards Sets numberOfShards to 8 if true else numberOfShards is set to 1
-     * @return {@link C8KVCreateOptions}
+     * @return {@link C8KVCreateBodyOptions}
      */
-    public C8KVCreateOptions enableShards(final Boolean enableShards) {
+    public C8KVCreateBodyOptions enableShards(final Boolean enableShards) {
         this.enableShards = enableShards;
         return this;
     }
@@ -106,9 +95,9 @@ public class C8KVCreateOptions {
     /**
      * Sets waitForSync collection creation property.
      *
-     * @return {@link C8KVCreateOptions}
+     * @return {@link C8KVCreateBodyOptions}
      */
-    public C8KVCreateOptions waitForSync(final Boolean waitForSync) {
+    public C8KVCreateBodyOptions waitForSync(final Boolean waitForSync) {
         this.waitForSync = waitForSync;
         return this;
     }

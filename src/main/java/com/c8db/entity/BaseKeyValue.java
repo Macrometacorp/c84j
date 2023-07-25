@@ -4,16 +4,11 @@
 
 package com.c8db.entity;
 
-import com.c8db.entity.DocumentField.Type;
 import lombok.Data;
-import lombok.NonNull;
 
-import java.io.Serializable;
-import java.util.HashMap;
 import java.util.Map;
 
-import static com.c8db.entity.DocumentField.Type.EXPIRE_AT;
-import static com.c8db.entity.DocumentField.Type.VALUE;
+import static com.c8db.entity.DocumentField.Type.*;
 
 @Data
 public class BaseKeyValue extends BaseDocument {
@@ -23,6 +18,9 @@ public class BaseKeyValue extends BaseDocument {
 
     @DocumentField(EXPIRE_AT)
     protected Long expireAt;
+
+    @DocumentField(GROUP_ID)
+    protected String groupID;
 
     public BaseKeyValue() {
         super();
@@ -38,6 +36,13 @@ public class BaseKeyValue extends BaseDocument {
         super(key);
         this.value = value;
         this.expireAt = expireAt;
+    }
+
+    public BaseKeyValue(final String key, final String value, final Long expireAt, final String groupID) {
+        super(key);
+        this.value = value;
+        this.expireAt = expireAt;
+        this.groupID = groupID;
     }
 
     public BaseKeyValue(final Map<String, Object> properties) {
