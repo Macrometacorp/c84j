@@ -769,5 +769,7 @@ public interface C8Database extends C8SerializationAccessor {
      * @return C8StreamWorker handler
      */
     C8CEP cep();
+    
+    C8Secret secret();
 
 }

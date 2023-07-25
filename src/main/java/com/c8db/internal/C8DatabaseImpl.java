@@ -19,6 +19,7 @@ import com.c8db.C8Graph;
 import com.c8db.C8KeyValue;
 import com.c8db.C8Redis;
 import com.c8db.C8CEP;
+import com.c8db.C8Secret;
 import com.c8db.entity.C8DBVersion;
 import com.c8db.C8Stream;
 import com.c8db.Restql;
@@ -512,6 +513,11 @@ public class C8DatabaseImpl extends InternalC8Database<C8DBImpl, C8ExecutorSync>
     @Override
     public C8CEP cep() {
         return new C8CEPImpl(this);
+    }
+    
+    @Override
+    public C8Secret secret() {
+        return new C8SecretImpl(this);
     }
 
 }
