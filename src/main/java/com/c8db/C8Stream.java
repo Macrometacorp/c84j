@@ -20,6 +20,7 @@ package com.c8db;
 import java.util.Collection;
 
 import com.c8db.entity.C8StreamBacklogEntity;
+import com.c8db.entity.C8StreamDevicePresenceEntity;
 import com.c8db.entity.C8StreamStatisticsEntity;
 
 /**
@@ -79,4 +80,16 @@ public interface C8Stream extends C8SerializationAccessor {
      * @param subscriptionName Identification name of the subscription.
      */
     void deleteSubscription(String subscriptionName);
+
+    /**
+     * Retrieves device presence based on specified filters.
+     *
+     * @param regionFilter       The region filter to narrow down the filtering.
+     * @param producerFilter     The producer filter to narrow down the filtering.
+     * @param subscriptionFilter The subscription filter to narrow down the filtering.
+     * @param consumerFilter     The consumer filter to narrow down the filtering.
+     * @return The C8StreamDevicePresenceEntity representing the device presence.
+     */
+    C8StreamDevicePresenceEntity getDevicePresence(String regionFilter, String producerFilter,
+                                                   String subscriptionFilter, String consumerFilter);
 }
