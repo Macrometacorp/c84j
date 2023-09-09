@@ -36,6 +36,7 @@ public class C8qlQueryOptions implements Serializable {
     private VPackSlice bindVars;
     private Long batchSize;
     private Long ttl;
+    private String streamTransactionId;
 
     public C8qlQueryOptions() {
         super();
@@ -170,6 +171,21 @@ public class C8qlQueryOptions implements Serializable {
             options = new Options();
         }
         return options;
+    }
+
+    public String getStreamTransactionId() {
+        return streamTransactionId;
+    }
+
+    /**
+     * @param streamTransactionId If set, the operation will be executed within the
+     *                            transaction.
+     * @return options
+     * @since ArangoDB 3.5.0
+     */
+    public C8qlQueryOptions streamTransactionId(final String streamTransactionId) {
+        this.streamTransactionId = streamTransactionId;
+        return this;
     }
 
     private static class Options implements Serializable {
