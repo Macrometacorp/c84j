@@ -63,6 +63,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import static com.c8db.internal.InternalC8Collection.TRANSACTION_ID;
+
 /**
  *
  */
@@ -292,6 +294,9 @@ public abstract class InternalC8Database<A extends InternalC8DB<E>, E extends C8
                                                                 new C8Serializer.Options()
                                                                         .serializeNullValues(true))
                                                         : null)));
+        if (options != null) {
+            request.putHeaderParam(TRANSACTION_ID, options.getStreamTransactionId());
+        }
         return request;
     }
 
