@@ -21,6 +21,7 @@ import java.util.Collection;
 import com.c8db.C8Stream;
 import com.c8db.Service;
 import com.c8db.entity.C8StreamBacklogEntity;
+import com.c8db.entity.C8StreamDevicePresenceEntity;
 import com.c8db.entity.C8StreamStatisticsEntity;
 
 /**
@@ -62,5 +63,13 @@ public class C8StreamImpl extends InternalC8Stream<C8DBImpl, C8DatabaseImpl, C8E
     @Override
     public void deleteSubscription(final String subscriptionName) {
         executor.execute(deleteSubscriptionRequest(subscriptionName), Void.class, null, Service.C8STREAMS);
+    }
+
+    @Override
+    public C8StreamDevicePresenceEntity getDevicePresence(String regionFilter, String producerFilter,
+                                                          String subscriptionFilter, String consumerFilter) {
+        return executor.execute(
+                getC8StreamDevicePresenceRequest(regionFilter, producerFilter, subscriptionFilter, consumerFilter),
+                getC8StreamDevicePresenceResponseDeserializer(), null, Service.C8STREAMS);
     }
 }

@@ -16,21 +16,18 @@
 
 package com.c8db.internal;
 
-import java.io.IOException;
 import java.util.Collection;
 
 import com.arangodb.velocypack.Type;
 import com.arangodb.velocypack.VPackSlice;
 import com.arangodb.velocypack.exception.VPackException;
-import com.c8db.C8DBException;
 import com.c8db.entity.C8StreamBacklogEntity;
+import com.c8db.entity.C8StreamDevicePresenceEntity;
 import com.c8db.entity.C8StreamStatisticsEntity;
 import com.c8db.internal.C8Executor.ResponseDeserializer;
 import com.c8db.velocystream.Request;
 import com.c8db.velocystream.RequestType;
 import com.c8db.velocystream.Response;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  *
@@ -39,6 +36,10 @@ public abstract class InternalC8Stream<A extends InternalC8DB<E>, D extends Inte
         extends C8Executeable<E> {
 
     protected static final String PATH_API_STREAMS = "/_api/streams";
+    private static final String REGION_FILTER_QUERY_PARAM = "regionFilter";
+    private static final String PRODUCER_FILTER_QUERY_PARAM = "producerFilter";
+    private static final String SUBSCRIPTION_FILTER_QUERY_PARAM = "subscriptionFilter";
+    private static final String CONSUMER_FILTER_QUERY_PARAM = "consumerFilter";
 
     private final D db;
     private final String name;
@@ -122,4 +123,31 @@ public abstract class InternalC8Stream<A extends InternalC8DB<E>, D extends Inte
                 "subscriptions", subscriptionName);
         return request;
     }
+
+    protected Request getC8StreamDevicePresenceRequest(String regionFilter, String producerFilter,
+                                                       String subscriptionFilter, String consumerFilter) {
+        Request request = request(db.tenant(), db.name(), RequestType.GET, PATH_API_STREAMS, name, "presence");
+        if (regionFilter != null && !regionFilter.isEmpty()) {
+            request.putQueryParam(REGION_FILTER_QUERY_PARAM, regionFilter);
+        }
+        if (producerFilter != null && !producerFilter.isEmpty()) {
+            request.putQueryParam(PRODUCER_FILTER_QUERY_PARAM, producerFilter);
+        }
+        if (subscriptionFilter != null && !subscriptionFilter.isEmpty()) {
+            request.putQueryParam(SUBSCRIPTION_FILTER_QUERY_PARAM, subscriptionFilter);
+        }
+        if (consumerFilter != null && !consumerFilter.isEmpty()) {
+            request.putQueryParam(CONSUMER_FILTER_QUERY_PARAM, consumerFilter);
+        }
+        return request;
+    }
+
+    protected ResponseDeserializer<C8StreamDevicePresenceEntity> getC8StreamDevicePresenceResponseDeserializer() {
+        return response -> {
+            final VPackSlice result = response.getBody().get(C8ResponseField.RESULT);
+            return util().deserialize(result, new Type<C8StreamDevicePresenceEntity>() {
+            }.getType());
+        };
+    }
+
 }
