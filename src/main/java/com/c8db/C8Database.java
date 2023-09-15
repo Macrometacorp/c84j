@@ -11,6 +11,7 @@ import com.c8db.entity.C8qlParseEntity;
 import com.c8db.entity.CollectionEntity;
 import com.c8db.entity.DatabaseEntity;
 import com.c8db.entity.EdgeDefinition;
+import com.c8db.entity.ExecuteUserQueryOptions;
 import com.c8db.entity.GeoFabricPermissions;
 import com.c8db.entity.GraphEntity;
 import com.c8db.entity.IndexEntity;
@@ -703,6 +704,23 @@ public interface C8Database extends C8SerializationAccessor {
      * @throws C8DBException
      */
     <T> C8Cursor<T> executeUserQuery(final String userName, String name, Map<String, Object> bindVars, Class<T> type) throws C8DBException;
+
+    /**
+     * Executes a saved using query using the given {@code name} and
+     * {@code bindVars}, then returns a new {@code C8Cursor} instance for the result
+     * list. If {@code userName} is null then tries to execute it for current user.
+     *
+     * @param userName user the query belongs to. If null executes it for current user
+     * @param name     A user query name
+     * @param bindVars key/value pairs defining the variables to bind the query to
+     * @param type     The type of the result (POJO class, VPackSlice, String for
+     *                 JSON, or Collection/List/Map)
+     * @param options optional parameters for execution
+     * @return cursor of the results
+     * @throws C8DBException
+     */
+    <T> C8Cursor<T> executeUserQuery(final String userName, String name, Map<String, Object> bindVars, Class<T> type,
+                                     ExecuteUserQueryOptions options) throws C8DBException;
 
     C8Event event();
 

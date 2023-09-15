@@ -8,6 +8,7 @@ package com.c8db.internal;
 import com.c8db.C8Cursor;
 import com.c8db.C8DBException;
 import com.c8db.Restql;
+import com.c8db.entity.ExecuteUserQueryOptions;
 import com.c8db.entity.UserQueryEntity;
 import com.c8db.entity.UserQueryOptions;
 
@@ -43,13 +44,27 @@ public class RestqlImpl extends InternalRestql<C8DBImpl, C8DatabaseImpl, C8Execu
     }
 
     @Override
-    public <T> C8Cursor<T> executeUserQuery(final String name, final Map<String, Object> bindVars, Class<T> type) {
+    public <T> C8Cursor<T> executeUserQuery(final String name, final Map<String, Object> bindVars, final Class<T> type) {
         return db().executeUserQuery(null, name, bindVars, type);
     }
 
     @Override
-    public <T> C8Cursor<T> executeUserQueryByUserNameAndName(final String userName, final String name, final Map<String, Object> bindVars, Class<T> type) {
+    public <T> C8Cursor<T> executeUserQuery(final String name, final Map<String, Object> bindVars, final Class<T> type,
+                                            final ExecuteUserQueryOptions options) {
+        return db().executeUserQuery(null, name, bindVars, type, options);
+    }
+
+    @Override
+    public <T> C8Cursor<T> executeUserQueryByUserNameAndName(final String userName, final String name,
+                                                             final Map<String, Object> bindVars, final Class<T> type) {
         return db().executeUserQuery(userName, name, bindVars, type);
+    }
+
+    @Override
+    public <T> C8Cursor<T> executeUserQueryByUserNameAndName(final String userName, final String name,
+                                                             final Map<String, Object> bindVars,
+                                                             final Class<T> type, final ExecuteUserQueryOptions options) {
+        return db().executeUserQuery(userName, name, bindVars, type, options);
     }
 
     @Override
