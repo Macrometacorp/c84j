@@ -31,6 +31,7 @@ import com.c8db.entity.CollectionEntity;
 import com.c8db.entity.CursorEntity;
 import com.c8db.entity.DatabaseEntity;
 import com.c8db.entity.EdgeDefinition;
+import com.c8db.entity.ExecuteUserQueryOptions;
 import com.c8db.entity.GeoFabricPermissions;
 import com.c8db.entity.GraphEntity;
 import com.c8db.entity.IndexEntity;
@@ -462,9 +463,15 @@ public class C8DatabaseImpl extends InternalC8Database<C8DBImpl, C8ExecutorSync>
     }
 
     @Override
-    public <T> C8Cursor<T> executeUserQuery(final String userName, final String name, final Map<String, Object> bindVars, final Class<T> type)
+    public <T> C8Cursor<T> executeUserQuery(String userName, String name, Map<String, Object> bindVars, Class<T> type) throws C8DBException {
+        return executeUserQuery(userName, name, bindVars, type, null);
+    }
+
+    @Override
+    public <T> C8Cursor<T> executeUserQuery(final String userName, final String name, final Map<String, Object> bindVars,
+                                            final Class<T> type, final ExecuteUserQueryOptions options)
             throws C8DBException {
-        final Request request = userQueryRequest(userName, name, bindVars);
+        final Request request = userQueryRequest(userName, name, bindVars, options);
         final HostHandle hostHandle = new HostHandle();
         final CursorEntity result = executor.execute(request, CursorEntity.class, hostHandle);
         return createCursor(result, type, null, hostHandle);

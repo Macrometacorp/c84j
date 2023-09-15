@@ -26,6 +26,7 @@ import com.c8db.entity.C8StreamEntity;
 import com.c8db.entity.CollectionEntity;
 import com.c8db.entity.DatabaseEntity;
 import com.c8db.entity.EdgeDefinition;
+import com.c8db.entity.ExecuteUserQueryOptions;
 import com.c8db.entity.GeoFabricPermissions;
 import com.c8db.entity.GraphEntity;
 import com.c8db.entity.PathEntity;
@@ -295,7 +296,9 @@ public abstract class InternalC8Database<A extends InternalC8DB<E>, E extends C8
                                                                         .serializeNullValues(true))
                                                         : null)));
         if (options != null) {
-            request.putHeaderParam(TRANSACTION_ID, options.getStreamTransactionId());
+            if (options.getStreamTransactionId() != null) {
+                request.putHeaderParam(TRANSACTION_ID, options.getStreamTransactionId());
+            }
         }
         return request;
     }
@@ -622,10 +625,18 @@ public abstract class InternalC8Database<A extends InternalC8DB<E>, E extends C8
         };
     }
 
-    protected Request userQueryRequest(final String userName, final String restqlName, final Map<String, Object> bindVars) {
+    protected Request userQueryRequest(final String userName, final String restqlName, final Map<String, Object> bindVars,
+                                       ExecuteUserQueryOptions options) {
         final Request request = userName == null ?
                 request(tenant, name, RequestType.POST, PATH_API_USER_QUERIES, "execute", "root", restqlName)
                 : request(tenant, name, RequestType.POST, PATH_API_USER_QUERIES, "execute", userName, restqlName);
+
+        if (options != null) {
+            if (options.getStreamTransactionId() != null) {
+                request.putHeaderParam(TRANSACTION_ID, options.getStreamTransactionId());
+            }
+        }
+
         request.setBody(util().serialize(bindVars == null ? new HashMap<String, Object>() : bindVars));
         return request;
     }
