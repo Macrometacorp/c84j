@@ -17,6 +17,7 @@
 
 package com.c8db;
 
+import com.c8db.entity.ExecuteUserQueryOptions;
 import com.c8db.entity.UserQueryEntity;
 import com.c8db.entity.UserQueryOptions;
 
@@ -83,6 +84,32 @@ public interface Restql extends C8SerializationAccessor {
      * @return
      */
     <T> C8Cursor<T> executeUserQuery(String name, Map<String, Object> bindVars, Class<T> type);
+
+    /**
+     * Executes saved query by name
+     *
+     * @param name     name of the saved query
+     * @param bindVars vars for the query
+     * @param type     result type
+     * @param options  optional parameters for execution
+     * @return
+     */
+    <T> C8Cursor<T> executeUserQuery(String name, Map<String, Object> bindVars, Class<T> type,
+                                     ExecuteUserQueryOptions options);
+
+    /**
+     * Executes saved query by name for the give user
+     *
+     * @param <T>
+     * @param userName user name
+     * @param name     query name
+     * @param bindVars bind vars
+     * @param type     return type
+     * @param options  optional parameters for execution
+     * @return
+     */
+    <T> C8Cursor<T> executeUserQueryByUserNameAndName(String userName, String name, Map<String, Object> bindVars,
+                                                      Class<T> type, ExecuteUserQueryOptions options);
 
     /**
      * Executes saved query by name for the give user
