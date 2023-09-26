@@ -85,7 +85,7 @@ public abstract class InternalC8Collection<A extends InternalC8DB<E>, D extends 
     private static final String OLD = "old";
     private static final String SILENT = "silent";
 
-    private static final String TRANSACTION_ID = "x-arango-trx-id";
+    public static final String TRANSACTION_ID = "x-gdn-trxid";
 
     private final D db;
     protected volatile String name;
