@@ -156,16 +156,4 @@ public interface C8KeyValue {
      * @throws C8DBException
      */
     long countKVPairs() throws C8DBException;
-
-    class C8KVCountPairsOptions extends MixinBase implements C8KVGroupIdMixin<C8KVReadKeysOptions> {}
-    class C8KVReadKeysOptions extends MixinBase implements C8KVPaginationMixin<C8KVReadKeysOptions>,
-            C8KVSortMixin<C8KVReadKeysOptions>, C8KVGroupIdMixin<C8KVReadKeysOptions> {}
-    class C8KVReadValuesOptions extends MixinBase implements C8KVKeysMixin<C8KVReadKeysOptions>,
-            C8KVPaginationMixin<C8KVReadKeysOptions>, C8KVGroupIdMixin<C8KVReadKeysOptions> {}
-    class C8KVTruncateOptions extends MixinBase implements C8KVGroupIdMixin<C8KVReadKeysOptions> {}
-    class C8KVCreateOptions extends MixinBase implements C8KVCreateMixin<C8KVCreateOptions> {}
-
-    enum Order {
-        asc, desc
-    }
 }

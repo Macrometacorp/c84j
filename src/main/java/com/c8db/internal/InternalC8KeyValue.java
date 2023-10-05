@@ -5,7 +5,6 @@
 package com.c8db.internal;
 
 import com.arangodb.velocypack.VPackSlice;
-import com.c8db.C8KeyValue;
 import com.c8db.entity.*;
 import com.c8db.internal.C8Executor.ResponseDeserializer;
 import com.c8db.internal.util.C8SerializationFactory.Serializer;
@@ -13,7 +12,6 @@ import com.c8db.model.*;
 import com.c8db.util.C8Serializer;
 import com.c8db.velocystream.Request;
 import com.c8db.velocystream.RequestType;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
@@ -22,8 +20,11 @@ public abstract class InternalC8KeyValue<A extends InternalC8DB<E>, D extends In
         extends C8Executeable<E> {
 
     protected static final String PATH_API_KV = "/kv";
-    protected static final String PATH_API_KV_PAIR = "/value";
-    protected static final String PATH_API_KV_PAIRS = "/values";
+    protected static final String PATH_API_KV_KEYS = "keys";
+    protected static final String PATH_API_KV_PAIR = "value";
+    protected static final String PATH_API_KV_PAIRS = "values";
+    protected static final String PATH_API_KV_COUNT = "count";
+    protected static final String PATH_API_KV_TRUNCATE = "truncate";
 
     private static final String OFFSET = "offset";
     private static final String LIMIT = "limit";
@@ -53,7 +54,7 @@ public abstract class InternalC8KeyValue<A extends InternalC8DB<E>, D extends In
     }
 
     protected  <T> Request insertKVPairsRequest(final Collection<T> values) {
-        final Request request = request(db.tenant(), db.name(), RequestType.PUT, PATH_API_KV, name, "value");
+        final Request request = request(db.tenant(), db.name(), RequestType.PUT, PATH_API_KV, name, PATH_API_KV_PAIR);
         request.setBody(util(Serializer.CUSTOM).serialize(values,
                 new C8Serializer.Options().serializeNullValues(false).stringAsJson(true)));
         return request;
@@ -97,7 +98,7 @@ public abstract class InternalC8KeyValue<A extends InternalC8DB<E>, D extends In
     }
 
     protected Request getKVPairRequest(final String key) {
-        final Request request = request(db.tenant(), db.name(), RequestType.GET, PATH_API_KV, name, "value",
+        final Request request = request(db.tenant(), db.name(), RequestType.GET, PATH_API_KV, name, PATH_API_KV_PAIR,
                 key);
         return request;
     }
@@ -119,8 +120,8 @@ public abstract class InternalC8KeyValue<A extends InternalC8DB<E>, D extends In
         };
     }
 
-    protected Request countKVPairsRequest(C8KeyValue.C8KVCountPairsOptions options) {
-        final Request request =  request(db.tenant(), db.name(), RequestType.GET, PATH_API_KV, name, "count");
+    protected Request countKVPairsRequest(C8KVCountPairsOptions options) {
+        final Request request =  request(db.tenant(), db.name(), RequestType.GET, PATH_API_KV, name, PATH_API_KV_COUNT);
         if (options != null && StringUtils.isNotEmpty(options.getGroup())) {
             request.putQueryParam(GROUP_ID, options.getGroup());
         }
@@ -131,9 +132,9 @@ public abstract class InternalC8KeyValue<A extends InternalC8DB<E>, D extends In
         return response ->  response.getBody().get("count").getAsLong();
     }
 
-    protected Request getKVPairsRequest(final C8KeyValue.C8KVReadValuesOptions options) {
-        final C8KeyValue.C8KVReadValuesOptions params = (options != null ? options : new C8KeyValue.C8KVReadValuesOptions());
-        final Request request = request(db.tenant(), db.name(), RequestType.POST, PATH_API_KV, name, "values")
+    protected Request getKVPairsRequest(final C8KVReadValuesOptions options) {
+        final C8KVReadValuesOptions params = (options != null ? options : new C8KVReadValuesOptions());
+        final Request request = request(db.tenant(), db.name(), RequestType.POST, PATH_API_KV, name, PATH_API_KV_PAIRS)
                 .putQueryParam(OFFSET, params.getOffset())
                 .putQueryParam(LIMIT, params.getLimit());
         if (params.getKeys() != null && !params.getKeys().isEmpty()) {
@@ -171,9 +172,9 @@ public abstract class InternalC8KeyValue<A extends InternalC8DB<E>, D extends In
         };
     }
 
-    protected Request getKVKeysRequest(final C8KeyValue.C8KVReadKeysOptions options) {
-        final C8KeyValue.C8KVReadKeysOptions params = (options != null ? options : new C8KeyValue.C8KVReadKeysOptions());
-        Request request = request(db.tenant(), db.name(), RequestType.GET, PATH_API_KV, name, "keys")
+    protected Request getKVKeysRequest(final C8KVReadKeysOptions options) {
+        final C8KVReadKeysOptions params = (options != null ? options : new C8KVReadKeysOptions());
+        Request request = request(db.tenant(), db.name(), RequestType.GET, PATH_API_KV, name, PATH_API_KV_KEYS)
                 .putQueryParam(OFFSET, params.getOffset())
                 .putQueryParam(LIMIT, params.getLimit())
                 .putQueryParam(ORDER, params.getOrder());
@@ -196,7 +197,7 @@ public abstract class InternalC8KeyValue<A extends InternalC8DB<E>, D extends In
     }
 
     protected Request deleteKVPairRequest(final String key) {
-        final Request request = request(db.tenant(), db.name(), RequestType.DELETE, PATH_API_KV, name, "value",
+        final Request request = request(db.tenant(), db.name(), RequestType.DELETE, PATH_API_KV, name, PATH_API_KV_PAIR,
                 key);
         return request;
     }
@@ -215,7 +216,7 @@ public abstract class InternalC8KeyValue<A extends InternalC8DB<E>, D extends In
     }
 
     protected <T> Request deleteKVPairsRequest(final Collection<T> keys) {
-        final Request request = request(db.tenant(), db.name(), RequestType.DELETE, PATH_API_KV, name, "values");
+        final Request request = request(db.tenant(), db.name(), RequestType.DELETE, PATH_API_KV, name, PATH_API_KV_PAIRS);
         request.setBody(util().serialize(keys));
         return request;
     }
@@ -253,7 +254,7 @@ public abstract class InternalC8KeyValue<A extends InternalC8DB<E>, D extends In
         };
     }
 
-    protected Request createRequest(final String name, final C8KeyValue.C8KVCreateOptions options) {
+    protected Request createRequest(final String name, final C8KVCreateOptions options) {
         VPackSlice body = util()
                 .serialize(options != null ? OptionsBuilder.build(options) : new C8KVCreateBodyOptions());
 
@@ -264,8 +265,8 @@ public abstract class InternalC8KeyValue<A extends InternalC8DB<E>, D extends In
         return request;
     }
 
-    protected Request truncateRequest(C8KeyValue.C8KVTruncateOptions options) {
-        final Request request = request(db.tenant(), db.name(), RequestType.PUT, PATH_API_KV, name, "truncate");
+    protected Request truncateRequest(C8KVTruncateOptions options) {
+        final Request request = request(db.tenant(), db.name(), RequestType.PUT, PATH_API_KV, name, PATH_API_KV_TRUNCATE);
 
         if (options != null && StringUtils.isNotEmpty(options.getGroup())) {
             request.putQueryParam(GROUP_ID, options.getGroup());

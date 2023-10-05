@@ -109,7 +109,7 @@ public interface C8KVCreateMixin<R> {
 
     /**
      * @param expiration Enable TTL support (default: false)
-     * @return {@link C8KeyValue.C8KVCreateOptions}
+     * @return {@link C8KVCreateOptions}
      */
     default R expiration(final boolean expiration) {
         setProperty(EXPIRATION_PARAMETER, expiration);
@@ -122,7 +122,7 @@ public interface C8KVCreateMixin<R> {
 
     /**
      * @param group Enable group support (default: false)
-     * @return {@link C8KeyValue.C8KVCreateOptions}
+     * @return {@link C8KVCreateOptions}
      */
     default R group(final boolean group) {
         setProperty(GROUP_PARAMETER, group);

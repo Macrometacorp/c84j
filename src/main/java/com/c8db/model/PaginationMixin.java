@@ -4,7 +4,7 @@
 
 package com.c8db.model;
 
-public interface C8KVPaginationMixin<R> {
+public interface PaginationMixin<R> {
 
     String OFFSET_PARAMETER = "offset";
     String LIMIT_PARAMETER = "limit";
