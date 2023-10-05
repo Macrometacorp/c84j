@@ -4,9 +4,7 @@
 
 package com.c8db.model;
 
-import com.c8db.C8KeyValue;
-
-public interface C8KVSortMixin<R> {
+public interface SortMixin<R> {
 
     String ORDER_PARAMETER = "order";
 
@@ -18,7 +16,7 @@ public interface C8KVSortMixin<R> {
      * @param order The order of returned KVs
      * @return options
      */
-    default R order(final C8KeyValue.Order order) {
+    default R order(final Order order) {
         setProperty(ORDER_PARAMETER, order);
         return (R) this;
     }
@@ -26,12 +24,16 @@ public interface C8KVSortMixin<R> {
     /**
      * @return the order of returned KVs
      */
-    default C8KeyValue.Order getOrder() {
-        C8KeyValue.Order order = getProperty(ORDER_PARAMETER);
+    default Order getOrder() {
+        Order order = getProperty(ORDER_PARAMETER);
         if (order == null) {
-            return C8KeyValue.Order.asc;
+            return Order.asc;
         }
         return order;
+    }
+
+    enum Order {
+        asc, desc
     }
 
 }

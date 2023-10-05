@@ -54,7 +54,7 @@ public class OptionsBuilder {
         return options.name(name);
     }
 
-    public static C8KVCreateBodyOptions build(final C8KeyValue.C8KVCreateOptions options) {
+    public static C8KVCreateBodyOptions build(final C8KVCreateOptions options) {
         return new C8KVCreateBodyOptions()
                 .stream(options.hasStream())
                 .enableShards(options.isEnableShards())

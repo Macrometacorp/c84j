@@ -4,7 +4,7 @@
 
 package com.c8db.model;
 
-public interface C8KVGroupIdMixin<R> {
+public interface GroupIdMixin<R> {
 
     String GROUP_ID_PARAMETER = "groupID";
 
