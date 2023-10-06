@@ -56,25 +56,47 @@ public class C8KeyValueImpl extends InternalC8KeyValue<C8DBImpl, C8DatabaseImpl,
     @Override
     public  MultiDocumentEntity<DocumentCreateEntity<BaseKeyValue>> insertKVPairs(final Collection<BaseKeyValue>  values)
             throws C8DBException {
-        return executor.execute(insertKVPairsRequest(values), insertKVPairsResponseDeserializer());
+        return insertKVPairs(values, null);
+    }
+
+    @Override
+    public  MultiDocumentEntity<DocumentCreateEntity<BaseKeyValue>> insertKVPairs(final Collection<BaseKeyValue>  values,
+                                                                                  C8KVInsertValuesOptions options)
+            throws C8DBException {
+        return executor.execute(insertKVPairsRequest(values, options), insertKVPairsResponseDeserializer());
     }
 
     @Override
     public DocumentDeleteEntity<Void> deleteKVPair(String key) throws C8DBException {
-        return executor.execute(deleteKVPairRequest(key),
+        return deleteKVPair(key, null);
+    }
+
+    @Override
+    public DocumentDeleteEntity<Void> deleteKVPair(String key, C8KVDeleteValueOptions options) throws C8DBException {
+        return executor.execute(deleteKVPairRequest(key, options),
                 deleteKVPairResponseDeserializer(Void.class));
     }
 
     @Override
     public MultiDocumentEntity<DocumentDeleteEntity<Void>> deleteKVPairs(Collection<?> values) throws C8DBException {
-        return executor.execute(deleteKVPairsRequest(values), deleteKVPairsResponseDeserializer(Void.class));
+        return deleteKVPairs(values, null);
+    }
+
+    @Override
+    public MultiDocumentEntity<DocumentDeleteEntity<Void>> deleteKVPairs(Collection<?> values, C8KVDeleteValuesOptions options) throws C8DBException {
+        return executor.execute(deleteKVPairsRequest(values, options), deleteKVPairsResponseDeserializer(Void.class));
     }
 
     @Override
     public BaseKeyValue getKVPair(String key) throws C8DBException {
+        return getKVPair(key, null);
+    }
+
+    @Override
+    public BaseKeyValue getKVPair(String key, C8KVReadValueOptions options) throws C8DBException {
         DocumentUtil.validateDocumentKey(key);
         try {
-            return executor.execute(getKVPairRequest(key), BaseKeyValue.class);
+            return executor.execute(getKVPairRequest(key, options), BaseKeyValue.class);
         } catch (final C8DBException e) {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug(e.getMessage(), e);

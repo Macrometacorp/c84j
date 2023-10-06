@@ -60,7 +60,8 @@ public class OptionsBuilder {
                 .enableShards(options.isEnableShards())
                 .waitForSync(options.isWaitForSync())
                 .blobs(options.isBlobs())
-                .shardKeys(options.getShardKeys());
+                .shardKeys(options.getShardKeys())
+                .strongConsistency(options.hasStrongConsistency());
     }
 
     public static C8qlQueryOptions build(final C8qlQueryOptions options, final String query, final VPackSlice bindVars) {
