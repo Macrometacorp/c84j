@@ -20,19 +20,19 @@ public interface C8KeyValue {
 
     /**
      * Creates a KV with the given {@code options} for this KV's
-     * name, then returns KV name from the server.
+     * name
      *
-     * @param options Additional options, can be null*
-     * @return The KV name
+     * @param options Additional options, can be null
+     * @return The KV entity
      * @throws C8DBException
      */
     C8KVEntity create(C8KVCreateOptions options) throws C8DBException;
 
     /**
      * Creates a KV with the given {@code options} for this KV's
-     * name, then returns KV name from the server.
+     * name.
      *
-     * @return The KV name
+     * @return The KV entity
      * @throws C8DBException
      */
     C8KVEntity create() throws C8DBException;
@@ -55,7 +55,7 @@ public interface C8KeyValue {
     /**
      * Removes all pair from the KV
      *
-     * @param options The read options - group
+     * @param options Additional options, can be null
      * @throws C8DBException
      */
     void truncate(C8KVTruncateOptions options) throws C8DBException;
@@ -82,7 +82,7 @@ public interface C8KeyValue {
     DocumentDeleteEntity<Void> deleteKVPair(String key) throws C8DBException;
 
     /**
-     * Deletes multiple documents from the KV.
+     * Deletes multiple pairs from the KV.
      *
      * @param values The keys of the pairs or the KVs themselves
      * @return information about the pair
@@ -93,7 +93,7 @@ public interface C8KeyValue {
     /**
      * Retrieves the KV pair with the given {@code key} from the KV.
      *
-     * @param key     The key of the pair
+     * @param key The key of the pair
      * @return the document identified by the key
      */
     BaseKeyValue getKVPair(String key) throws C8DBException;
@@ -117,16 +117,16 @@ public interface C8KeyValue {
     /**
      * Retrieves multiple pairs with the given {@code _key} from the KV.
      *
-     * @param options The read options - offset, limit, order
+     * @param options Additional options, can be null
      * @return the documents and possible errors
      * @throws C8DBException
      */
    MultiDocumentEntity<BaseKeyValue> getKVPairs(C8KVReadValuesOptions options) throws C8DBException;
 
     /**
-     * Retrieves keys from key-value collection.
+     * Retrieves keys from KV collection.
      *
-     * @return
+     * @return list of keys
      * @throws C8DBException
      */
     Collection<String> getKVKeys() throws C8DBException;
@@ -134,8 +134,8 @@ public interface C8KeyValue {
     /**
      * Retrieves keys from key-value collection.
      *
-     * @param options
-     * @return
+     * @param options Additional options, can be null
+     * @return list of keys
      * @throws C8DBException
      */
     Collection<String> getKVKeys(C8KVReadKeysOptions options) throws C8DBException;
@@ -143,17 +143,34 @@ public interface C8KeyValue {
     /**
      * Retrieves number of key-value pairs in collection.
      *
-     * @param options ot set parameter group
-     * @return number of key-value pairs in collection.
+     * @param options Additional options, can be null
+     * @return number of KV pairs in collection.
      * @throws C8DBException
      */
     long countKVPairs(C8KVCountPairsOptions options) throws C8DBException;
 
     /**
-     * Retrieves number of key-value pairs in collection.
+     * Retrieves number of KV pairs in collection.
      *
-     * @return number of key-value pairs in collection.
+     * @return number of KV pairs in collection.
      * @throws C8DBException
      */
     long countKVPairs() throws C8DBException;
+
+    /**
+     * Retrieve group names of collection.
+     *
+     * @param options Additional options, can be null
+     * @return list of group names in collection
+     * @throws C8DBException
+     */
+    Collection<String> getGroups(C8KVReadGroupsOptions options) throws C8DBException;
+
+    /**
+     * Retrieve group names of collection.
+     *
+     * @return list of group names in collection
+     * @throws C8DBException
+     */
+    Collection<String> getGroups() throws C8DBException;
 }

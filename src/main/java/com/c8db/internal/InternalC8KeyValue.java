@@ -25,6 +25,7 @@ public abstract class InternalC8KeyValue<A extends InternalC8DB<E>, D extends In
     protected static final String PATH_API_KV_PAIRS = "values";
     protected static final String PATH_API_KV_COUNT = "count";
     protected static final String PATH_API_KV_TRUNCATE = "truncate";
+    protected static final String PATH_API_KV_GROUPS = "groups";
 
     private static final String OFFSET = "offset";
     private static final String LIMIT = "limit";
@@ -276,6 +277,22 @@ public abstract class InternalC8KeyValue<A extends InternalC8DB<E>, D extends In
 
     protected Request dropRequest() {
         return request(db.tenant(), db.name(), RequestType.DELETE, PATH_API_KV, name);
+    }
+
+    protected Request getAllGroups() {
+        return request(db.tenant(), db.name(), RequestType.GET, PATH_API_KV, name, PATH_API_KV_GROUPS);
+    }
+
+    protected ResponseDeserializer<Collection<String>> getAllGroupsResponseDeserializer() {
+        return response -> {
+            Collection<String> coll = new ArrayList<>();
+            final VPackSlice kvs = response.getBody().get("groups");
+            for (final Iterator<VPackSlice> iterator = kvs.arrayIterator(); iterator.hasNext();) {
+                final VPackSlice next = iterator.next();
+                coll.add(next.getAsString());
+            }
+            return coll;
+        };
     }
 
 }

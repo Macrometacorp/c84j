@@ -53,5 +53,4 @@ public interface PaginationMixin<R> {
         return limit;
     }
 
-
 }
