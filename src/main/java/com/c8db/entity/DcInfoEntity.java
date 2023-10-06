@@ -13,15 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
+ * Modifications copyright (c) 2023 Macrometa Corp All rights reserved.
  */
 
 package com.c8db.entity;
 
 import com.arangodb.velocypack.annotations.SerializedName;
 
-/**
- *
- */
 public class DcInfoEntity implements Entity {
 
     @SerializedName("_id")
@@ -149,8 +147,8 @@ public class DcInfoEntity implements Entity {
         private String countryCode;
         @SerializedName("countryname")
         private String countryName;
-        private String latitude;
-        private String longitude;
+        private Double latitude;
+        private Double longitude;
         private String name;
 
         /**
@@ -198,14 +196,14 @@ public class DcInfoEntity implements Entity {
         /**
          * @return the latitude
          */
-        public String getLatitude() {
+        public Double getLatitude() {
             return latitude;
         }
 
         /**
          * @return the longitude
          */
-        public String getLongitude() {
+        public Double getLongitude() {
             return longitude;
         }
 
