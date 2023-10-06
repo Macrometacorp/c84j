@@ -19,7 +19,7 @@ import java.util.*;
 public abstract class InternalC8KeyValue<A extends InternalC8DB<E>, D extends InternalC8Database<A, E>, E extends C8Executor>
         extends C8Executeable<E> {
 
-    protected static final String PATH_API_KV = "/kv";
+    protected static final String PATH_API_KV = "/_api/kv";
     protected static final String PATH_API_KV_KEYS = "keys";
     protected static final String PATH_API_KV_PAIR = "value";
     protected static final String PATH_API_KV_PAIRS = "values";

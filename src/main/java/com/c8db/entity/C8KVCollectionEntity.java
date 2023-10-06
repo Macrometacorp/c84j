@@ -3,13 +3,24 @@
  */
 package com.c8db.entity;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-
-@NoArgsConstructor
-@Getter
 public class C8KVCollectionEntity implements Entity {
-	private String name;
-	private boolean expiration;
-	private boolean group;
+
+    private String name;
+    private boolean expiration;
+    private boolean group;
+
+    public C8KVCollectionEntity() {
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public boolean hasExpiration() {
+        return expiration;
+    }
+
+    public boolean hasGroup() {
+        return group;
+    }
 }

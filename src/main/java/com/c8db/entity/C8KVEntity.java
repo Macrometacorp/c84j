@@ -3,8 +3,11 @@
  */
 package com.c8db.entity;
 
-public class C8KVEntity  extends DocumentEntity {
-	public C8KVEntity() {
-		super();
-	}
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor
+@Getter
+public class C8KVEntity implements Entity {
+    private String name;
 }
