@@ -22,9 +22,8 @@ import com.c8db.entity.CollectionType;
 import com.c8db.entity.KeyOptions;
 import com.c8db.entity.KeyType;
 
-public class CollectionCreateOptions {
+public class CollectionCreateOptions extends MixinBase implements StrongConsistencyMixin<CollectionCreateOptions> {
 
-    private String name;
     private KeyOptions keyOptions;
     private Boolean isSpot;
     private String[] shardKeys;
@@ -35,22 +34,10 @@ public class CollectionCreateOptions {
     private Boolean enableShards;
     // Macrometa Corp Modification: Expose `waitForSync` property.
     private Boolean waitForSync;
+    private Boolean cacheEnabled;
 
     public CollectionCreateOptions() {
         super();
-    }
-
-    protected String getName() {
-        return name;
-    }
-
-    /**
-     * @param name The name of the collection
-     * @return options
-     */
-    protected CollectionCreateOptions name(final String name) {
-        this.name = name;
-        return this;
     }
 
     public KeyOptions getKeyOptions() {
@@ -203,6 +190,25 @@ public class CollectionCreateOptions {
      */
     public CollectionCreateOptions waitForSync(final Boolean waitForSync) {
         this.waitForSync = waitForSync;
+        return this;
+    }
+
+    /**
+     * Checks whether the cacheEnabled is enabled.
+     *
+     * @return true of false
+     */
+    public Boolean isCacheEnabled() {
+        return cacheEnabled;
+    }
+
+    /**
+     * Sets cacheEnabled collection creation property.
+     *
+     * @return {@link CollectionCreateOptions}
+     */
+    public CollectionCreateOptions cacheEnabled(final Boolean cacheEnabled) {
+        this.cacheEnabled = cacheEnabled;
         return this;
     }
 

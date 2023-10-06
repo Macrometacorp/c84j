@@ -30,6 +30,8 @@ public class CollectionEntity implements Entity {
 	private CollectionType type;
 	private Boolean hasStream;
 	private CollectionModel collectionModel;
+	private Boolean strongConsistency;
+	private Boolean blobs;
 
 	public CollectionEntity() {
 		super();
@@ -69,6 +71,14 @@ public class CollectionEntity implements Entity {
 
 	public CollectionModel getCollectionModel() {
 		return collectionModel;
+	}
+
+	public Boolean getStrongConsistency() {
+		return strongConsistency;
+	}
+
+	public Boolean getBlobs() {
+		return blobs;
 	}
 
 }

@@ -50,8 +50,20 @@ public class OptionsBuilder {
         return options.fields(fields);
     }
 
-    public static CollectionCreateOptions build(final CollectionCreateOptions options, final String name) {
-        return options.name(name);
+    public static CollectionCreateBodyOptions build(final CollectionCreateOptions options, final String name) {
+        return new CollectionCreateBodyOptions()
+                .name(name)
+                .keyOptions(options.getKeyOptions())
+                .isSpot(options.getIsSpot())
+                .shardKeys(options.getShardKeys())
+                .type(options.getType())
+                .isLocal(options.getLocal())
+                .isSystem(options.isSystem())
+                .stream(options.hasStream())
+                .enableShards(options.isEnableShards())
+                .waitForSync(options.isWaitForSync())
+                .strongConsistency(options.hasStrongConsistency())
+                .cacheEnabled(options.isCacheEnabled());
     }
 
     public static C8KVCreateBodyOptions build(final C8KVCreateOptions options) {

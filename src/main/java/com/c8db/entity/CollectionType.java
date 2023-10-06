@@ -20,7 +20,7 @@ package com.c8db.entity;
 
 public enum CollectionType {
 
-    KV(1), DOCUMENT(2), EDGES(3), DYNAMO(4);
+    DOCUMENT(2), EDGES(3);
 
     private final int type;
 

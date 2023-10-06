@@ -19,7 +19,7 @@ package com.c8db.model;
 /**
  *
  */
-public class DocumentReplaceOptions {
+public class DocumentReplaceOptions extends MixinBase implements StrongConsistencyMixin<DocumentReplaceOptions>  {
 
     private Boolean waitForSync;
     private Boolean ignoreRevs;
