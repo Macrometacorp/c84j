@@ -3,4 +3,5 @@
  */
 package com.c8db.model;
 
-public class C8KVTruncateOptions extends MixinBase implements GroupIdMixin<C8KVTruncateOptions> {}
+public class C8KVTruncateOptions extends MixinBase implements GroupIdMixin<C8KVTruncateOptions>,
+        StrongConsistencyMixin<C8KVTruncateOptions> {}

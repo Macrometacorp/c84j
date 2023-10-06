@@ -70,7 +70,23 @@ public interface C8KeyValue {
      * @return information about the document
      * @throws C8DBException
      */
-    MultiDocumentEntity<DocumentCreateEntity<BaseKeyValue>> insertKVPairs(Collection<BaseKeyValue> values) throws C8DBException;
+    MultiDocumentEntity<DocumentCreateEntity<BaseKeyValue>> insertKVPairs(Collection<BaseKeyValue> values)
+            throws C8DBException;
+
+    /**
+     * Set one or more key-value pairs in key-value collection.
+     * If the input is an array of objects then key-value pairs are created in batch.
+     * If the key does not exist the key-value pairs are created. Otherwise the entry for the key is updated.
+     * Specify expiration in UTC timestamp.
+     *
+     * @param values  A collection of KV pairs
+     * @param options Additional options, can be null
+     * @return information about the document
+     * @throws C8DBException
+     */
+    MultiDocumentEntity<DocumentCreateEntity<BaseKeyValue>> insertKVPairs(Collection<BaseKeyValue> values,
+                                                                          C8KVInsertValuesOptions options)
+            throws C8DBException;
 
     /**
      * Deletes a pair with the given {@code key} from the KV.
@@ -91,12 +107,42 @@ public interface C8KeyValue {
     MultiDocumentEntity<DocumentDeleteEntity<Void>> deleteKVPairs(Collection<?> values) throws C8DBException;
 
     /**
+     * Deletes multiple pairs from the KV.
+     *
+     * @param values The keys of the pairs or the KVs themselves
+     * @param options Additional options, can be null
+     * @return information about the pair
+     * @throws C8DBException
+     */
+    MultiDocumentEntity<DocumentDeleteEntity<Void>> deleteKVPairs(Collection<?> values, C8KVDeleteValuesOptions options)
+            throws C8DBException;
+
+    /**
+     * Deletes a pair with the given {@code key} from the KV.
+     *
+     * @param key The key of the pair
+     * @param options Additional options, can be null
+     * @return information about the pair
+     * @throws C8DBException
+     */
+    DocumentDeleteEntity<Void> deleteKVPair(String key, C8KVDeleteValueOptions options) throws C8DBException;
+
+    /**
      * Retrieves the KV pair with the given {@code key} from the KV.
      *
      * @param key The key of the pair
      * @return the document identified by the key
      */
     BaseKeyValue getKVPair(String key) throws C8DBException;
+
+    /**
+     * Retrieves the KV pair with the given {@code key} from the KV.
+     *
+     * @param key The key of the pair
+     * @param options Additional options, can be null
+     * @return the document identified by the key
+     */
+    BaseKeyValue getKVPair(String key, C8KVReadValueOptions options) throws C8DBException;
 
     /**
      * Retrieve all KV collections.

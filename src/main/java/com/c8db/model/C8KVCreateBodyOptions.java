@@ -14,6 +14,7 @@ public class C8KVCreateBodyOptions {
     private Boolean waitForSync;
     private Boolean blobs;
     private String[] shardKeys;
+    private Boolean strongConsistency;
 
     public C8KVCreateBodyOptions() {
         super();
@@ -99,6 +100,25 @@ public class C8KVCreateBodyOptions {
      */
     public C8KVCreateBodyOptions waitForSync(final Boolean waitForSync) {
         this.waitForSync = waitForSync;
+        return this;
+    }
+
+    /**
+     * Checks whether the strongConsistency is enabled.
+     *
+     * @return true of false
+     */
+    public Boolean isStrongConsistency() {
+        return strongConsistency;
+    }
+
+    /**
+     * Sets strongConsistency collection creation property.
+     *
+     * @return {@link C8KVCreateBodyOptions}
+     */
+    public C8KVCreateBodyOptions strongConsistency(final Boolean strongConsistency) {
+        this.strongConsistency = strongConsistency;
         return this;
     }
 

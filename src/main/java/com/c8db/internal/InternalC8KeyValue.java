@@ -33,6 +33,8 @@ public abstract class InternalC8KeyValue<A extends InternalC8DB<E>, D extends In
     private static final String EXPIRATION = "expiration";
     private static final String GROUP_ID = "groupID";
     private static final String GROUP = "group";
+    private static final String STRONG_CONSISTENCY = "strongConsistency";
+
 
     private static final String NEW = "new";
     private static final String OLD = "old";
@@ -54,8 +56,9 @@ public abstract class InternalC8KeyValue<A extends InternalC8DB<E>, D extends In
         return name;
     }
 
-    protected  <T> Request insertKVPairsRequest(final Collection<T> values) {
+    protected  <T> Request insertKVPairsRequest(final Collection<T> values, C8KVInsertValuesOptions options) {
         final Request request = request(db.tenant(), db.name(), RequestType.PUT, PATH_API_KV, name, PATH_API_KV_PAIR);
+        request.putQueryParam(STRONG_CONSISTENCY, options != null && options.hasStrongConsistency());
         request.setBody(util(Serializer.CUSTOM).serialize(values,
                 new C8Serializer.Options().serializeNullValues(false).stringAsJson(true)));
         return request;
@@ -98,9 +101,10 @@ public abstract class InternalC8KeyValue<A extends InternalC8DB<E>, D extends In
         };
     }
 
-    protected Request getKVPairRequest(final String key) {
+    protected Request getKVPairRequest(final String key, C8KVReadValueOptions options) {
         final Request request = request(db.tenant(), db.name(), RequestType.GET, PATH_API_KV, name, PATH_API_KV_PAIR,
                 key);
+        request.putQueryParam(STRONG_CONSISTENCY, options != null && options.hasStrongConsistency());
         return request;
     }
 
@@ -123,7 +127,7 @@ public abstract class InternalC8KeyValue<A extends InternalC8DB<E>, D extends In
 
     protected Request countKVPairsRequest(C8KVCountPairsOptions options) {
         final Request request =  request(db.tenant(), db.name(), RequestType.GET, PATH_API_KV, name, PATH_API_KV_COUNT);
-        if (options != null && StringUtils.isNotEmpty(options.getGroup())) {
+        if (options != null && StringUtils.isNotEmpty(options.getGroup())){
             request.putQueryParam(GROUP_ID, options.getGroup());
         }
         return request;
@@ -144,6 +148,7 @@ public abstract class InternalC8KeyValue<A extends InternalC8DB<E>, D extends In
         if (StringUtils.isNotEmpty(params.getGroup())) {
             request.putQueryParam(GROUP_ID, params.getGroup());
         }
+        request.putQueryParam(STRONG_CONSISTENCY, options != null && options.hasStrongConsistency());
         return request;
     }
 
@@ -197,9 +202,10 @@ public abstract class InternalC8KeyValue<A extends InternalC8DB<E>, D extends In
         };
     }
 
-    protected Request deleteKVPairRequest(final String key) {
+    protected Request deleteKVPairRequest(final String key, C8KVDeleteValueOptions options) {
         final Request request = request(db.tenant(), db.name(), RequestType.DELETE, PATH_API_KV, name, PATH_API_KV_PAIR,
                 key);
+        request.putQueryParam(STRONG_CONSISTENCY, options != null && options.hasStrongConsistency());
         return request;
     }
 
@@ -216,8 +222,9 @@ public abstract class InternalC8KeyValue<A extends InternalC8DB<E>, D extends In
         };
     }
 
-    protected <T> Request deleteKVPairsRequest(final Collection<T> keys) {
+    protected <T> Request deleteKVPairsRequest(final Collection<T> keys, C8KVDeleteValuesOptions options) {
         final Request request = request(db.tenant(), db.name(), RequestType.DELETE, PATH_API_KV, name, PATH_API_KV_PAIRS);
+        request.putQueryParam(STRONG_CONSISTENCY, options != null && options.hasStrongConsistency());
         request.setBody(util().serialize(keys));
         return request;
     }
@@ -268,10 +275,10 @@ public abstract class InternalC8KeyValue<A extends InternalC8DB<E>, D extends In
 
     protected Request truncateRequest(C8KVTruncateOptions options) {
         final Request request = request(db.tenant(), db.name(), RequestType.PUT, PATH_API_KV, name, PATH_API_KV_TRUNCATE);
-
         if (options != null && StringUtils.isNotEmpty(options.getGroup())) {
             request.putQueryParam(GROUP_ID, options.getGroup());
         }
+        request.putQueryParam(STRONG_CONSISTENCY, options != null && options.hasStrongConsistency());
         return request;
     }
 
