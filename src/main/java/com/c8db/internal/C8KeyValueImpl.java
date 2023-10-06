@@ -124,4 +124,14 @@ public class C8KeyValueImpl extends InternalC8KeyValue<C8DBImpl, C8DatabaseImpl,
     public long countKVPairs() throws C8DBException {
         return countKVPairs(null);
     }
+
+    @Override
+    public Collection<String> getGroups(C8KVReadGroupsOptions options) throws C8DBException {
+        return executor.execute(getAllGroups(), getAllGroupsResponseDeserializer());
+    }
+
+    @Override
+    public Collection<String> getGroups() throws C8DBException {
+        return getGroups(null);
+    }
 }
