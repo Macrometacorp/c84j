@@ -19,7 +19,7 @@ package com.c8db.model;
 /**
  * 
  */
-public class DocumentUpdateOptions {
+public class DocumentUpdateOptions extends MixinBase implements StrongConsistencyMixin<DocumentUpdateOptions> {
 
     private Boolean keepNull;
     private Boolean mergeObjects;

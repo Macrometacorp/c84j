@@ -98,6 +98,16 @@ public interface C8KeyValue {
     DocumentDeleteEntity<Void> deleteKVPair(String key) throws C8DBException;
 
     /**
+     * Deletes a pair with the given {@code key} from the KV.
+     *
+     * @param key The key of the pair
+     * @param options Additional options, can be null
+     * @return information about the pair
+     * @throws C8DBException
+     */
+    DocumentDeleteEntity<Void> deleteKVPair(String key, C8KVDeleteValueOptions options) throws C8DBException;
+
+    /**
      * Deletes multiple pairs from the KV.
      *
      * @param values The keys of the pairs or the KVs themselves
@@ -116,16 +126,6 @@ public interface C8KeyValue {
      */
     MultiDocumentEntity<DocumentDeleteEntity<Void>> deleteKVPairs(Collection<?> values, C8KVDeleteValuesOptions options)
             throws C8DBException;
-
-    /**
-     * Deletes a pair with the given {@code key} from the KV.
-     *
-     * @param key The key of the pair
-     * @param options Additional options, can be null
-     * @return information about the pair
-     * @throws C8DBException
-     */
-    DocumentDeleteEntity<Void> deleteKVPair(String key, C8KVDeleteValueOptions options) throws C8DBException;
 
     /**
      * Retrieves the KV pair with the given {@code key} from the KV.

@@ -18,7 +18,7 @@ package com.c8db.model;
 
 /**
  */
-public class DocumentDeleteOptions {
+public class DocumentDeleteOptions extends MixinBase implements StrongConsistencyMixin<DocumentDeleteOptions> {
 
     private Boolean waitForSync;
     private String ifMatch;

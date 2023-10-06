@@ -84,7 +84,7 @@ public abstract class InternalC8Collection<A extends InternalC8DB<E>, D extends 
     private static final String OVERWRITE = "overwrite";
     private static final String OLD = "old";
     private static final String SILENT = "silent";
-
+    private static final String STRONG_CONSISTENCY = "strongConsistency";
     public static final String TRANSACTION_ID = "x-gdn-trxid";
 
     private final D db;
@@ -112,6 +112,7 @@ public abstract class InternalC8Collection<A extends InternalC8DB<E>, D extends 
         request.putQueryParam(RETURN_OLD, params.getReturnOld());
         request.putQueryParam(SILENT, params.getSilent());
         request.putQueryParam(OVERWRITE, params.getOverwrite());
+        request.putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency());
         request.putHeaderParam(TRANSACTION_ID, params.getStreamTransactionId());
         request.setBody(util(Serializer.CUSTOM).serialize(value));
         return request;
@@ -210,6 +211,7 @@ public abstract class InternalC8Collection<A extends InternalC8DB<E>, D extends 
         final Request request = request(db.tenant(), db.name(), RequestType.GET, PATH_API_DOCUMENT,
                 DocumentUtil.createDocumentHandle(name, key));
         final DocumentReadOptions params = (options != null ? options : new DocumentReadOptions());
+        request.putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency());
         request.putHeaderParam(C8RequestParam.IF_NONE_MATCH, params.getIfNoneMatch());
         request.putHeaderParam(C8RequestParam.IF_MATCH, params.getIfMatch());
         request.putHeaderParam(TRANSACTION_ID, params.getStreamTransactionId());
@@ -220,6 +222,7 @@ public abstract class InternalC8Collection<A extends InternalC8DB<E>, D extends 
         final DocumentReadOptions params = (options != null ? options : new DocumentReadOptions());
         final Request request = request(db.tenant(), db.name(), RequestType.PUT, PATH_API_DOCUMENT, name)
                 .putQueryParam("onlyget", true)
+                .putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency())
                 .putHeaderParam(C8RequestParam.IF_NONE_MATCH, params.getIfNoneMatch())
                 .putHeaderParam(C8RequestParam.IF_MATCH, params.getIfMatch()).setBody(util().serialize(keys))
                 .putHeaderParam(TRANSACTION_ID, params.getStreamTransactionId());
@@ -269,6 +272,7 @@ public abstract class InternalC8Collection<A extends InternalC8DB<E>, D extends 
         request.putQueryParam(RETURN_NEW, params.getReturnNew());
         request.putQueryParam(RETURN_OLD, params.getReturnOld());
         request.putQueryParam(SILENT, params.getSilent());
+        request.putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency());
         request.setBody(util(Serializer.CUSTOM).serialize(value));
         return request;
     }
@@ -308,6 +312,7 @@ public abstract class InternalC8Collection<A extends InternalC8DB<E>, D extends 
         request.putQueryParam(RETURN_NEW, params.getReturnNew());
         request.putQueryParam(RETURN_OLD, params.getReturnOld());
         request.putQueryParam(SILENT, params.getSilent());
+        request.putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency());
         request.setBody(util(Serializer.CUSTOM).serialize(values,
                 new C8Serializer.Options().serializeNullValues(false).stringAsJson(true)));
         return request;
@@ -374,6 +379,7 @@ public abstract class InternalC8Collection<A extends InternalC8DB<E>, D extends 
         request.putQueryParam(RETURN_NEW, params.getReturnNew());
         request.putQueryParam(RETURN_OLD, params.getReturnOld());
         request.putQueryParam(SILENT, params.getSilent());
+        request.putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency());
         request.setBody(util(Serializer.CUSTOM).serialize(value, new C8Serializer.Options()
                 .serializeNullValues(params.getSerializeNull() == null || params.getSerializeNull())));
         return request;
@@ -417,6 +423,7 @@ public abstract class InternalC8Collection<A extends InternalC8DB<E>, D extends 
         request.putQueryParam(RETURN_NEW, params.getReturnNew());
         request.putQueryParam(RETURN_OLD, params.getReturnOld());
         request.putQueryParam(SILENT, params.getSilent());
+        request.putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency());
         request.setBody(util(Serializer.CUSTOM).serialize(values,
                 new C8Serializer.Options()
                         .serializeNullValues(params.getSerializeNull() == null || params.getSerializeNull())
@@ -481,6 +488,7 @@ public abstract class InternalC8Collection<A extends InternalC8DB<E>, D extends 
         request.putQueryParam(C8RequestParam.WAIT_FOR_SYNC, params.getWaitForSync());
         request.putQueryParam(RETURN_OLD, params.getReturnOld());
         request.putQueryParam(SILENT, params.getSilent());
+        request.putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency());
         return request;
     }
 
@@ -508,6 +516,7 @@ public abstract class InternalC8Collection<A extends InternalC8DB<E>, D extends 
         request.putQueryParam(C8RequestParam.WAIT_FOR_SYNC, params.getWaitForSync());
         request.putQueryParam(RETURN_OLD, params.getReturnOld());
         request.putQueryParam(SILENT, params.getSilent());
+        request.putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency());
         request.setBody(util().serialize(keys));
         return request;
     }
@@ -554,6 +563,7 @@ public abstract class InternalC8Collection<A extends InternalC8DB<E>, D extends 
         final Request request = request(db.tenant(), db.name(), RequestType.HEAD, PATH_API_DOCUMENT,
                 DocumentUtil.createDocumentHandle(name, key));
         final DocumentExistsOptions params = (options != null ? options : new DocumentExistsOptions());
+        request.putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency());
         request.putHeaderParam(TRANSACTION_ID, params.getStreamTransactionId());
         request.putHeaderParam(C8RequestParam.IF_MATCH, params.getIfMatch());
         request.putHeaderParam(C8RequestParam.IF_NONE_MATCH, params.getIfNoneMatch());

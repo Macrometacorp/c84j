@@ -18,7 +18,7 @@ package com.c8db.model;
 
 /**
  */
-public class DocumentExistsOptions {
+public class DocumentExistsOptions extends MixinBase implements StrongConsistencyMixin<DocumentExistsOptions> {
 
     private String ifNoneMatch;
     private String ifMatch;

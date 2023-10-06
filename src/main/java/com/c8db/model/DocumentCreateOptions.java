@@ -18,7 +18,7 @@ package com.c8db.model;
 
 /**
  */
-public class DocumentCreateOptions {
+public class DocumentCreateOptions extends MixinBase implements StrongConsistencyMixin<DocumentCreateOptions> {
 
     private Boolean waitForSync;
     private Boolean returnNew;

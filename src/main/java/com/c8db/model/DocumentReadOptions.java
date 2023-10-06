@@ -19,7 +19,7 @@ package com.c8db.model;
 /**
  *
  */
-public class DocumentReadOptions {
+public class DocumentReadOptions extends MixinBase implements StrongConsistencyMixin<DocumentReadOptions> {
 
     private String ifNoneMatch;
     private String ifMatch;
