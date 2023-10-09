@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Macrometa Corp All rights reserved.
+ * Copyright (c) 2023 Macrometa Corp All rights reserved.
  */
 
 package com.c8db.internal;
@@ -127,9 +127,11 @@ public abstract class InternalC8KeyValue<A extends InternalC8DB<E>, D extends In
 
     protected Request countKVPairsRequest(C8KVCountPairsOptions options) {
         final Request request =  request(db.tenant(), db.name(), RequestType.GET, PATH_API_KV, name, PATH_API_KV_COUNT);
-        if (options != null && StringUtils.isNotEmpty(options.getGroup())){
-            request.putQueryParam(GROUP_ID, options.getGroup());
+        final C8KVCountPairsOptions params = (options != null ? options : new C8KVCountPairsOptions());
+        if (StringUtils.isNotEmpty(params.getGroup())){
+            request.putQueryParam(GROUP_ID, params.getGroup());
         }
+        request.putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency());
         return request;
     }
 
@@ -148,7 +150,7 @@ public abstract class InternalC8KeyValue<A extends InternalC8DB<E>, D extends In
         if (StringUtils.isNotEmpty(params.getGroup())) {
             request.putQueryParam(GROUP_ID, params.getGroup());
         }
-        request.putQueryParam(STRONG_CONSISTENCY, options != null && options.hasStrongConsistency());
+        request.putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency());
         return request;
     }
 
@@ -187,6 +189,7 @@ public abstract class InternalC8KeyValue<A extends InternalC8DB<E>, D extends In
         if (StringUtils.isNotEmpty(params.getGroup())) {
             request.putQueryParam(GROUP_ID, params.getGroup());
         }
+        request.putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency());
         return request;
     }
 
@@ -275,10 +278,11 @@ public abstract class InternalC8KeyValue<A extends InternalC8DB<E>, D extends In
 
     protected Request truncateRequest(C8KVTruncateOptions options) {
         final Request request = request(db.tenant(), db.name(), RequestType.PUT, PATH_API_KV, name, PATH_API_KV_TRUNCATE);
-        if (options != null && StringUtils.isNotEmpty(options.getGroup())) {
-            request.putQueryParam(GROUP_ID, options.getGroup());
+        final C8KVTruncateOptions params = (options != null ? options : new C8KVTruncateOptions());
+        if (StringUtils.isNotEmpty(params.getGroup())) {
+            request.putQueryParam(GROUP_ID, params.getGroup());
         }
-        request.putQueryParam(STRONG_CONSISTENCY, options != null && options.hasStrongConsistency());
+        request.putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency());
         return request;
     }
 
