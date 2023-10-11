@@ -19,9 +19,11 @@ package com.c8db.internal.velocypack;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.Map;
 
 import com.c8db.entity.CollectionModel;
+import com.c8db.entity.DcInfoEntity;
 import com.c8db.entity.FxType;
 import com.c8db.model.C8DynamoAttributeType;
 import com.c8db.model.C8DynamoProjectionType;
@@ -214,6 +216,40 @@ public class VPackDeserializers {
             final MinReplicationFactor minReplicationFactor = new MinReplicationFactor();
             minReplicationFactor.setMinReplicationFactor(vpack.getAsInt());
             return minReplicationFactor;
+        }
+    };
+
+    public static final VPackDeserializer<DcInfoEntity.LocationInfo> LOCATION_INFO = new VPackDeserializer<DcInfoEntity.LocationInfo>() {
+        @Override
+        public DcInfoEntity.LocationInfo deserialize(final VPackSlice parent, final VPackSlice vpack,
+                                                     final VPackDeserializationContext context) throws VPackException {
+            DcInfoEntity.LocationInfo locationInfo = null;
+            if (vpack.isObject()) {
+                String city = null;
+                String countryCode = null;
+                String countryName = null;
+                Double latitude = null;
+                Double longitude = null;
+                String url = null;
+                for (Iterator<Map.Entry<String, VPackSlice>> i = vpack.objectIterator(); i.hasNext();) {
+                    Map.Entry<String, VPackSlice> item = i.next();
+                    switch (item.getKey()) {
+                        case "city": city = item.getValue().getAsString();
+                        break;
+                        case "countrycode": countryCode = item.getValue().getAsString();
+                        break;
+                        case "countryname": countryName = item.getValue().getAsString();
+                        break;
+                        case "latitude": latitude = Double.parseDouble(item.getValue().getAsString());
+                        break;
+                        case "longitude": longitude = Double.parseDouble(item.getValue().getAsString());
+                        break;
+                        case "url": url = item.getValue().getAsString();
+                    }
+                }
+                locationInfo = new DcInfoEntity.LocationInfo(city, countryCode, countryName, latitude, longitude, url);
+            }
+            return locationInfo;
         }
     };
 }

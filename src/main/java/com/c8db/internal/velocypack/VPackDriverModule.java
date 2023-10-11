@@ -30,6 +30,7 @@ import com.c8db.entity.C8DynamoProjection;
 import com.c8db.entity.CollectionModel;
 import com.c8db.entity.CollectionStatus;
 import com.c8db.entity.CollectionType;
+import com.c8db.entity.DcInfoEntity;
 import com.c8db.entity.DocumentField;
 import com.c8db.entity.FxType;
 import com.c8db.entity.License;
@@ -96,6 +97,7 @@ public class VPackDriverModule implements VPackModule, VPackParserModule {
         context.registerDeserializer(FxType.class, VPackDeserializers.FX_TYPE);
         context.registerDeserializer(ReplicationFactor.class, VPackDeserializers.REPLICATION_FACTOR);
         context.registerDeserializer(MinReplicationFactor.class, VPackDeserializers.MIN_REPLICATION_FACTOR);
+        context.registerDeserializer(DcInfoEntity.LocationInfo.class, VPackDeserializers.LOCATION_INFO);
     }
 
     @Override
