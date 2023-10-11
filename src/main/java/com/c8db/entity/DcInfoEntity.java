@@ -18,10 +18,13 @@
 package com.c8db.entity;
 
 import com.arangodb.velocypack.annotations.SerializedName;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 /**
  *
  */
+@Getter
 public class DcInfoEntity implements Entity {
 
     @SerializedName("_id")
@@ -40,180 +43,22 @@ public class DcInfoEntity implements Entity {
     private Tag tags;
     private LocationInfo locationInfo;
 
-    /**
-     * @return the id
-     */
-    public String getId() {
-        return id;
-    }
-
-    /**
-     * @return the key
-     */
-    public String getKey() {
-        return key;
-    }
-
-    /**
-     * @return the rev
-     */
-    public String getRev() {
-        return rev;
-    }
-
-    /**
-     * @return the host
-     */
-    public String getHost() {
-        return host;
-    }
-
-    /**
-     * @return the local
-     */
-    public Boolean getLocal() {
-        return local;
-    }
-
-    /**
-     * @return the name
-     */
-    public String getName() {
-        return name;
-    }
-
-    /**
-     * @return the port
-     */
-    public int getPort() {
-        return port;
-    }
-
-    /**
-     * @return the spotRegion
-     */
-    public Boolean getSpotRegion() {
-        return spotRegion;
-    }
-
-    /**
-     * @return the status
-     */
-    public int getStatus() {
-        return status;
-    }
-
-    /**
-     * @return the tags
-     */
-    public Tag getTags() {
-        return tags;
-    }
-
-    /**
-     * @return the locationInfo
-     */
-    public LocationInfo getLocationInfo() {
-        return locationInfo;
-    }
-
+    @Getter
     public static class Tag {
-
         private String api;
         private String url;
-
-        /**
-         * @return the role
-         */
-        public String getApi() {
-            return api;
-        }
-
-        /**
-         * @return the url
-         */
-        public String getUrl() {
-            return url;
-        }
     }
 
+    @AllArgsConstructor
+    @Getter
     public static class LocationInfo {
-        @SerializedName("_id")
-        private String id;
-        @SerializedName("_key")
-        private String key;
-        @SerializedName("_rev")
-        private String rev;
         private String city;
         @SerializedName("countrycode")
         private String countryCode;
         @SerializedName("countryname")
         private String countryName;
-        private String latitude;
-        private String longitude;
-        private String name;
-
-        /**
-         * @return the id
-         */
-        public String getId() {
-            return id;
-        }
-
-        /**
-         * @return the key
-         */
-        public String getKey() {
-            return key;
-        }
-
-        /**
-         * @return the rev
-         */
-        public String getRev() {
-            return rev;
-        }
-
-        /**
-         * @return the city
-         */
-        public String getCity() {
-            return city;
-        }
-
-        /**
-         * @return the countryCode
-         */
-        public String getCountryCode() {
-            return countryCode;
-        }
-
-        /**
-         * @return the countryName
-         */
-        public String getCountryName() {
-            return countryName;
-        }
-
-        /**
-         * @return the latitude
-         */
-        public String getLatitude() {
-            return latitude;
-        }
-
-        /**
-         * @return the longitude
-         */
-        public String getLongitude() {
-            return longitude;
-        }
-
-        /**
-         * @return the name
-         */
-        public String getName() {
-            return name;
-        }
+        private Double latitude;
+        private Double longitude;
+        private String url;
     }
 }
