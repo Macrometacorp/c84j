@@ -12,13 +12,19 @@ public class RequestBackoffRetryCounter implements BackoffRetryCounter {
 
     public static final int INITIAL_SLEEP_TIME_SEC = 4;
     public static final int SLEEP_TIME_MULTIPLIER = 2;
-    private static final int MAX_SLEEP_TIME_SEC = 128;
+    private static final int DEFAULT_MAX_SLEEP_TIME_SEC = 128;
 
-    private Request request;
+    private final Request request;
+    private final int maxSleepTimeSec;
     private int currentWaitTime;
 
-    public RequestBackoffRetryCounter(Request request) {
+    public RequestBackoffRetryCounter(Request request, Integer retryTimeout) {
         this.request = request;
+        if (retryTimeout != null) {
+            maxSleepTimeSec = retryTimeout / 1000 / 2;
+        } else {
+            maxSleepTimeSec = DEFAULT_MAX_SLEEP_TIME_SEC;
+        }
         this.currentWaitTime = INITIAL_SLEEP_TIME_SEC;
     }
 
@@ -27,7 +33,7 @@ public class RequestBackoffRetryCounter implements BackoffRetryCounter {
     }
 
     public synchronized boolean canRetry() {
-        return request.isRetryEnabled() && currentWaitTime <= MAX_SLEEP_TIME_SEC;
+        return request.isRetryEnabled() && currentWaitTime <= maxSleepTimeSec;
     }
 
     public synchronized void increment() {

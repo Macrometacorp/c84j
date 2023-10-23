@@ -322,6 +322,17 @@ public interface C8DB extends C8SerializationAccessor {
         }
 
         /**
+         * Sets the retry timeout in milliseconds.
+         *
+         * @param retryTimeout timeout in milliseconds
+         * @return {@link C8DB.Builder}
+         */
+        public Builder retryTimeout(final Integer retryTimeout) {
+            setRetryTimeout(retryTimeout);
+            return this;
+        }
+
+        /**
          * Register a custom {@link VPackSerializer} for a specific type to be used
          * within the internal serialization process.
          *
@@ -664,7 +675,7 @@ public interface C8DB extends C8SerializationAccessor {
             final ConnectionFactory connectionFactory = (protocol == null || Protocol.VST == protocol)
                     ? new VstConnectionFactorySync(timeout, connectionTtl, useSsl, sslContext)
                     : new HttpConnectionFactory(timeout, responseSizeLimit, user, password, email, jwtAuth, useSsl, sslContext, custom, protocol,
-                            connectionTtl, httpCookieSpec, jwtToken, apiKey, hosts.get(Service.C8DB).get(0));
+                            connectionTtl, httpCookieSpec, jwtToken, apiKey, hosts.get(Service.C8DB).get(0), retryTimeout);
 
             final Map<Service, Collection<Host>> hostsMatrix = createHostMatrix(max, connectionFactory);
             final HostResolver hostResolver = createHostResolver(hostsMatrix, max, connectionFactory);
@@ -673,7 +684,8 @@ public interface C8DB extends C8SerializationAccessor {
                     new VstCommunicationSync.Builder(hostHandlerMatrix).timeout(timeout).user(user).password(password)
                             .useSsl(useSsl).sslContext(sslContext).chunksize(chunksize).maxConnections(maxConnections)
                             .connectionTtl(connectionTtl),
-                    new HttpCommunication.Builder(hostHandlerMatrix), util, protocol, hostResolver, new C8Context());
+                    new HttpCommunication.Builder(hostHandlerMatrix), util, protocol, hostResolver,
+                    new C8Context());
         }
 
     }
