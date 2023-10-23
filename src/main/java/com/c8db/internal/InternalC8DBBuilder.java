@@ -67,6 +67,7 @@ public abstract class InternalC8DBBuilder {
     private static final String PROPERTY_KEY_HOST = "c8db.host";
     private static final String PROPERTY_KEY_PORT = "c8db.port";
     private static final String PROPERTY_KEY_TIMEOUT = "c8db.timeout";
+    private static final String PROPERTY_KEY_RETRY_TIMEOUT = "c8db.retryTimeout";
     private static final String PROPERTY_KEY_RESPONSE_SIZE_LIMIT = "c8db.responseSizeLimit";
     private static final String PROPERTY_KEY_USER = "c8db.user";
     private static final String PROPERTY_KEY_PASSWORD = "c8db.password";
@@ -106,6 +107,7 @@ public abstract class InternalC8DBBuilder {
     protected Boolean acquireHostList;
     protected Integer acquireHostListInterval;
     protected LoadBalancingStrategy loadBalancingStrategy;
+    protected Integer retryTimeout;
     protected C8Serialization customSerializer;
     protected String apiKey;
     protected SecretProvider secretProvider;
@@ -166,6 +168,7 @@ public abstract class InternalC8DBBuilder {
         acquireHostList = loadAcquireHostList(properties, acquireHostList);
         acquireHostListInterval = loadAcquireHostListInterval(properties, acquireHostListInterval);
         loadBalancingStrategy = loadLoadBalancingStrategy(properties, loadBalancingStrategy);
+        retryTimeout = loadRetryTimeout(properties, retryTimeout);
     }
 
     protected void setHost(final Service service, final String host, final int port) {
@@ -276,6 +279,9 @@ public abstract class InternalC8DBBuilder {
         LOG.debug("HostHandler is " + hostHandler.getClass().getSimpleName());
 
         return new DirtyReadHostHandler(hostHandler, new RoundRobinHostHandler(hostResolver, service));
+    }
+    protected void setRetryTimeout(final Integer retryTimeout) {
+        this.retryTimeout = retryTimeout;
     }
 
     protected void deserializer(final C8Deserializer deserializer) {
@@ -409,6 +415,12 @@ public abstract class InternalC8DBBuilder {
             final LoadBalancingStrategy currentValue) {
         return LoadBalancingStrategy.valueOf(getProperty(properties, PROPERTY_KEY_LOAD_BALANCING_STRATEGY, currentValue,
                 C8Defaults.DEFAULT_LOAD_BALANCING_STRATEGY).toUpperCase());
+    }
+
+    private static Integer loadRetryTimeout(final Properties properties, final Integer currentValue) {
+        return Integer
+                .parseInt(getProperty(properties, PROPERTY_KEY_RETRY_TIMEOUT, currentValue,
+                        C8Defaults.DEFAULT_RETRY_TIMEOUT));
     }
 
     protected static <T> String getProperty(final Properties properties, final String key, final T currentValue,

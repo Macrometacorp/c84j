@@ -52,5 +52,5 @@ public final class C8Defaults {
     public static final boolean DEFAULT_ACQUIRE_HOST_LIST = false;
     public static final int DEFAULT_ACQUIRE_HOST_LIST_INTERVAL = 60 * 60 * 1000; // hour
     public static final LoadBalancingStrategy DEFAULT_LOAD_BALANCING_STRATEGY = LoadBalancingStrategy.NONE;
-
+    public static final Integer DEFAULT_RETRY_TIMEOUT = 256000;
 }
