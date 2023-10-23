@@ -105,13 +105,15 @@ public class HttpConnection implements Connection {
     private final String apiKey;
     private final HostDescription auxHost;
     private final Service service;
+    private final Integer retryTimeout;
 
     private HttpConnection(final HostDescription host, final Integer timeout, final Integer responseSizeLimit,
                            final String user, final String password,
                            final String email, final Boolean jwtAuthEnabled, final Boolean useSsl,
                            final SSLContext sslContext, final C8Serialization util,
                            final Protocol contentType, final Long ttl, final String httpCookieSpec,
-                           final String jwt, final String apiKey, final HostDescription auxHost, final Service service) {
+                           final String jwt, final String apiKey, final HostDescription auxHost,
+                           final Service service, final Integer retryTimeout) {
 
         super();
         this.host = host;
@@ -127,6 +129,7 @@ public class HttpConnection implements Connection {
         this.apiKey = apiKey;
         this.auxHost = auxHost;
         this.service = service;
+        this.retryTimeout = retryTimeout;
         final RegistryBuilder<ConnectionSocketFactory> registryBuilder = RegistryBuilder
                 .create();
         if (Boolean.TRUE == useSsl) {
@@ -315,7 +318,7 @@ public class HttpConnection implements Connection {
     private Response retryRequest(final Request request, HttpRequestBase httpRequest) throws IOException {
         Response response = null;
 
-        BackoffRetryCounter retryCounter = new RequestBackoffRetryCounter(request);
+        BackoffRetryCounter retryCounter = new RequestBackoffRetryCounter(request, retryTimeout);
         while (retryCounter.canRetry()) {
             try {
                 LOGGER.info(String.format("Retrying request to %s in %s...", service.name(),
@@ -522,6 +525,7 @@ public class HttpConnection implements Connection {
         private String apiKey;
         private HostDescription auxHost;
         private Service service;
+        private Integer retryTimeout;
 
         public Builder user(final String user) {
             this.user = user;
@@ -608,9 +612,14 @@ public class HttpConnection implements Connection {
             return this;
         }
 
+        public Builder retryTimeout(final Integer retryTimeout) {
+            this.retryTimeout = retryTimeout;
+            return this;
+        }
+
         public HttpConnection build() {
             return new HttpConnection(host, timeout, responseSizeLimit, user, password, email, jwtAuthEnabled, useSsl, sslContext, util,
-                    contentType, ttl, httpCookieSpec, jwt, apiKey, auxHost, service);
+                    contentType, ttl, httpCookieSpec, jwt, apiKey, auxHost, service, retryTimeout);
         }
     }
 
