@@ -333,6 +333,17 @@ public interface C8DB extends C8SerializationAccessor {
         }
 
         /**
+         * Sets the retry timeout in milliseconds.
+         *
+         * @param retryTimeout timeout in milliseconds
+         * @return {@link C8DB.Builder}
+         */
+        public Builder retryTimeout(final Integer retryTimeout) {
+            setRetryTimeout(retryTimeout);
+            return this;
+        }
+
+        /**
          * Register a custom {@link VPackSerializer} for a specific type to be used
          * within the internal serialization process.
          *
@@ -677,7 +688,7 @@ public interface C8DB extends C8SerializationAccessor {
                 connectionFactory = new VstConnectionFactorySync(timeout, connectionTtl, useSsl, sslContext);
             } else {
                 connectionFactory = new HttpConnectionFactory(timeout, responseSizeLimit, user, password, secretProvider, email, jwtAuth, jwtToken, useSsl,
-                    sslContext, custom, protocol, connectionTtl, httpCookieSpec, apiKey, auxHost);
+                    sslContext, custom, protocol, connectionTtl, httpCookieSpec, apiKey, auxHost, retryTimeout);
             }
             final Map<Service, Collection<Host>> hostsMatrix = createHostMatrix(max, connectionFactory);
             final HostResolver hostResolver = createHostResolver(hostsMatrix, max, connectionFactory);
@@ -686,7 +697,8 @@ public interface C8DB extends C8SerializationAccessor {
                     new VstCommunicationSync.Builder(hostHandlerMatrix).timeout(timeout).user(user).password(password)
                             .useSsl(useSsl).sslContext(sslContext).chunksize(chunksize).maxConnections(maxConnections)
                             .connectionTtl(connectionTtl),
-                    new HttpCommunication.Builder(hostHandlerMatrix), util, protocol, hostResolver, new C8Context());
+                    new HttpCommunication.Builder(hostHandlerMatrix), util, protocol, hostResolver,
+                    new C8Context());
         }
 
     }
