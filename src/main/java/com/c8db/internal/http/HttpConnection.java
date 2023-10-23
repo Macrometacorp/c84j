@@ -14,6 +14,8 @@ import com.c8db.internal.net.HostDescription;
 import com.c8db.internal.util.CURLLogger;
 import com.c8db.internal.util.IOUtils;
 import com.c8db.internal.util.ResponseUtils;
+import com.c8db.util.BackoffRetryCounter;
+import com.c8db.util.RequestBackoffRetryCounter;
 import com.c8db.util.C8Serialization;
 import com.c8db.util.C8Serializer.Options;
 import com.c8db.velocystream.Request;
@@ -85,9 +87,6 @@ public class HttpConnection implements Connection {
     private static final ContentType CONTENT_TYPE_APPLICATION_JSON_UTF8 = ContentType.create("application/json",
             "utf-8");
     private static final ContentType CONTENT_TYPE_VPACK = ContentType.create("application/x-velocypack");
-    private static final int INITIAL_SLEEP_TIME_SEC = 4;
-    private static final int SLEEP_TIME_MULTIPLIER = 2;
-    private static final int MAX_SLEEP_TIME_SEC = 128;
     // It is temporary solution until jwt-rotation comes.
     private static final String SERVICE_USER_EMAIL = "service@macrometa.io";
     private final PoolingHttpClientConnectionManager cm;
@@ -316,10 +315,12 @@ public class HttpConnection implements Connection {
     private Response retryRequest(final Request request, HttpRequestBase httpRequest) throws IOException {
         Response response = null;
 
-        for (int currentWaitTime = INITIAL_SLEEP_TIME_SEC; currentWaitTime <= MAX_SLEEP_TIME_SEC; currentWaitTime *= SLEEP_TIME_MULTIPLIER) {
+        BackoffRetryCounter retryCounter = new RequestBackoffRetryCounter(request);
+        while (retryCounter.canRetry()) {
             try {
-                LOGGER.info(String.format("Retrying request to %s in %d seconds...", service.name(), currentWaitTime));
-                Thread.sleep(currentWaitTime * 1000);
+                LOGGER.info(String.format("Retrying request to %s in %s...", service.name(),
+                        retryCounter.getTimeInterval()));
+                Thread.sleep(retryCounter.getTimeIntervalMillis());
                 response = buildResponse(client.execute(httpRequest));
                 checkError(response);
 
@@ -333,9 +334,11 @@ public class HttpConnection implements Connection {
                     httpRequest.addHeader("Authorization", "bearer " + jwt);
                 }
             }
+            retryCounter.increment();
         }
 
-        LOGGER.info(String.format("Unable to connect to the C8DB after %d seconds. No more retries will be made", MAX_SLEEP_TIME_SEC));
+        LOGGER.info(String.format("Unable to connect to the C8DB after %s. No more retries will be made",
+                retryCounter.getTimeInterval()));
         return response;
     }
 
