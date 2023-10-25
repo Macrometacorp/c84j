@@ -65,6 +65,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.ConnectException;
 import java.net.UnknownHostException;
 import java.nio.charset.CodingErrorAction;
 import java.util.ArrayList;
@@ -303,7 +304,7 @@ public class HttpConnection implements Connection {
             } else {
                 checkError(response);
             }
-        } catch (UnknownHostException | NoHttpResponseException ex) {
+        } catch (UnknownHostException | NoHttpResponseException | ConnectException ex) {
             response = retryRequest(request, httpRequest);
             if(response == null){
                 throw new C8DBException("c84j exhausted all retries.", SC_SERVICE_UNAVAILABLE, ex);
