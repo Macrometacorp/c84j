@@ -391,8 +391,9 @@ public abstract class InternalC8DBBuilder {
     }
 
     private static Integer loadMaxConnections(final Properties properties, final Integer currentValue) {
-        return Integer.parseInt(getProperty(properties, PROPERTY_KEY_MAX_CONNECTIONS, currentValue,
-                C8Defaults.MAX_CONNECTIONS_VST_DEFAULT));
+        final String max = getProperty(properties, PROPERTY_KEY_MAX_CONNECTIONS, currentValue,
+                null);
+        return max != null ? Integer.parseInt(max) : null;
     }
 
     private static Long loadConnectionTtl(final Properties properties, final Long currentValue) {
