@@ -23,10 +23,15 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <slf4j-api.version>1.7.36</slf4j-api.version>
         <arangodb.velocypack.version>1.4.3</arangodb.velocypack.version>
-        <jackson.databind.version>2.13.2.2</jackson.databind.version>
+        <jackson.databind.version>2.13.5</jackson.databind.version>
         <jackson.version>2.13.2</jackson.version>
-        <!-- provided -->
+        <json.version>20231013</json.version>
+        <aws.version>1.12.202</aws.version>
+        <commons.version>3.12.0</commons.version>
         <httpclient.version>4.5.13</httpclient.version>
+
+        <!-- provided -->
+        <lombok.version>1.18.22</lombok.version>
 
         <!-- test -->
         <logback-classic.version>1.2.3</logback-classic.version>
@@ -263,25 +268,25 @@
             <version>${jackson.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>1.18.22</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.12.0</version>
+            <version>${commons.version}</version>
         </dependency>
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk-dynamodb</artifactId>
-            <version>1.12.202</version>
+            <version>${aws.version}</version>
         </dependency>
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
-            <version>20220320</version>
+            <version>${json.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 
