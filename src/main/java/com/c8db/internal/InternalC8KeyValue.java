@@ -290,8 +290,13 @@ public abstract class InternalC8KeyValue<A extends InternalC8DB<E>, D extends In
         return request(db.tenant(), db.name(), RequestType.DELETE, PATH_API_KV, name);
     }
 
-    protected Request getAllGroups() {
-        return request(db.tenant(), db.name(), RequestType.GET, PATH_API_KV, name, PATH_API_KV_GROUPS);
+    protected Request getAllGroups(C8KVReadGroupsOptions options) {
+        final C8KVReadGroupsOptions params = (options != null ? options : new C8KVReadGroupsOptions());
+        final Request request = request(db.tenant(), db.name(), RequestType.GET, PATH_API_KV, name, PATH_API_KV_GROUPS)
+                .putQueryParam(OFFSET, params.getOffset())
+                .putQueryParam(LIMIT, params.getLimit());
+        request.putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency());
+        return request;
     }
 
     protected ResponseDeserializer<Collection<String>> getAllGroupsResponseDeserializer() {

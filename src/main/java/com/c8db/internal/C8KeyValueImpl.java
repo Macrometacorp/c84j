@@ -149,7 +149,7 @@ public class C8KeyValueImpl extends InternalC8KeyValue<C8DBImpl, C8DatabaseImpl,
 
     @Override
     public Collection<String> getGroups(C8KVReadGroupsOptions options) throws C8DBException {
-        return executor.execute(getAllGroups(), getAllGroupsResponseDeserializer());
+        return executor.execute(getAllGroups(options), getAllGroupsResponseDeserializer());
     }
 
     @Override
