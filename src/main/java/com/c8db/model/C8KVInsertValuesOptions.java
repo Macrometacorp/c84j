@@ -3,4 +3,5 @@
  */
 package com.c8db.model;
 
-public class C8KVInsertValuesOptions extends MixinBase implements StrongConsistencyMixin<C8KVInsertValuesOptions> {}
+public class C8KVInsertValuesOptions extends MixinBase implements StrongConsistencyMixin<C8KVInsertValuesOptions>,
+        StreamTransactionIdMixin<C8KVInsertValuesOptions> {}
