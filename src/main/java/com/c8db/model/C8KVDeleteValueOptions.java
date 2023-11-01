@@ -3,4 +3,5 @@
  */
 package com.c8db.model;
 
-public class C8KVDeleteValueOptions extends MixinBase implements StrongConsistencyMixin<C8KVDeleteValueOptions> {}
+public class C8KVDeleteValueOptions extends MixinBase implements StrongConsistencyMixin<C8KVDeleteValueOptions>,
+        StreamTransactionIdMixin<C8KVDeleteValueOptions> {}

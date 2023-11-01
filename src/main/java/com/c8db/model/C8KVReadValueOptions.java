@@ -3,4 +3,5 @@
  */
 package com.c8db.model;
 
-public class C8KVReadValueOptions extends MixinBase implements StrongConsistencyMixin<C8KVReadValueOptions> {}
+public class C8KVReadValueOptions extends MixinBase implements StrongConsistencyMixin<C8KVReadValueOptions>,
+        StreamTransactionIdMixin<C8KVReadValueOptions> {}
