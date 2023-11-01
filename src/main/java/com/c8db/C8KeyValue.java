@@ -204,19 +204,34 @@ public interface C8KeyValue {
     long countKVPairs() throws C8DBException;
 
     /**
-     * Retrieve group names of collection.
+     * Retrieve group IDs of collection.
      *
      * @param options Additional options, can be null
-     * @return list of group names in collection
+     * @return list of group IDs in collection
      * @throws C8DBException
      */
     Collection<String> getGroups(C8KVReadGroupsOptions options) throws C8DBException;
 
     /**
-     * Retrieve group names of collection.
+     * Retrieve group IDs of collection.
      *
-     * @return list of group names in collection
+     * @return list of group IDs in collection
      * @throws C8DBException
      */
     Collection<String> getGroups() throws C8DBException;
+
+    /**
+     * Update the group ID for all key-value pairs belonging to a given group ID in a collection.
+     *
+     * @param options Additional options, can be null
+     * @throws C8DBException
+     */
+    void updateGroup(String oldGroupID, String newGroupID, C8KVUpdateGroupOptions options) throws C8DBException;
+
+    /**
+     * Update the group ID for all key-value pairs belonging to a given group ID in a collection.
+     *
+     * @throws C8DBException
+     */
+    void updateGroup(String oldGroupID, String newGroupID) throws C8DBException;
 }
