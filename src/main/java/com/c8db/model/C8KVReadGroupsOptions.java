@@ -3,4 +3,5 @@
  */
 package com.c8db.model;
 
-public class C8KVReadGroupsOptions extends MixinBase implements PaginationMixin<C8KVReadGroupsOptions> {}
+public class C8KVReadGroupsOptions extends MixinBase implements PaginationMixin<C8KVReadGroupsOptions>,
+        StrongConsistencyMixin<C8KVReadGroupsOptions> {}
