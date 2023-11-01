@@ -26,6 +26,7 @@ public abstract class InternalC8KeyValue<A extends InternalC8DB<E>, D extends In
     protected static final String PATH_API_KV_COUNT = "count";
     protected static final String PATH_API_KV_TRUNCATE = "truncate";
     protected static final String PATH_API_KV_GROUPS = "groups";
+    protected static final String PATH_API_KV_GROUP_ID = "groupID";
 
     private static final String OFFSET = "offset";
     private static final String LIMIT = "limit";
@@ -290,7 +291,7 @@ public abstract class InternalC8KeyValue<A extends InternalC8DB<E>, D extends In
         return request(db.tenant(), db.name(), RequestType.DELETE, PATH_API_KV, name);
     }
 
-    protected Request getAllGroups(C8KVReadGroupsOptions options) {
+    protected Request getAllGroupsRequest(C8KVReadGroupsOptions options) {
         final C8KVReadGroupsOptions params = (options != null ? options : new C8KVReadGroupsOptions());
         final Request request = request(db.tenant(), db.name(), RequestType.GET, PATH_API_KV, name, PATH_API_KV_GROUPS)
                 .putQueryParam(OFFSET, params.getOffset())
@@ -309,6 +310,19 @@ public abstract class InternalC8KeyValue<A extends InternalC8DB<E>, D extends In
             }
             return coll;
         };
+    }
+
+    protected Request updateGroupRequest(String oldGroupID, String newGroupID, C8KVUpdateGroupOptions options) {
+        final C8KVUpdateGroupOptions params = (options != null ? options : new C8KVUpdateGroupOptions());
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("oldGroupID", oldGroupID);
+        payload.put("newGroupID", newGroupID);
+        VPackSlice body = util().serialize(payload);
+        final Request request = request(db.tenant(), db.name(), RequestType.PUT, PATH_API_KV, name,
+                PATH_API_KV_GROUP_ID);
+        request.putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency());
+        request.setBody(body);
+        return request;
     }
 
 }

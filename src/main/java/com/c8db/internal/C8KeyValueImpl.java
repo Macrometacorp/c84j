@@ -12,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
-import java.util.List;
 
 public class C8KeyValueImpl extends InternalC8KeyValue<C8DBImpl, C8DatabaseImpl, C8ExecutorSync>
         implements C8KeyValue {
@@ -149,11 +148,21 @@ public class C8KeyValueImpl extends InternalC8KeyValue<C8DBImpl, C8DatabaseImpl,
 
     @Override
     public Collection<String> getGroups(C8KVReadGroupsOptions options) throws C8DBException {
-        return executor.execute(getAllGroups(options), getAllGroupsResponseDeserializer());
+        return executor.execute(getAllGroupsRequest(options), getAllGroupsResponseDeserializer());
     }
 
     @Override
     public Collection<String> getGroups() throws C8DBException {
         return getGroups(null);
+    }
+
+    @Override
+    public void updateGroup(String oldGroupID, String newGroupID, C8KVUpdateGroupOptions options) throws C8DBException {
+        executor.execute(updateGroupRequest(oldGroupID, newGroupID, options), C8KVEntity.class);
+    }
+
+    @Override
+    public void updateGroup(String oldGroupID, String newGroupID) throws C8DBException {
+        updateGroup(oldGroupID, newGroupID, null);
     }
 }

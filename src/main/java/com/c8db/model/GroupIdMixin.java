@@ -13,7 +13,7 @@ public interface GroupIdMixin<R> {
     <T> void setProperty(String name, T value);
 
     /**
-     * @param group The group of returned KVs
+     * @param group The group ID of returned KVs
      * @return options
      */
     default R group(final String group) {
@@ -22,7 +22,7 @@ public interface GroupIdMixin<R> {
     }
 
     /**
-     * @return the group of returned KVs
+     * @return the group ID of returned KVs
      */
     default String getGroup() {
         return getProperty(GROUP_ID_PARAMETER);
