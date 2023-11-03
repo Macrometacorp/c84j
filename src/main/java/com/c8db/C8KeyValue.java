@@ -37,6 +37,14 @@ public interface C8KeyValue {
      */
     C8KVEntity create() throws C8DBException;
 
+
+    /**
+     * Deletes the KV from the database.
+     *
+     * @throws C8DBException
+     */
+    void drop(C8KVDropOptions options) throws C8DBException;
+
     /**
      * Deletes the KV from the database.
      *
@@ -143,14 +151,6 @@ public interface C8KeyValue {
      * @return the document identified by the key
      */
     BaseKeyValue getKVPair(String key, C8KVReadValueOptions options) throws C8DBException;
-
-    /**
-     * Retrieve all KV collections.
-     *
-     * @return list of KV collections
-     * @throws C8DBException
-     */
-    Collection<C8KVCollectionEntity> all() throws C8DBException;
 
     /**
      * Retrieves multiple pairs.

@@ -16,6 +16,7 @@ import com.c8db.internal.C8Defaults;
 /**
  */
 public abstract class BaseTest {
+public abstract class BaseTest extends Assert {
 
     @Parameters
     public static Collection<C8DB.Builder> builders() {

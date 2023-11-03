@@ -13,6 +13,7 @@ import com.c8db.entity.MultiDocumentEntity;
 import com.c8db.entity.Permissions;
 import com.c8db.model.C8RedisCreateOptions;
 import com.c8db.model.CollectionCountOptions;
+import com.c8db.model.CollectionDropOptions;
 import com.c8db.model.CollectionPropertiesOptions;
 import com.c8db.model.CollectionTruncateOptions;
 import com.c8db.model.DocumentCreateOptions;
@@ -487,7 +488,7 @@ public interface C8Redis {
      *      Documentation</a>
      * @since ArangoDB 3.1.0
      */
-    void drop(boolean isSystem) throws C8DBException;
+    void drop(CollectionDropOptions options) throws C8DBException;
 
     /**
      * Returns information about the collection

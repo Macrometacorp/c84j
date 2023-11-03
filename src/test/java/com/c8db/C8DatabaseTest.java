@@ -513,7 +513,7 @@ public class C8DatabaseTest extends BaseTest {
                 assertThat(cursor.hasNext(), is(i != batchSize));
             }
         } finally {
-            db.collection(COLLECTION_NAME).drop(false);
+            db.collection(COLLECTION_NAME).drop();
         }
     }
 

@@ -24,7 +24,7 @@ import com.c8db.entity.IndexType;
 /**
  *
  */
-public class SkiplistIndexOptions extends IndexOptions {
+public class SkiplistIndexOptions extends IndexOptions<SkiplistIndexOptions> {
 
     private Iterable<String> fields;
     private Boolean unique;

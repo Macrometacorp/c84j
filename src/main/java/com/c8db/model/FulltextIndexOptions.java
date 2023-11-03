@@ -24,7 +24,7 @@ import com.c8db.entity.IndexType;
 /**
  *
  */
-public class FulltextIndexOptions extends IndexOptions {
+public class FulltextIndexOptions extends IndexOptions<FulltextIndexOptions> {
 
     private Iterable<String> fields;
     private Integer minLength;

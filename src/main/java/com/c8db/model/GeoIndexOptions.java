@@ -24,7 +24,7 @@ import com.c8db.entity.IndexType;
 /**
  *
  */
-public class GeoIndexOptions extends IndexOptions {
+public class GeoIndexOptions extends IndexOptions<GeoIndexOptions> {
 
     private Iterable<String> fields;
     private Boolean geoJson;

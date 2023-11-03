@@ -21,6 +21,10 @@ package com.c8db.internal;
 
 import java.util.Collection;
 
+import com.c8db.model.CollectionDropOptions;
+import com.c8db.model.CollectionIndexDeleteOptions;
+import com.c8db.model.CollectionIndexReadOptions;
+import com.c8db.model.CollectionIndexesReadOptions;
 import com.c8db.model.TTLIndexOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,7 +87,7 @@ public class C8CollectionImpl extends InternalC8Collection<C8DBImpl, C8DatabaseI
     }
 
     @Override
-    public CollectionEntity truncate(CollectionTruncateOptions options) throws C8DBException {
+    public CollectionEntity truncate(final CollectionTruncateOptions options) throws C8DBException {
         return executor.execute(truncateRequest(options), CollectionEntity.class);
     }
 
@@ -93,7 +97,7 @@ public class C8CollectionImpl extends InternalC8Collection<C8DBImpl, C8DatabaseI
     }
 
     @Override
-    public CollectionPropertiesEntity count(CollectionCountOptions options) throws C8DBException {
+    public CollectionPropertiesEntity count(final CollectionCountOptions options) throws C8DBException {
         return executor.execute(countRequest(options), CollectionPropertiesEntity.class);
     }
 
@@ -108,13 +112,13 @@ public class C8CollectionImpl extends InternalC8Collection<C8DBImpl, C8DatabaseI
     }
 
     @Override
-    public void drop() throws C8DBException {
-        executor.execute(dropRequest(null), Void.class);
+    public void drop(final CollectionDropOptions options) throws C8DBException {
+        executor.execute(dropRequest(options), Void.class);
     }
 
     @Override
-    public void drop(final boolean isSystem) throws C8DBException {
-        executor.execute(dropRequest(isSystem), Void.class);
+    public void drop() throws C8DBException {
+        drop(null);
     }
 
     @Override
@@ -341,13 +345,23 @@ public class C8CollectionImpl extends InternalC8Collection<C8DBImpl, C8DatabaseI
     }
 
     @Override
+    public IndexEntity getIndex(final String id, final CollectionIndexReadOptions options) throws C8DBException {
+        return executor.execute(getIndexRequest(id, options), IndexEntity.class);
+    }
+
+    @Override
     public IndexEntity getIndex(final String id) throws C8DBException {
-        return executor.execute(getIndexRequest(id), IndexEntity.class);
+        return getIndex(id, null);
+    }
+
+    @Override
+    public String deleteIndex(final String id, final CollectionIndexDeleteOptions options) throws C8DBException {
+        return executor.execute(deleteIndexRequest(id, options), deleteIndexResponseDeserializer());
     }
 
     @Override
     public String deleteIndex(final String id) throws C8DBException {
-        return executor.execute(deleteIndexRequest(id), deleteIndexResponseDeserializer());
+        return deleteIndex(id, null);
     }
 
     @Override
@@ -388,8 +402,13 @@ public class C8CollectionImpl extends InternalC8Collection<C8DBImpl, C8DatabaseI
     }
 
     @Override
+    public Collection<IndexEntity> getIndexes(final CollectionIndexesReadOptions options) throws C8DBException {
+        return executor.execute(getIndexesRequest(options), getIndexesResponseDeserializer());
+    }
+
+    @Override
     public Collection<IndexEntity> getIndexes() throws C8DBException {
-        return executor.execute(getIndexesRequest(), getIndexesResponseDeserializer());
+        return getIndexes(null);
     }
 
 

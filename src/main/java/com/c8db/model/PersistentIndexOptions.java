@@ -24,7 +24,7 @@ import com.c8db.entity.IndexType;
 /**
  *
  */
-public class PersistentIndexOptions extends IndexOptions {
+public class PersistentIndexOptions extends IndexOptions<PersistentIndexOptions> {
 
     private Iterable<String> fields;
     private Boolean unique;

@@ -9,7 +9,7 @@ import com.c8db.entity.IndexType;
 /**
  * Index option for Time to live (ttl) index type.
  */
-public class TTLIndexOptions extends IndexOptions {
+public class TTLIndexOptions extends IndexOptions<TTLIndexOptions> {
 
     private Iterable<String> fields;
     private long expireAfter;

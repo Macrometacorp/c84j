@@ -5,6 +5,7 @@
 package com.c8db;
 
 import com.c8db.entity.C8DBVersion;
+import com.c8db.entity.C8KVCollectionEntity;
 import com.c8db.entity.C8StreamEntity;
 import com.c8db.entity.C8qlExecutionExplainEntity;
 import com.c8db.entity.C8qlParseEntity;
@@ -23,6 +24,7 @@ import com.c8db.entity.TransactionEntity;
 import com.c8db.entity.TraversalEntity;
 import com.c8db.entity.UserQueryEntity;
 import com.c8db.entity.UserQueryOptions;
+import com.c8db.model.C8KVStoresReadOptions;
 import com.c8db.model.C8StreamCreateOptions;
 import com.c8db.model.C8TransactionOptions;
 import com.c8db.model.C8qlQueryExplainOptions;
@@ -760,6 +762,23 @@ public interface C8Database extends C8SerializationAccessor {
      * @return C8KeyValue handler
      */
     C8KeyValue kv(final String name);
+
+    /**
+     * Retrieve all KV collections.
+     *
+     * @param options Additional options, can be null
+     * @return list of KV collections
+     * @throws C8DBException
+     */
+    Collection<C8KVCollectionEntity> getKVStores(C8KVStoresReadOptions options) throws C8DBException;
+
+    /**
+     * Retrieve all KV collections.
+     *
+     * @return list of KV collections
+     * @throws C8DBException
+     */
+    Collection<C8KVCollectionEntity> getKVStores() throws C8DBException;
 
     /**
      * Returns a {@code C8Dynamo} instance.

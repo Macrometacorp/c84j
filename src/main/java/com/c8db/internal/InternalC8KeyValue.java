@@ -114,23 +114,6 @@ public abstract class InternalC8KeyValue<A extends InternalC8DB<E>, D extends In
         return request;
     }
 
-    protected Request getAllCollections() {
-        return request(db.tenant(), db.name(), RequestType.GET, PATH_API_KV);
-    }
-
-    protected ResponseDeserializer<Collection<C8KVCollectionEntity>> getAllCollectionsResponseDeserializer() {
-        return response -> {
-            Collection<C8KVCollectionEntity> coll = new ArrayList<>();
-            final VPackSlice kvs = response.getBody().get("result");
-            for (final Iterator<VPackSlice> iterator = kvs.arrayIterator(); iterator.hasNext();) {
-                final VPackSlice next = iterator.next();
-                final C8KVCollectionEntity entity = util(Serializer.CUSTOM).deserialize(next, C8KVCollectionEntity.class);
-                coll.add(entity);
-            }
-            return coll;
-        };
-    }
-
     protected Request countKVPairsRequest(C8KVCountPairsOptions options) {
         final Request request =  request(db.tenant(), db.name(), RequestType.GET, PATH_API_KV, name, PATH_API_KV_COUNT);
         final C8KVCountPairsOptions params = (options != null ? options : new C8KVCountPairsOptions());
@@ -297,8 +280,11 @@ public abstract class InternalC8KeyValue<A extends InternalC8DB<E>, D extends In
         return request;
     }
 
-    protected Request dropRequest() {
-        return request(db.tenant(), db.name(), RequestType.DELETE, PATH_API_KV, name);
+    protected Request dropRequest(C8KVDropOptions options) {
+        final C8KVDropOptions params = (options != null ? options : new C8KVDropOptions());
+        final Request request = request(db.tenant(), db.name(), RequestType.DELETE, PATH_API_KV, name);
+        request.putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency());
+        return request;
     }
 
     protected Request getAllGroupsRequest(C8KVReadGroupsOptions options) {
