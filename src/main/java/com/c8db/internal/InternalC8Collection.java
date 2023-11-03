@@ -41,6 +41,10 @@ import com.c8db.internal.C8Executor.ResponseDeserializer;
 import com.c8db.internal.util.DocumentUtil;
 import com.c8db.internal.util.C8SerializationFactory.Serializer;
 import com.c8db.model.CollectionCountOptions;
+import com.c8db.model.CollectionDropOptions;
+import com.c8db.model.CollectionIndexDeleteOptions;
+import com.c8db.model.CollectionIndexReadOptions;
+import com.c8db.model.CollectionIndexesReadOptions;
 import com.c8db.model.CollectionPropertiesOptions;
 import com.c8db.model.CollectionRenameOptions;
 import com.c8db.model.CollectionTruncateOptions;
@@ -84,6 +88,7 @@ public abstract class InternalC8Collection<A extends InternalC8DB<E>, D extends 
     private static final String OVERWRITE = "overwrite";
     private static final String OLD = "old";
     private static final String SILENT = "silent";
+    private static final String IS_SYSTEM = "isSystem";
     private static final String STRONG_CONSISTENCY = "strongConsistency";
     public static final String TRANSACTION_ID = "x-gdn-trxid";
 
@@ -570,12 +575,18 @@ public abstract class InternalC8Collection<A extends InternalC8DB<E>, D extends 
         return request;
     }
 
-    protected Request getIndexRequest(final String id) {
-        return request(db.tenant(), db.name(), RequestType.GET, PATH_API_INDEX, createIndexId(id));
+    protected Request getIndexRequest(final String id, CollectionIndexReadOptions options) {
+        final CollectionIndexReadOptions params = (options != null ? options : new CollectionIndexReadOptions());
+        final Request request = request(db.tenant(), db.name(), RequestType.GET, PATH_API_INDEX, createIndexId(id));
+        request.putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency());
+        return request;
     }
 
-    protected Request deleteIndexRequest(final String id) {
-        return request(db.tenant(), db.name(), RequestType.DELETE, PATH_API_INDEX, createIndexId(id));
+    protected Request deleteIndexRequest(final String id, CollectionIndexDeleteOptions options) {
+        final CollectionIndexDeleteOptions params = (options != null ? options : new CollectionIndexDeleteOptions());
+        final Request request = request(db.tenant(), db.name(), RequestType.DELETE, PATH_API_INDEX, createIndexId(id));
+        request.putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency());
+        return request;
     }
 
     protected ResponseDeserializer<String> deleteIndexResponseDeserializer() {
@@ -600,58 +611,67 @@ public abstract class InternalC8Collection<A extends InternalC8DB<E>, D extends 
     }
 
     protected Request createHashIndexRequest(final Iterable<String> fields, final HashIndexOptions options) {
+        final HashIndexOptions params = (options != null ? options : new HashIndexOptions());
         final Request request = request(db.tenant(), db.name(), RequestType.POST, PATH_API_INDEX);
         request.putQueryParam(COLLECTION_QUERY_PARAM, name);
-        request.setBody(
-                util().serialize(OptionsBuilder.build(options != null ? options : new HashIndexOptions(), fields)));
+        request.putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency());
+        request.setBody(util().serialize(OptionsBuilder.build(params, fields)));
         return request;
     }
 
     protected Request createSkiplistIndexRequest(final Iterable<String> fields, final SkiplistIndexOptions options) {
+        final SkiplistIndexOptions params = (options != null ? options : new SkiplistIndexOptions());
         final Request request = request(db.tenant(), db.name(), RequestType.POST, PATH_API_INDEX);
         request.putQueryParam(COLLECTION_QUERY_PARAM, name);
+        request.putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency());
         request.setBody(
-                util().serialize(OptionsBuilder.build(options != null ? options : new SkiplistIndexOptions(), fields)));
+                util().serialize(OptionsBuilder.build(params, fields)));
         return request;
     }
 
     protected Request createPersistentIndexRequest(final Iterable<String> fields,
             final PersistentIndexOptions options) {
+        final PersistentIndexOptions params = (options != null ? options : new PersistentIndexOptions());
         final Request request = request(db.tenant(), db.name(), RequestType.POST, PATH_API_INDEX);
         request.putQueryParam(COLLECTION_QUERY_PARAM, name);
-        request.setBody(util()
-                .serialize(OptionsBuilder.build(options != null ? options : new PersistentIndexOptions(), fields)));
+        request.putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency());
+        request.setBody(util().serialize(OptionsBuilder.build(params, fields)));
         return request;
     }
 
     protected Request createGeoIndexRequest(final Iterable<String> fields, final GeoIndexOptions options) {
+        final GeoIndexOptions params = (options != null ? options : new GeoIndexOptions());
         final Request request = request(db.tenant(), db.name(), RequestType.POST, PATH_API_INDEX);
         request.putQueryParam(COLLECTION_QUERY_PARAM, name);
-        request.setBody(
-                util().serialize(OptionsBuilder.build(options != null ? options : new GeoIndexOptions(), fields)));
+        request.putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency());
+        request.setBody(util().serialize(OptionsBuilder.build(params, fields)));
         return request;
     }
 
     protected Request createFulltextIndexRequest(final Iterable<String> fields, final FulltextIndexOptions options) {
+        final FulltextIndexOptions params = (options != null ? options : new FulltextIndexOptions());
         final Request request = request(db.tenant(), db.name(), RequestType.POST, PATH_API_INDEX);
         request.putQueryParam(COLLECTION_QUERY_PARAM, name);
-        request.setBody(
-                util().serialize(OptionsBuilder.build(options != null ? options : new FulltextIndexOptions(), fields)));
+        request.putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency());
+        request.setBody(util().serialize(OptionsBuilder.build(params, fields)));
         return request;
     }
 
     // Macrometa Corp Modification: Add `createTTLIndexRequest` method.
     protected Request createTTLIndexRequest(final Iterable<String> fields, final TTLIndexOptions options) {
+        final TTLIndexOptions params = (options != null ? options : new TTLIndexOptions());
         final Request request = request(db.tenant(), db.name(), RequestType.POST, PATH_API_INDEX);
         request.putQueryParam(COLLECTION_QUERY_PARAM, name);
-        request.setBody(
-                util().serialize(OptionsBuilder.build(options != null ? options : new TTLIndexOptions(), fields)));
+        request.putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency());
+        request.setBody(util().serialize(OptionsBuilder.build(params, fields)));
         return request;
     }
 
-    protected Request getIndexesRequest() {
+    protected Request getIndexesRequest(CollectionIndexesReadOptions options) {
+        final CollectionIndexesReadOptions params = (options != null ? options : new CollectionIndexesReadOptions());
         final Request request = request(db.tenant(), db.name(), RequestType.GET, PATH_API_INDEX);
         request.putQueryParam(COLLECTION_QUERY_PARAM, name);
+        request.putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency());
         return request;
     }
 
@@ -666,22 +686,27 @@ public abstract class InternalC8Collection<A extends InternalC8DB<E>, D extends 
     }
 
     protected Request truncateRequest(final CollectionTruncateOptions options) {
-        final Request request = request(db.tenant(), db.name(), RequestType.PUT, PATH_API_COLLECTION, name, "truncate");
+        final Request request = request(db.tenant(), db.name(), RequestType.PUT, PATH_API_COLLECTION, name,
+                "truncate");
         final CollectionTruncateOptions params = (options != null ? options : new CollectionTruncateOptions());
         request.putHeaderParam(TRANSACTION_ID, params.getStreamTransactionId());
         return request;
     }
 
     protected Request countRequest(final CollectionCountOptions options) {
-        final Request request = request(db.tenant(), db.name(), RequestType.GET, PATH_API_COLLECTION, name, "count");
+        final Request request = request(db.tenant(), db.name(), RequestType.GET, PATH_API_COLLECTION, name,
+                "count");
         final CollectionCountOptions params = (options != null ? options : new CollectionCountOptions());
         request.putHeaderParam(TRANSACTION_ID, params.getStreamTransactionId());
         return request;
     }
 
-    protected Request dropRequest(final Boolean isSystem) {
-        return request(db.tenant(), db.name(), RequestType.DELETE, PATH_API_COLLECTION, name).putQueryParam("isSystem",
-                isSystem);
+    protected Request dropRequest(CollectionDropOptions options) {
+        final CollectionDropOptions params = (options != null ? options : new CollectionDropOptions());
+        final Request request = request(db.tenant(), db.name(), RequestType.DELETE, PATH_API_COLLECTION, name);
+        request.putQueryParam(IS_SYSTEM, params.isSystem());
+        request.putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency());
+        return request;
     }
 
     protected Request getInfoRequest() {

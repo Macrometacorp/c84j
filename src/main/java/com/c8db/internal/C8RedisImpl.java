@@ -16,6 +16,7 @@ import com.c8db.entity.MultiDocumentEntity;
 import com.c8db.entity.Permissions;
 import com.c8db.model.C8RedisCreateOptions;
 import com.c8db.model.CollectionCountOptions;
+import com.c8db.model.CollectionDropOptions;
 import com.c8db.model.CollectionPropertiesOptions;
 import com.c8db.model.CollectionTruncateOptions;
 import com.c8db.model.DocumentCreateOptions;
@@ -54,8 +55,8 @@ public class C8RedisImpl extends InternalC8Redis<C8DBImpl, C8DatabaseImpl, C8Exe
     }
 
     @Override
-    public void drop(boolean isSystem) throws C8DBException {
-        collection.drop(isSystem);
+    public void drop(CollectionDropOptions options) throws C8DBException {
+        collection.drop(options);
     }
 
     @Override

@@ -25,7 +25,7 @@ import com.c8db.entity.IndexType;
 /**
  * This class is used for all index similarities
  */
-public class IndexOptions {
+public class IndexOptions<R> extends MixinBase implements StrongConsistencyMixin<R> {
 
     private final IndexType type;
     private Boolean inBackground;
@@ -42,9 +42,9 @@ public class IndexOptions {
      *                     only flag.
      * @return options
      */
-    public IndexOptions inBackground(final Boolean inBackground) {
+    public R inBackground(final Boolean inBackground) {
         this.inBackground = inBackground;
-        return this;
+        return (R) this;
     }
 
     public Boolean getInBackground() {
@@ -60,9 +60,9 @@ public class IndexOptions {
         return name;
     }
 
-    public IndexOptions name(final String name) {
+    public R name(final String name) {
         this.name = name;
-        return this;
+        return (R) this;
     }
 
     // Macrometa Corp Modification: Introduce create() method.

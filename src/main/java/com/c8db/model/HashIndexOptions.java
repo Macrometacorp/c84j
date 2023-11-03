@@ -24,7 +24,7 @@ import com.c8db.entity.IndexType;
 /**
  *
  */
-public class HashIndexOptions extends IndexOptions {
+public class HashIndexOptions extends IndexOptions<HashIndexOptions> {
 
     private Iterable<String> fields;
     private Boolean unique;

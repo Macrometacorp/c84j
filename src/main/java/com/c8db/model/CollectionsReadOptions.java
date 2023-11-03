@@ -19,7 +19,7 @@ package com.c8db.model;
 /**
  * 
  */
-public class CollectionsReadOptions {
+public class CollectionsReadOptions extends MixinBase implements StrongConsistencyMixin<CollectionsReadOptions> {
 
     private Boolean excludeSystem;
 

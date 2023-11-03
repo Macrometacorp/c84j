@@ -31,6 +31,10 @@ import com.c8db.entity.MultiDocumentEntity;
 import com.c8db.entity.Permissions;
 import com.c8db.model.CollectionCountOptions;
 import com.c8db.model.CollectionCreateOptions;
+import com.c8db.model.CollectionDropOptions;
+import com.c8db.model.CollectionIndexDeleteOptions;
+import com.c8db.model.CollectionIndexReadOptions;
+import com.c8db.model.CollectionIndexesReadOptions;
 import com.c8db.model.CollectionPropertiesOptions;
 import com.c8db.model.CollectionTruncateOptions;
 import com.c8db.model.DocumentCreateOptions;
@@ -404,6 +408,19 @@ public interface C8Collection extends C8SerializationAccessor {
      * Fetches information about the index with the given {@code id} and returns it.
      *
      * @param id The index-handle
+     * @param options Additional options, can be null
+     * @return information about the index
+     * @throws C8DBException
+     * @see <a href=
+     *      "https://docs.arangodb.com/current/HTTP/Indexes/WorkingWith.html#read-index">API
+     *      Documentation</a>
+     */
+    IndexEntity getIndex(String id, CollectionIndexReadOptions options) throws C8DBException;
+
+    /**
+     * Fetches information about the index with the given {@code id} and returns it.
+     *
+     * @param id The index-handle
      * @return information about the index
      * @throws C8DBException
      * @see <a href=
@@ -411,6 +428,19 @@ public interface C8Collection extends C8SerializationAccessor {
      *      Documentation</a>
      */
     IndexEntity getIndex(String id) throws C8DBException;
+
+    /**
+     * Deletes the index with the given {@code id} from the collection.
+     *
+     * @param id The index-handle
+     * @param options Additional options, can be null
+     * @return the id of the index
+     * @throws C8DBException
+     * @see <a href=
+     *      "https://docs.arangodb.com/current/HTTP/Indexes/WorkingWith.html#delete-index">API
+     *      Documentation</a>
+     */
+    String deleteIndex(String id, CollectionIndexDeleteOptions options) throws C8DBException;
 
     /**
      * Deletes the index with the given {@code id} from the collection.
@@ -499,6 +529,18 @@ public interface C8Collection extends C8SerializationAccessor {
      * @throws C8DBException
      */
     IndexEntity ensureTTLIndex(Iterable<String> fields, TTLIndexOptions options) throws C8DBException;
+
+    /**
+     * Fetches a list of all indexes on this collection.
+     *
+     * @param options Additional options, can be null
+     * @return information about the indexes
+     * @throws C8DBException
+     * @see <a href=
+     *      "https://docs.arangodb.com/current/HTTP/Indexes/WorkingWith.html#read-all-indexes-of-a-collection">API
+     *      Documentation</a>
+     */
+    Collection<IndexEntity> getIndexes(CollectionIndexesReadOptions options) throws C8DBException;
 
     /**
      * Fetches a list of all indexes on this collection.
@@ -594,26 +636,23 @@ public interface C8Collection extends C8SerializationAccessor {
     /**
      * Deletes the collection from the database.
      *
+     * @param options Additional options, can be null
+     * @throws C8DBException
+     * @see <a href=
+     *      "https://docs.arangodb.com/current/HTTP/Collection/Creating.html#drops-collection">API
+     *      Documentation</a>
+     */
+    void drop(CollectionDropOptions options) throws C8DBException;
+
+    /**
+     * Deletes the collection from the database.
+     *
      * @throws C8DBException
      * @see <a href=
      *      "https://docs.arangodb.com/current/HTTP/Collection/Creating.html#drops-collection">API
      *      Documentation</a>
      */
     void drop() throws C8DBException;
-
-    /**
-     * Deletes the collection from the database.
-     *
-     * @param isSystem Whether or not the collection to drop is a system collection.
-     *                 This parameter must be set to true in order to drop a system
-     *                 collection.
-     * @throws C8DBException
-     * @see <a href=
-     *      "https://docs.arangodb.com/current/HTTP/Collection/Creating.html#drops-collection">API
-     *      Documentation</a>
-     * @since ArangoDB 3.1.0
-     */
-    void drop(boolean isSystem) throws C8DBException;
 
     /**
      * Returns information about the collection

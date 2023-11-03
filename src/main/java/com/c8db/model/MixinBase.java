@@ -4,6 +4,8 @@
 
 package com.c8db.model;
 
+import com.arangodb.velocypack.annotations.Expose;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,6 +28,7 @@ import java.util.Map;
  */
 public class MixinBase {
 
+    @Expose(serialize = false)
     private final Map<String, Object> properties = new HashMap();
 
     /**

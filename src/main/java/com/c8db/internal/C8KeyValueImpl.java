@@ -23,12 +23,7 @@ public class C8KeyValueImpl extends InternalC8KeyValue<C8DBImpl, C8DatabaseImpl,
     }
 
     @Override
-    public Collection<C8KVCollectionEntity> all() throws C8DBException {
-        return executor.execute(getAllCollections(), getAllCollectionsResponseDeserializer());
-    }
-
-    @Override
-    public C8KVEntity create(C8KVCreateOptions options) throws C8DBException {
+    public C8KVEntity create(final C8KVCreateOptions options) throws C8DBException {
         return executor.execute(createRequest(name, options), C8KVEntity.class);
     }
 
@@ -38,8 +33,13 @@ public class C8KeyValueImpl extends InternalC8KeyValue<C8DBImpl, C8DatabaseImpl,
     }
 
     @Override
+    public void drop(final C8KVDropOptions options) throws C8DBException {
+        executor.execute(dropRequest(options), Void.class);
+    }
+
+    @Override
     public void drop() throws C8DBException {
-        executor.execute(dropRequest(), Void.class);
+        drop(null);
     }
 
     @Override
@@ -48,7 +48,7 @@ public class C8KeyValueImpl extends InternalC8KeyValue<C8DBImpl, C8DatabaseImpl,
     }
 
     @Override
-    public void truncate(C8KVTruncateOptions options) throws C8DBException {
+    public void truncate(final C8KVTruncateOptions options) throws C8DBException {
         executor.execute(truncateRequest(options), Void.class);
     }
 
@@ -60,39 +60,42 @@ public class C8KeyValueImpl extends InternalC8KeyValue<C8DBImpl, C8DatabaseImpl,
 
     @Override
     public  MultiDocumentEntity<DocumentCreateEntity<BaseKeyValue>> insertKVPairs(final Collection<BaseKeyValue>  values,
-                                                                                  C8KVInsertValuesOptions options)
+                                                                                  final C8KVInsertValuesOptions options)
             throws C8DBException {
         return executor.execute(insertKVPairsRequest(values, options), insertKVPairsResponseDeserializer());
     }
 
     @Override
-    public DocumentDeleteEntity<Void> deleteKVPair(String key) throws C8DBException {
+    public DocumentDeleteEntity<Void> deleteKVPair(final String key) throws C8DBException {
         return deleteKVPair(key, null);
     }
 
     @Override
-    public DocumentDeleteEntity<Void> deleteKVPair(String key, C8KVDeleteValueOptions options) throws C8DBException {
+    public DocumentDeleteEntity<Void> deleteKVPair(final String key, final C8KVDeleteValueOptions options)
+            throws C8DBException {
         return executor.execute(deleteKVPairRequest(key, options),
                 deleteKVPairResponseDeserializer(Void.class));
     }
 
     @Override
-    public MultiDocumentEntity<DocumentDeleteEntity<Void>> deleteKVPairs(Collection<?> values) throws C8DBException {
+    public MultiDocumentEntity<DocumentDeleteEntity<Void>> deleteKVPairs(final Collection<?> values) throws C8DBException {
         return deleteKVPairs(values, null);
     }
 
     @Override
-    public MultiDocumentEntity<DocumentDeleteEntity<Void>> deleteKVPairs(Collection<?> values, C8KVDeleteValuesOptions options) throws C8DBException {
+    public MultiDocumentEntity<DocumentDeleteEntity<Void>> deleteKVPairs(final Collection<?> values,
+                                                                         final C8KVDeleteValuesOptions options)
+            throws C8DBException {
         return executor.execute(deleteKVPairsRequest(values, options), deleteKVPairsResponseDeserializer(Void.class));
     }
 
     @Override
-    public BaseKeyValue getKVPair(String key) throws C8DBException {
+    public BaseKeyValue getKVPair(final String key) throws C8DBException {
         return getKVPair(key, null);
     }
 
     @Override
-    public BaseKeyValue getKVPair(String key, C8KVReadValueOptions options) throws C8DBException {
+    public BaseKeyValue getKVPair(final String key, final C8KVReadValueOptions options) throws C8DBException {
         DocumentUtil.validateDocumentKey(key);
         try {
             return executor.execute(getKVPairRequest(key, options), BaseKeyValue.class);
@@ -132,12 +135,12 @@ public class C8KeyValueImpl extends InternalC8KeyValue<C8DBImpl, C8DatabaseImpl,
     }
 
     @Override
-    public Collection<String> getKVKeys(C8KVReadKeysOptions options) throws C8DBException {
+    public Collection<String> getKVKeys(final C8KVReadKeysOptions options) throws C8DBException {
         return executor.execute(getKVKeysRequest(options), getKVKeysResponseDeserializer());
     }
 
     @Override
-    public long countKVPairs(C8KVCountPairsOptions options) throws C8DBException {
+    public long countKVPairs(final C8KVCountPairsOptions options) throws C8DBException {
         return executor.execute(countKVPairsRequest(options), countKVPairsResponseDeserializer());
     }
 
@@ -147,7 +150,7 @@ public class C8KeyValueImpl extends InternalC8KeyValue<C8DBImpl, C8DatabaseImpl,
     }
 
     @Override
-    public Collection<String> getGroups(C8KVReadGroupsOptions options) throws C8DBException {
+    public Collection<String> getGroups(final C8KVReadGroupsOptions options) throws C8DBException {
         return executor.execute(getAllGroupsRequest(options), getAllGroupsResponseDeserializer());
     }
 
@@ -157,12 +160,13 @@ public class C8KeyValueImpl extends InternalC8KeyValue<C8DBImpl, C8DatabaseImpl,
     }
 
     @Override
-    public void updateGroup(String oldGroupID, String newGroupID, C8KVUpdateGroupOptions options) throws C8DBException {
+    public void updateGroup(final String oldGroupID, final String newGroupID, final C8KVUpdateGroupOptions options)
+            throws C8DBException {
         executor.execute(updateGroupRequest(oldGroupID, newGroupID, options), C8KVEntity.class);
     }
 
     @Override
-    public void updateGroup(String oldGroupID, String newGroupID) throws C8DBException {
+    public void updateGroup(final String oldGroupID, final String newGroupID) throws C8DBException {
         updateGroup(oldGroupID, newGroupID, null);
     }
 }

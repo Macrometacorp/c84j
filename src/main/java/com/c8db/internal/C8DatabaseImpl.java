@@ -25,6 +25,7 @@ import com.c8db.C8Stream;
 import com.c8db.Restql;
 import com.c8db.Service;
 import com.c8db.C8Event;
+import com.c8db.entity.C8KVCollectionEntity;
 import com.c8db.entity.C8StreamEntity;
 import com.c8db.entity.C8qlExecutionExplainEntity;
 import com.c8db.entity.C8qlParseEntity;
@@ -47,6 +48,7 @@ import com.c8db.entity.UserQueryOptions;
 import com.c8db.internal.cursor.C8CursorImpl;
 import com.c8db.internal.net.HostHandle;
 import com.c8db.internal.util.DocumentUtil;
+import com.c8db.model.C8KVStoresReadOptions;
 import com.c8db.model.C8StreamCreateOptions;
 import com.c8db.model.C8TransactionOptions;
 import com.c8db.model.C8qlQueryExplainOptions;
@@ -498,10 +500,22 @@ public class C8DatabaseImpl extends InternalC8Database<C8DBImpl, C8ExecutorSync>
         return new C8AlertsImpl(this);
     }
 
+    @Override
     public C8KeyValue kv(final String name) {
         return new C8KeyValueImpl(this, name);
     }
-    
+
+    @Override
+    public Collection<C8KVCollectionEntity> getKVStores(C8KVStoresReadOptions options) throws C8DBException {
+        return executor.execute(getAllKVStores(options), getAllKVStoresResponseDeserializer());
+    }
+
+    @Override
+    public Collection<C8KVCollectionEntity> getKVStores() throws C8DBException {
+        return getKVStores(null);
+    }
+
+
     @Override
     public C8Dynamo dynamo(String tableName) {
         return new C8DynamoImpl(this, tableName);

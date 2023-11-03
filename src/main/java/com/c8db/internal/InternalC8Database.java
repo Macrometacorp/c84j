@@ -22,6 +22,7 @@ package com.c8db.internal;
 import com.arangodb.velocypack.Type;
 import com.arangodb.velocypack.VPackSlice;
 import com.arangodb.velocypack.exception.VPackException;
+import com.c8db.entity.C8KVCollectionEntity;
 import com.c8db.entity.C8StreamEntity;
 import com.c8db.entity.CollectionEntity;
 import com.c8db.entity.DatabaseEntity;
@@ -41,6 +42,7 @@ import com.c8db.entity.UserQueryOptions;
 import com.c8db.internal.C8Executor.ResponseDeserializer;
 import com.c8db.internal.util.C8SerializationFactory;
 import com.c8db.internal.util.C8SerializationFactory.Serializer;
+import com.c8db.model.C8KVStoresReadOptions;
 import com.c8db.model.C8StreamCreateOptions;
 import com.c8db.model.C8TransactionOptions;
 import com.c8db.model.C8qlQueryExplainOptions;
@@ -97,6 +99,8 @@ public abstract class InternalC8Database<A extends InternalC8DB<E>, E extends C8
     private static final String PATH_API_BEGIN_STREAM_TRANSACTION = "/_api/transaction/begin";
     // TODO: doesnt exist in API Reference. Should it be removed?
     private static final String PATH_API_TRAVERSAL = "/_api/traversal";
+    protected static final String PATH_API_KV = "/_api/kv";
+    private static final String STRONG_CONSISTENCY = "strongConsistency";
 
     private final String tenant;
     private final String name;
@@ -172,6 +176,26 @@ public abstract class InternalC8Database<A extends InternalC8DB<E>, E extends C8
                 return util().deserialize(result, new Type<Collection<CollectionEntity>>() {
                 }.getType());
             }
+        };
+    }
+
+    protected Request getAllKVStores(C8KVStoresReadOptions options) {
+        final C8KVStoresReadOptions params = (options != null ? options : new C8KVStoresReadOptions());
+        final Request request = request(tenant(), name(), RequestType.GET, PATH_API_KV);
+        request.putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency());
+        return request;
+    }
+
+    protected ResponseDeserializer<Collection<C8KVCollectionEntity>> getAllKVStoresResponseDeserializer() {
+        return response -> {
+            Collection<C8KVCollectionEntity> coll = new ArrayList<>();
+            final VPackSlice kvs = response.getBody().get("result");
+            for (final Iterator<VPackSlice> iterator = kvs.arrayIterator(); iterator.hasNext();) {
+                final VPackSlice next = iterator.next();
+                final C8KVCollectionEntity entity = util(Serializer.CUSTOM).deserialize(next, C8KVCollectionEntity.class);
+                coll.add(entity);
+            }
+            return coll;
         };
     }
 
