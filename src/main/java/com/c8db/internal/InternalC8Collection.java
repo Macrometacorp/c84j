@@ -110,17 +110,16 @@ public abstract class InternalC8Collection<A extends InternalC8DB<E>, D extends 
     }
 
     protected <T> Request insertDocumentRequest(final T value, final DocumentCreateOptions options) {
-        final Request request = request(db.tenant(), db.name(), RequestType.POST, PATH_API_DOCUMENT, name);
         final DocumentCreateOptions params = (options != null ? options : new DocumentCreateOptions());
-        request.putQueryParam(C8RequestParam.WAIT_FOR_SYNC, params.getWaitForSync());
-        request.putQueryParam(RETURN_NEW, params.getReturnNew());
-        request.putQueryParam(RETURN_OLD, params.getReturnOld());
-        request.putQueryParam(SILENT, params.getSilent());
-        request.putQueryParam(OVERWRITE, params.getOverwrite());
-        request.putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency());
-        request.putHeaderParam(TRANSACTION_ID, params.getStreamTransactionId());
-        request.setBody(util(Serializer.CUSTOM).serialize(value));
-        return request;
+        return request(db.tenant(), db.name(), RequestType.POST, PATH_API_DOCUMENT, name)
+                .putQueryParam(C8RequestParam.WAIT_FOR_SYNC, params.getWaitForSync())
+                .putQueryParam(RETURN_NEW, params.getReturnNew())
+                .putQueryParam(RETURN_OLD, params.getReturnOld())
+                .putQueryParam(SILENT, params.getSilent())
+                .putQueryParam(OVERWRITE, params.getOverwrite())
+                .putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency())
+                .putHeaderParam(TRANSACTION_ID, params.getStreamTransactionId())
+                .setBody(util(Serializer.CUSTOM).serialize(value));
     }
 
     protected <T> ResponseDeserializer<DocumentCreateEntity<T>> insertDocumentResponseDeserializer(final T value,
@@ -152,16 +151,15 @@ public abstract class InternalC8Collection<A extends InternalC8DB<E>, D extends 
     }
 
     protected <T> Request insertDocumentsRequest(final Collection<T> values, final DocumentCreateOptions params) {
-        final Request request = request(db.tenant(), db.name(), RequestType.POST, PATH_API_DOCUMENT, name);
-        request.putQueryParam(C8RequestParam.WAIT_FOR_SYNC, params.getWaitForSync());
-        request.putQueryParam(RETURN_NEW, params.getReturnNew());
-        request.putQueryParam(RETURN_OLD, params.getReturnOld());
-        request.putQueryParam(SILENT, params.getSilent());
-        request.putQueryParam(OVERWRITE, params.getOverwrite());
-        request.putHeaderParam(TRANSACTION_ID, params.getStreamTransactionId());
-        request.setBody(util(Serializer.CUSTOM).serialize(values,
-                new C8Serializer.Options().serializeNullValues(false).stringAsJson(true)));
-        return request;
+        return request(db.tenant(), db.name(), RequestType.POST, PATH_API_DOCUMENT, name)
+                .putQueryParam(C8RequestParam.WAIT_FOR_SYNC, params.getWaitForSync())
+                .putQueryParam(RETURN_NEW, params.getReturnNew())
+                .putQueryParam(RETURN_OLD, params.getReturnOld())
+                .putQueryParam(SILENT, params.getSilent())
+                .putQueryParam(OVERWRITE, params.getOverwrite())
+                .putHeaderParam(TRANSACTION_ID, params.getStreamTransactionId())
+                .setBody(util(Serializer.CUSTOM).serialize(values,
+                        new C8Serializer.Options().serializeNullValues(false).stringAsJson(true)));
     }
 
     @SuppressWarnings("unchecked")
@@ -213,25 +211,23 @@ public abstract class InternalC8Collection<A extends InternalC8DB<E>, D extends 
     }
 
     protected Request getDocumentRequest(final String key, final DocumentReadOptions options) {
-        final Request request = request(db.tenant(), db.name(), RequestType.GET, PATH_API_DOCUMENT,
-                DocumentUtil.createDocumentHandle(name, key));
         final DocumentReadOptions params = (options != null ? options : new DocumentReadOptions());
-        request.putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency());
-        request.putHeaderParam(C8RequestParam.IF_NONE_MATCH, params.getIfNoneMatch());
-        request.putHeaderParam(C8RequestParam.IF_MATCH, params.getIfMatch());
-        request.putHeaderParam(TRANSACTION_ID, params.getStreamTransactionId());
-        return request;
+        return request(db.tenant(), db.name(), RequestType.GET, PATH_API_DOCUMENT,
+                DocumentUtil.createDocumentHandle(name, key))
+                .putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency())
+                .putHeaderParam(C8RequestParam.IF_NONE_MATCH, params.getIfNoneMatch())
+                .putHeaderParam(C8RequestParam.IF_MATCH, params.getIfMatch())
+                .putHeaderParam(TRANSACTION_ID, params.getStreamTransactionId());
     }
 
     protected Request getDocumentsRequest(final Collection<String> keys, final DocumentReadOptions options) {
         final DocumentReadOptions params = (options != null ? options : new DocumentReadOptions());
-        final Request request = request(db.tenant(), db.name(), RequestType.PUT, PATH_API_DOCUMENT, name)
+        return request(db.tenant(), db.name(), RequestType.PUT, PATH_API_DOCUMENT, name)
                 .putQueryParam("onlyget", true)
                 .putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency())
                 .putHeaderParam(C8RequestParam.IF_NONE_MATCH, params.getIfNoneMatch())
                 .putHeaderParam(C8RequestParam.IF_MATCH, params.getIfMatch()).setBody(util().serialize(keys))
                 .putHeaderParam(TRANSACTION_ID, params.getStreamTransactionId());
-        return request;
     }
 
     protected <T> ResponseDeserializer<MultiDocumentEntity<T>> getDocumentsResponseDeserializer(final Class<T> type,
@@ -267,19 +263,18 @@ public abstract class InternalC8Collection<A extends InternalC8DB<E>, D extends 
 
     protected <T> Request replaceDocumentRequest(final String key, final T value,
             final DocumentReplaceOptions options) {
-        final Request request = request(db.tenant(), db.name(), RequestType.PUT, PATH_API_DOCUMENT,
-                DocumentUtil.createDocumentHandle(name, key));
         final DocumentReplaceOptions params = (options != null ? options : new DocumentReplaceOptions());
-        request.putHeaderParam(C8RequestParam.IF_MATCH, params.getIfMatch());
-        request.putHeaderParam(TRANSACTION_ID, params.getStreamTransactionId());
-        request.putQueryParam(C8RequestParam.WAIT_FOR_SYNC, params.getWaitForSync());
-        request.putQueryParam(IGNORE_REVS, params.getIgnoreRevs());
-        request.putQueryParam(RETURN_NEW, params.getReturnNew());
-        request.putQueryParam(RETURN_OLD, params.getReturnOld());
-        request.putQueryParam(SILENT, params.getSilent());
-        request.putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency());
-        request.setBody(util(Serializer.CUSTOM).serialize(value));
-        return request;
+        return request(db.tenant(), db.name(), RequestType.PUT, PATH_API_DOCUMENT,
+                DocumentUtil.createDocumentHandle(name, key))
+                .putHeaderParam(C8RequestParam.IF_MATCH, params.getIfMatch())
+                .putHeaderParam(TRANSACTION_ID, params.getStreamTransactionId())
+                .putQueryParam(C8RequestParam.WAIT_FOR_SYNC, params.getWaitForSync())
+                .putQueryParam(IGNORE_REVS, params.getIgnoreRevs())
+                .putQueryParam(RETURN_NEW, params.getReturnNew())
+                .putQueryParam(RETURN_OLD, params.getReturnOld())
+                .putQueryParam(SILENT, params.getSilent())
+                .putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency())
+                .setBody(util(Serializer.CUSTOM).serialize(value));
     }
 
     protected <T> ResponseDeserializer<DocumentUpdateEntity<T>> replaceDocumentResponseDeserializer(final T value,
@@ -309,18 +304,17 @@ public abstract class InternalC8Collection<A extends InternalC8DB<E>, D extends 
     }
 
     protected <T> Request replaceDocumentsRequest(final Collection<T> values, final DocumentReplaceOptions params) {
-        final Request request = request(db.tenant(), db.name(), RequestType.PUT, PATH_API_DOCUMENT, name);
-        request.putHeaderParam(C8RequestParam.IF_MATCH, params.getIfMatch());
-        request.putHeaderParam(TRANSACTION_ID, params.getStreamTransactionId());
-        request.putQueryParam(C8RequestParam.WAIT_FOR_SYNC, params.getWaitForSync());
-        request.putQueryParam(IGNORE_REVS, params.getIgnoreRevs());
-        request.putQueryParam(RETURN_NEW, params.getReturnNew());
-        request.putQueryParam(RETURN_OLD, params.getReturnOld());
-        request.putQueryParam(SILENT, params.getSilent());
-        request.putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency());
-        request.setBody(util(Serializer.CUSTOM).serialize(values,
-                new C8Serializer.Options().serializeNullValues(false).stringAsJson(true)));
-        return request;
+        return request(db.tenant(), db.name(), RequestType.PUT, PATH_API_DOCUMENT, name)
+                .putHeaderParam(C8RequestParam.IF_MATCH, params.getIfMatch())
+                .putHeaderParam(TRANSACTION_ID, params.getStreamTransactionId())
+                .putQueryParam(C8RequestParam.WAIT_FOR_SYNC, params.getWaitForSync())
+                .putQueryParam(IGNORE_REVS, params.getIgnoreRevs())
+                .putQueryParam(RETURN_NEW, params.getReturnNew())
+                .putQueryParam(RETURN_OLD, params.getReturnOld())
+                .putQueryParam(SILENT, params.getSilent())
+                .putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency())
+                .setBody(util(Serializer.CUSTOM).serialize(values,
+                        new C8Serializer.Options().serializeNullValues(false).stringAsJson(true)));
     }
 
     @SuppressWarnings("unchecked")
@@ -372,22 +366,21 @@ public abstract class InternalC8Collection<A extends InternalC8DB<E>, D extends 
     }
 
     protected <T> Request updateDocumentRequest(final String key, final T value, final DocumentUpdateOptions options) {
-        final Request request = request(db.tenant(), db.name(), RequestType.PATCH, PATH_API_DOCUMENT,
-                DocumentUtil.createDocumentHandle(name, key));
         final DocumentUpdateOptions params = (options != null ? options : new DocumentUpdateOptions());
-        request.putHeaderParam(C8RequestParam.IF_MATCH, params.getIfMatch());
-        request.putHeaderParam(TRANSACTION_ID, params.getStreamTransactionId());
-        request.putQueryParam(C8RequestParam.KEEP_NULL, params.getKeepNull());
-        request.putQueryParam(C8RequestParam.WAIT_FOR_SYNC, params.getWaitForSync());
-        request.putQueryParam(MERGE_OBJECTS, params.getMergeObjects());
-        request.putQueryParam(IGNORE_REVS, params.getIgnoreRevs());
-        request.putQueryParam(RETURN_NEW, params.getReturnNew());
-        request.putQueryParam(RETURN_OLD, params.getReturnOld());
-        request.putQueryParam(SILENT, params.getSilent());
-        request.putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency());
-        request.setBody(util(Serializer.CUSTOM).serialize(value, new C8Serializer.Options()
-                .serializeNullValues(params.getSerializeNull() == null || params.getSerializeNull())));
-        return request;
+        return request(db.tenant(), db.name(), RequestType.PATCH, PATH_API_DOCUMENT,
+                DocumentUtil.createDocumentHandle(name, key))
+                .putHeaderParam(C8RequestParam.IF_MATCH, params.getIfMatch())
+                .putHeaderParam(TRANSACTION_ID, params.getStreamTransactionId())
+                .putQueryParam(C8RequestParam.KEEP_NULL, params.getKeepNull())
+                .putQueryParam(C8RequestParam.WAIT_FOR_SYNC, params.getWaitForSync())
+                .putQueryParam(MERGE_OBJECTS, params.getMergeObjects())
+                .putQueryParam(IGNORE_REVS, params.getIgnoreRevs())
+                .putQueryParam(RETURN_NEW, params.getReturnNew())
+                .putQueryParam(RETURN_OLD, params.getReturnOld())
+                .putQueryParam(SILENT, params.getSilent())
+                .putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency())
+                .setBody(util(Serializer.CUSTOM).serialize(value, new C8Serializer.Options()
+                        .serializeNullValues(params.getSerializeNull() == null || params.getSerializeNull())));
     }
 
     protected <T> ResponseDeserializer<DocumentUpdateEntity<T>> updateDocumentResponseDeserializer(final T value,
@@ -417,23 +410,22 @@ public abstract class InternalC8Collection<A extends InternalC8DB<E>, D extends 
     }
 
     protected <T> Request updateDocumentsRequest(final Collection<T> values, final DocumentUpdateOptions params) {
-        final Request request = request(db.tenant(), db.name(), RequestType.PATCH, PATH_API_DOCUMENT, name);
         final Boolean keepNull = params.getKeepNull();
-        request.putHeaderParam(C8RequestParam.IF_MATCH, params.getIfMatch());
-        request.putHeaderParam(TRANSACTION_ID, params.getStreamTransactionId());
-        request.putQueryParam(C8RequestParam.KEEP_NULL, keepNull);
-        request.putQueryParam(C8RequestParam.WAIT_FOR_SYNC, params.getWaitForSync());
-        request.putQueryParam(MERGE_OBJECTS, params.getMergeObjects());
-        request.putQueryParam(IGNORE_REVS, params.getIgnoreRevs());
-        request.putQueryParam(RETURN_NEW, params.getReturnNew());
-        request.putQueryParam(RETURN_OLD, params.getReturnOld());
-        request.putQueryParam(SILENT, params.getSilent());
-        request.putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency());
-        request.setBody(util(Serializer.CUSTOM).serialize(values,
-                new C8Serializer.Options()
-                        .serializeNullValues(params.getSerializeNull() == null || params.getSerializeNull())
-                        .stringAsJson(true)));
-        return request;
+        return request(db.tenant(), db.name(), RequestType.PATCH, PATH_API_DOCUMENT, name)
+                .putHeaderParam(C8RequestParam.IF_MATCH, params.getIfMatch())
+                .putHeaderParam(TRANSACTION_ID, params.getStreamTransactionId())
+                .putQueryParam(C8RequestParam.KEEP_NULL, keepNull)
+                .putQueryParam(C8RequestParam.WAIT_FOR_SYNC, params.getWaitForSync())
+                .putQueryParam(MERGE_OBJECTS, params.getMergeObjects())
+                .putQueryParam(IGNORE_REVS, params.getIgnoreRevs())
+                .putQueryParam(RETURN_NEW, params.getReturnNew())
+                .putQueryParam(RETURN_OLD, params.getReturnOld())
+                .putQueryParam(SILENT, params.getSilent())
+                .putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency())
+                .setBody(util(Serializer.CUSTOM).serialize(values,
+                        new C8Serializer.Options()
+                                .serializeNullValues(params.getSerializeNull() == null || params.getSerializeNull())
+                                .stringAsJson(true)));
     }
 
     @SuppressWarnings("unchecked")
@@ -485,16 +477,15 @@ public abstract class InternalC8Collection<A extends InternalC8DB<E>, D extends 
     }
 
     protected Request deleteDocumentRequest(final String key, final DocumentDeleteOptions options) {
-        final Request request = request(db.tenant(), db.name(), RequestType.DELETE, PATH_API_DOCUMENT,
-                DocumentUtil.createDocumentHandle(name, key));
         final DocumentDeleteOptions params = (options != null ? options : new DocumentDeleteOptions());
-        request.putHeaderParam(C8RequestParam.IF_MATCH, params.getIfMatch());
-        request.putHeaderParam(TRANSACTION_ID, params.getStreamTransactionId());
-        request.putQueryParam(C8RequestParam.WAIT_FOR_SYNC, params.getWaitForSync());
-        request.putQueryParam(RETURN_OLD, params.getReturnOld());
-        request.putQueryParam(SILENT, params.getSilent());
-        request.putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency());
-        return request;
+        return request(db.tenant(), db.name(), RequestType.DELETE, PATH_API_DOCUMENT,
+                DocumentUtil.createDocumentHandle(name, key))
+                .putHeaderParam(C8RequestParam.IF_MATCH, params.getIfMatch())
+                .putHeaderParam(TRANSACTION_ID, params.getStreamTransactionId())
+                .putQueryParam(C8RequestParam.WAIT_FOR_SYNC, params.getWaitForSync())
+                .putQueryParam(RETURN_OLD, params.getReturnOld())
+                .putQueryParam(SILENT, params.getSilent())
+                .putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency());
     }
 
     protected <T> ResponseDeserializer<DocumentDeleteEntity<T>> deleteDocumentResponseDeserializer(
@@ -515,15 +506,14 @@ public abstract class InternalC8Collection<A extends InternalC8DB<E>, D extends 
     }
 
     protected <T> Request deleteDocumentsRequest(final Collection<T> keys, final DocumentDeleteOptions options) {
-        final Request request = request(db.tenant(), db.name(), RequestType.DELETE, PATH_API_DOCUMENT, name);
         final DocumentDeleteOptions params = (options != null ? options : new DocumentDeleteOptions());
-        request.putHeaderParam(TRANSACTION_ID, params.getStreamTransactionId());
-        request.putQueryParam(C8RequestParam.WAIT_FOR_SYNC, params.getWaitForSync());
-        request.putQueryParam(RETURN_OLD, params.getReturnOld());
-        request.putQueryParam(SILENT, params.getSilent());
-        request.putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency());
-        request.setBody(util().serialize(keys));
-        return request;
+        return request(db.tenant(), db.name(), RequestType.DELETE, PATH_API_DOCUMENT, name)
+                .putHeaderParam(TRANSACTION_ID, params.getStreamTransactionId())
+                .putQueryParam(C8RequestParam.WAIT_FOR_SYNC, params.getWaitForSync())
+                .putQueryParam(RETURN_OLD, params.getReturnOld())
+                .putQueryParam(SILENT, params.getSilent())
+                .putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency())
+                .setBody(util().serialize(keys));
     }
 
     protected <T> ResponseDeserializer<MultiDocumentEntity<DocumentDeleteEntity<T>>> deleteDocumentsResponseDeserializer(
@@ -565,28 +555,25 @@ public abstract class InternalC8Collection<A extends InternalC8DB<E>, D extends 
     }
 
     protected Request documentExistsRequest(final String key, final DocumentExistsOptions options) {
-        final Request request = request(db.tenant(), db.name(), RequestType.HEAD, PATH_API_DOCUMENT,
-                DocumentUtil.createDocumentHandle(name, key));
         final DocumentExistsOptions params = (options != null ? options : new DocumentExistsOptions());
-        request.putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency());
-        request.putHeaderParam(TRANSACTION_ID, params.getStreamTransactionId());
-        request.putHeaderParam(C8RequestParam.IF_MATCH, params.getIfMatch());
-        request.putHeaderParam(C8RequestParam.IF_NONE_MATCH, params.getIfNoneMatch());
-        return request;
+        return request(db.tenant(), db.name(), RequestType.HEAD, PATH_API_DOCUMENT,
+                DocumentUtil.createDocumentHandle(name, key))
+                .putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency())
+                .putHeaderParam(TRANSACTION_ID, params.getStreamTransactionId())
+                .putHeaderParam(C8RequestParam.IF_MATCH, params.getIfMatch())
+                .putHeaderParam(C8RequestParam.IF_NONE_MATCH, params.getIfNoneMatch());
     }
 
-    protected Request getIndexRequest(final String id, CollectionIndexReadOptions options) {
+    protected Request getIndexRequest(final String id, final CollectionIndexReadOptions options) {
         final CollectionIndexReadOptions params = (options != null ? options : new CollectionIndexReadOptions());
-        final Request request = request(db.tenant(), db.name(), RequestType.GET, PATH_API_INDEX, createIndexId(id));
-        request.putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency());
-        return request;
+        return request(db.tenant(), db.name(), RequestType.GET, PATH_API_INDEX, createIndexId(id))
+                .putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency());
     }
 
     protected Request deleteIndexRequest(final String id, CollectionIndexDeleteOptions options) {
         final CollectionIndexDeleteOptions params = (options != null ? options : new CollectionIndexDeleteOptions());
-        final Request request = request(db.tenant(), db.name(), RequestType.DELETE, PATH_API_INDEX, createIndexId(id));
-        request.putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency());
-        return request;
+        return request(db.tenant(), db.name(), RequestType.DELETE, PATH_API_INDEX, createIndexId(id))
+                .putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency());
     }
 
     protected ResponseDeserializer<String> deleteIndexResponseDeserializer() {
@@ -612,67 +599,59 @@ public abstract class InternalC8Collection<A extends InternalC8DB<E>, D extends 
 
     protected Request createHashIndexRequest(final Iterable<String> fields, final HashIndexOptions options) {
         final HashIndexOptions params = (options != null ? options : new HashIndexOptions());
-        final Request request = request(db.tenant(), db.name(), RequestType.POST, PATH_API_INDEX);
-        request.putQueryParam(COLLECTION_QUERY_PARAM, name);
-        request.putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency());
-        request.setBody(util().serialize(OptionsBuilder.build(params, fields)));
-        return request;
+        return request(db.tenant(), db.name(), RequestType.POST, PATH_API_INDEX)
+                .putQueryParam(COLLECTION_QUERY_PARAM, name)
+                .putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency())
+                .setBody(util().serialize(OptionsBuilder.build(params, fields)));
     }
 
     protected Request createSkiplistIndexRequest(final Iterable<String> fields, final SkiplistIndexOptions options) {
         final SkiplistIndexOptions params = (options != null ? options : new SkiplistIndexOptions());
-        final Request request = request(db.tenant(), db.name(), RequestType.POST, PATH_API_INDEX);
-        request.putQueryParam(COLLECTION_QUERY_PARAM, name);
-        request.putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency());
-        request.setBody(
-                util().serialize(OptionsBuilder.build(params, fields)));
-        return request;
+        return request(db.tenant(), db.name(), RequestType.POST, PATH_API_INDEX)
+                .putQueryParam(COLLECTION_QUERY_PARAM, name)
+                .putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency())
+                .setBody(util().serialize(OptionsBuilder.build(params, fields)));
     }
 
     protected Request createPersistentIndexRequest(final Iterable<String> fields,
             final PersistentIndexOptions options) {
         final PersistentIndexOptions params = (options != null ? options : new PersistentIndexOptions());
-        final Request request = request(db.tenant(), db.name(), RequestType.POST, PATH_API_INDEX);
-        request.putQueryParam(COLLECTION_QUERY_PARAM, name);
-        request.putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency());
-        request.setBody(util().serialize(OptionsBuilder.build(params, fields)));
-        return request;
+        return request(db.tenant(), db.name(), RequestType.POST, PATH_API_INDEX)
+                .putQueryParam(COLLECTION_QUERY_PARAM, name)
+                .putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency())
+                .setBody(util().serialize(OptionsBuilder.build(params, fields)));
     }
 
     protected Request createGeoIndexRequest(final Iterable<String> fields, final GeoIndexOptions options) {
         final GeoIndexOptions params = (options != null ? options : new GeoIndexOptions());
-        final Request request = request(db.tenant(), db.name(), RequestType.POST, PATH_API_INDEX);
-        request.putQueryParam(COLLECTION_QUERY_PARAM, name);
-        request.putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency());
-        request.setBody(util().serialize(OptionsBuilder.build(params, fields)));
-        return request;
+        return request(db.tenant(), db.name(), RequestType.POST, PATH_API_INDEX)
+                .putQueryParam(COLLECTION_QUERY_PARAM, name)
+                .putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency())
+                .setBody(util().serialize(OptionsBuilder.build(params, fields)));
     }
 
     protected Request createFulltextIndexRequest(final Iterable<String> fields, final FulltextIndexOptions options) {
         final FulltextIndexOptions params = (options != null ? options : new FulltextIndexOptions());
-        final Request request = request(db.tenant(), db.name(), RequestType.POST, PATH_API_INDEX);
-        request.putQueryParam(COLLECTION_QUERY_PARAM, name);
-        request.putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency());
-        request.setBody(util().serialize(OptionsBuilder.build(params, fields)));
-        return request;
+        return request(db.tenant(), db.name(), RequestType.POST, PATH_API_INDEX)
+                .putQueryParam(COLLECTION_QUERY_PARAM, name)
+                .putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency())
+                .setBody(util().serialize(OptionsBuilder.build(params, fields)));
     }
 
     // Macrometa Corp Modification: Add `createTTLIndexRequest` method.
     protected Request createTTLIndexRequest(final Iterable<String> fields, final TTLIndexOptions options) {
         final TTLIndexOptions params = (options != null ? options : new TTLIndexOptions());
-        final Request request = request(db.tenant(), db.name(), RequestType.POST, PATH_API_INDEX);
-        request.putQueryParam(COLLECTION_QUERY_PARAM, name);
-        request.putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency());
-        request.setBody(util().serialize(OptionsBuilder.build(params, fields)));
-        return request;
+        return request(db.tenant(), db.name(), RequestType.POST, PATH_API_INDEX)
+                .putQueryParam(COLLECTION_QUERY_PARAM, name)
+                .putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency())
+                .setBody(util().serialize(OptionsBuilder.build(params, fields)));
     }
 
     protected Request getIndexesRequest(CollectionIndexesReadOptions options) {
         final CollectionIndexesReadOptions params = (options != null ? options : new CollectionIndexesReadOptions());
-        final Request request = request(db.tenant(), db.name(), RequestType.GET, PATH_API_INDEX);
-        request.putQueryParam(COLLECTION_QUERY_PARAM, name);
-        request.putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency());
-        return request;
+        return request(db.tenant(), db.name(), RequestType.GET, PATH_API_INDEX)
+                .putQueryParam(COLLECTION_QUERY_PARAM, name)
+                .putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency());
     }
 
     protected ResponseDeserializer<Collection<IndexEntity>> getIndexesResponseDeserializer() {
@@ -686,27 +665,22 @@ public abstract class InternalC8Collection<A extends InternalC8DB<E>, D extends 
     }
 
     protected Request truncateRequest(final CollectionTruncateOptions options) {
-        final Request request = request(db.tenant(), db.name(), RequestType.PUT, PATH_API_COLLECTION, name,
-                "truncate");
         final CollectionTruncateOptions params = (options != null ? options : new CollectionTruncateOptions());
-        request.putHeaderParam(TRANSACTION_ID, params.getStreamTransactionId());
-        return request;
+        return request(db.tenant(), db.name(), RequestType.PUT, PATH_API_COLLECTION, name, "truncate")
+                .putHeaderParam(TRANSACTION_ID, params.getStreamTransactionId());
     }
 
     protected Request countRequest(final CollectionCountOptions options) {
-        final Request request = request(db.tenant(), db.name(), RequestType.GET, PATH_API_COLLECTION, name,
-                "count");
         final CollectionCountOptions params = (options != null ? options : new CollectionCountOptions());
-        request.putHeaderParam(TRANSACTION_ID, params.getStreamTransactionId());
-        return request;
+        return request(db.tenant(), db.name(), RequestType.GET, PATH_API_COLLECTION, name, "count")
+                .putHeaderParam(TRANSACTION_ID, params.getStreamTransactionId());
     }
 
     protected Request dropRequest(CollectionDropOptions options) {
         final CollectionDropOptions params = (options != null ? options : new CollectionDropOptions());
-        final Request request = request(db.tenant(), db.name(), RequestType.DELETE, PATH_API_COLLECTION, name);
-        request.putQueryParam(IS_SYSTEM, params.isSystem());
-        request.putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency());
-        return request;
+        return request(db.tenant(), db.name(), RequestType.DELETE, PATH_API_COLLECTION, name)
+                .putQueryParam(IS_SYSTEM, params.isSystem())
+                .putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency());
     }
 
     protected Request getInfoRequest() {
@@ -718,23 +692,18 @@ public abstract class InternalC8Collection<A extends InternalC8DB<E>, D extends 
     }
 
     protected Request changePropertiesRequest(final CollectionPropertiesOptions options) {
-        final Request request = request(db.tenant(), db.name(), RequestType.PUT, PATH_API_COLLECTION, name,
-                "properties");
-        request.setBody(util().serialize(options != null ? options : new CollectionPropertiesOptions()));
-        return request;
+        return request(db.tenant(), db.name(), RequestType.PUT, PATH_API_COLLECTION, name, "properties")
+                .setBody(util().serialize(options != null ? options : new CollectionPropertiesOptions()));
     }
 
     protected Request renameRequest(final String newName) {
-        final Request request = request(db.tenant(), db.name(), RequestType.PUT, PATH_API_COLLECTION, name, "rename");
-        request.setBody(util().serialize(OptionsBuilder.build(new CollectionRenameOptions(), newName)));
-        return request;
+        return request(db.tenant(), db.name(), RequestType.PUT, PATH_API_COLLECTION, name, "rename")
+                .setBody(util().serialize(OptionsBuilder.build(new CollectionRenameOptions(), newName)));
     }
 
     protected <T> Request responsibleShardRequest(final T value) {
-        final Request request = request(db.tenant(), db.name(), RequestType.PUT, PATH_API_COLLECTION, name,
-                "responsibleShard");
-        request.setBody(util(Serializer.CUSTOM).serialize(value));
-        return request;
+        return request(db.tenant(), db.name(), RequestType.PUT, PATH_API_COLLECTION, name, "responsibleShard")
+                .setBody(util(Serializer.CUSTOM).serialize(value));
     }
 
     protected Request getRevisionRequest() {

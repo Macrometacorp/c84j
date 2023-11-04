@@ -332,7 +332,8 @@ public class C8CollectionStrongConsistencyTest extends BaseTest {
         DocumentDeleteOptions options = new DocumentDeleteOptions()
                 .strongConsistency(true);
         C8Collection coll = db.collection(COLLECTION_NAME);
-        MultiDocumentEntity<DocumentDeleteEntity<Doc>> res = coll.deleteDocuments(Arrays.asList("key2", "key3"), Doc.class, options);
+        MultiDocumentEntity<DocumentDeleteEntity<Doc>> res =
+                coll.deleteDocuments(Arrays.asList("key2", "key3"), Doc.class, options);
 
         // validate if updated with `get documents` call
         DocumentReadOptions options2 = new DocumentReadOptions()

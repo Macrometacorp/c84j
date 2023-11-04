@@ -115,7 +115,8 @@ public class C8KVStrongConsistencyTest extends BaseTest {
     @Test
     public void test5_remove_KV_pair_by_strong_consistency() {
         C8KeyValue kvColl = db.kv(COLLECTION_NAME);
-        C8KVDeleteValueOptions options = new C8KVDeleteValueOptions().strongConsistency(true);
+        C8KVDeleteValueOptions options = new C8KVDeleteValueOptions()
+                .strongConsistency(true);
         kvColl.deleteKVPair("key1", options);
 
         // validate that the pair was deleted
@@ -128,7 +129,8 @@ public class C8KVStrongConsistencyTest extends BaseTest {
     @Test
     public void test6_remove_multiple_KV_pairs_by_strong_consistency() {
         C8KeyValue kvColl = db.kv(COLLECTION_NAME);
-        C8KVDeleteValuesOptions options = new C8KVDeleteValuesOptions().strongConsistency(true);
+        C8KVDeleteValuesOptions options = new C8KVDeleteValuesOptions()
+                .strongConsistency(true);
         kvColl.deleteKVPairs(Arrays.asList("key2"), options);
 
         // validate that only one pair left
@@ -155,7 +157,8 @@ public class C8KVStrongConsistencyTest extends BaseTest {
     @Test
     public void test8_drop() {
         C8KeyValue kvColl = db.kv(COLLECTION_NAME);
-        C8KVDropOptions options = new C8KVDropOptions().strongConsistency(true);
+        C8KVDropOptions options = new C8KVDropOptions()
+                .strongConsistency(true);
         kvColl.drop(options);
     }
 

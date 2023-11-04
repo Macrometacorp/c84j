@@ -100,6 +100,7 @@ public abstract class InternalC8Database<A extends InternalC8DB<E>, E extends C8
     // TODO: doesnt exist in API Reference. Should it be removed?
     private static final String PATH_API_TRAVERSAL = "/_api/traversal";
     protected static final String PATH_API_KV = "/_api/kv";
+    private static final String EXCLUDE_SYSTEM = "excludeSystem";
     private static final String STRONG_CONSISTENCY = "strongConsistency";
 
     private final String tenant;
@@ -161,11 +162,10 @@ public abstract class InternalC8Database<A extends InternalC8DB<E>, E extends C8
     }
 
     protected Request getCollectionsRequest(final CollectionsReadOptions options) {
-        final Request request;
-        request = request(tenant(), name(), RequestType.GET, InternalC8Collection.PATH_API_COLLECTION);
         final CollectionsReadOptions params = (options != null ? options : new CollectionsReadOptions());
-        request.putQueryParam("excludeSystem", params.getExcludeSystem());
-        return request;
+        return request(tenant(), name(), RequestType.GET, InternalC8Collection.PATH_API_COLLECTION)
+                .putQueryParam(EXCLUDE_SYSTEM, params.getExcludeSystem())
+                .putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency());
     }
 
     protected ResponseDeserializer<Collection<CollectionEntity>> getCollectionsResponseDeserializer() {
@@ -181,9 +181,8 @@ public abstract class InternalC8Database<A extends InternalC8DB<E>, E extends C8
 
     protected Request getAllKVStores(C8KVStoresReadOptions options) {
         final C8KVStoresReadOptions params = (options != null ? options : new C8KVStoresReadOptions());
-        final Request request = request(tenant(), name(), RequestType.GET, PATH_API_KV);
-        request.putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency());
-        return request;
+        return request(tenant(), name(), RequestType.GET, PATH_API_KV)
+                .putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency());
     }
 
     protected ResponseDeserializer<Collection<C8KVCollectionEntity>> getAllKVStoresResponseDeserializer() {

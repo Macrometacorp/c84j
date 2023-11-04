@@ -12,6 +12,7 @@ import com.c8db.model.*;
 import com.c8db.util.C8Serializer;
 import com.c8db.velocystream.Request;
 import com.c8db.velocystream.RequestType;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
@@ -60,12 +61,11 @@ public abstract class InternalC8KeyValue<A extends InternalC8DB<E>, D extends In
 
     protected  <T> Request insertKVPairsRequest(final Collection<T> values, C8KVInsertValuesOptions options) {
         final C8KVInsertValuesOptions params = (options != null ? options : new C8KVInsertValuesOptions());
-        final Request request = request(db.tenant(), db.name(), RequestType.PUT, PATH_API_KV, name, PATH_API_KV_PAIR);
-        request.putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency());
-        request.putHeaderParam(TRANSACTION_ID, params.getStreamTransactionId());
-        request.setBody(util(Serializer.CUSTOM).serialize(values,
+        return request(db.tenant(), db.name(), RequestType.PUT, PATH_API_KV, name, PATH_API_KV_PAIR)
+                .putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency())
+                .putHeaderParam(TRANSACTION_ID, params.getStreamTransactionId())
+                .setBody(util(Serializer.CUSTOM).serialize(values,
                 new C8Serializer.Options().serializeNullValues(false).stringAsJson(true)));
-        return request;
     }
 
     @SuppressWarnings("unchecked")
@@ -107,22 +107,17 @@ public abstract class InternalC8KeyValue<A extends InternalC8DB<E>, D extends In
 
     protected Request getKVPairRequest(final String key, C8KVReadValueOptions options) {
         final C8KVReadValueOptions params = (options != null ? options : new C8KVReadValueOptions());
-        final Request request = request(db.tenant(), db.name(), RequestType.GET, PATH_API_KV, name, PATH_API_KV_PAIR,
-                key);
-        request.putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency());
-        request.putHeaderParam(TRANSACTION_ID, params.getStreamTransactionId());
-        return request;
+        return request(db.tenant(), db.name(), RequestType.GET, PATH_API_KV, name, PATH_API_KV_PAIR, key)
+                .putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency())
+                .putHeaderParam(TRANSACTION_ID, params.getStreamTransactionId());
     }
 
     protected Request countKVPairsRequest(C8KVCountPairsOptions options) {
-        final Request request =  request(db.tenant(), db.name(), RequestType.GET, PATH_API_KV, name, PATH_API_KV_COUNT);
         final C8KVCountPairsOptions params = (options != null ? options : new C8KVCountPairsOptions());
-        if (StringUtils.isNotEmpty(params.getGroup())){
-            request.putQueryParam(GROUP_ID, params.getGroup());
-        }
-        request.putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency());
-        request.putHeaderParam(TRANSACTION_ID, params.getStreamTransactionId());
-        return request;
+        return request(db.tenant(), db.name(), RequestType.GET, PATH_API_KV, name, PATH_API_KV_COUNT)
+                .putQueryParam(GROUP_ID, params.getGroup())
+                .putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency())
+                .putHeaderParam(TRANSACTION_ID, params.getStreamTransactionId());
     }
 
     protected ResponseDeserializer<Long> countKVPairsResponseDeserializer() {
@@ -133,15 +128,13 @@ public abstract class InternalC8KeyValue<A extends InternalC8DB<E>, D extends In
         final C8KVReadValuesOptions params = (options != null ? options : new C8KVReadValuesOptions());
         final Request request = request(db.tenant(), db.name(), RequestType.POST, PATH_API_KV, name, PATH_API_KV_PAIRS)
                 .putQueryParam(OFFSET, params.getOffset())
-                .putQueryParam(LIMIT, params.getLimit());
-        if (params.getKeys() != null && !params.getKeys().isEmpty()) {
+                .putQueryParam(LIMIT, params.getLimit())
+                .putQueryParam(GROUP_ID, params.getGroup())
+                .putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency())
+                .putHeaderParam(TRANSACTION_ID, params.getStreamTransactionId());
+        if (ObjectUtils.isNotEmpty(params.getKeys())) {
             request.setBody(util().serialize(params.getKeys()));
         }
-        if (StringUtils.isNotEmpty(params.getGroup())) {
-            request.putQueryParam(GROUP_ID, params.getGroup());
-        }
-        request.putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency());
-        request.putHeaderParam(TRANSACTION_ID, params.getStreamTransactionId());
         return request;
     }
 
@@ -173,15 +166,12 @@ public abstract class InternalC8KeyValue<A extends InternalC8DB<E>, D extends In
 
     protected Request getKVKeysRequest(final C8KVReadKeysOptions options) {
         final C8KVReadKeysOptions params = (options != null ? options : new C8KVReadKeysOptions());
-        Request request = request(db.tenant(), db.name(), RequestType.GET, PATH_API_KV, name, PATH_API_KV_KEYS)
+       return request(db.tenant(), db.name(), RequestType.GET, PATH_API_KV, name, PATH_API_KV_KEYS)
                 .putQueryParam(OFFSET, params.getOffset())
                 .putQueryParam(LIMIT, params.getLimit())
-                .putQueryParam(ORDER, params.getOrder());
-        if (StringUtils.isNotEmpty(params.getGroup())) {
-            request.putQueryParam(GROUP_ID, params.getGroup());
-        }
-        request.putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency());
-        return request;
+                .putQueryParam(ORDER, params.getOrder())
+                .putQueryParam(GROUP_ID, params.getGroup())
+                .putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency());
     }
 
     protected ResponseDeserializer<Collection<String>> getKVKeysResponseDeserializer() {
@@ -198,11 +188,9 @@ public abstract class InternalC8KeyValue<A extends InternalC8DB<E>, D extends In
 
     protected Request deleteKVPairRequest(final String key, C8KVDeleteValueOptions options) {
         final C8KVDeleteValueOptions params = (options != null ? options : new C8KVDeleteValueOptions());
-        final Request request = request(db.tenant(), db.name(), RequestType.DELETE, PATH_API_KV, name, PATH_API_KV_PAIR,
-                key);
-        request.putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency());
-        request.putHeaderParam(TRANSACTION_ID, params.getStreamTransactionId());
-        return request;
+        return request(db.tenant(), db.name(), RequestType.DELETE, PATH_API_KV, name, PATH_API_KV_PAIR, key)
+                .putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency())
+                .putHeaderParam(TRANSACTION_ID, params.getStreamTransactionId());
     }
 
     protected <T> ResponseDeserializer<DocumentDeleteEntity<T>> deleteKVPairResponseDeserializer(
@@ -219,10 +207,9 @@ public abstract class InternalC8KeyValue<A extends InternalC8DB<E>, D extends In
     }
 
     protected <T> Request deleteKVPairsRequest(final Collection<T> keys, C8KVDeleteValuesOptions options) {
-        final Request request = request(db.tenant(), db.name(), RequestType.DELETE, PATH_API_KV, name, PATH_API_KV_PAIRS);
-        request.putQueryParam(STRONG_CONSISTENCY, options != null && options.hasStrongConsistency());
-        request.setBody(util().serialize(keys));
-        return request;
+        return request(db.tenant(), db.name(), RequestType.DELETE, PATH_API_KV, name, PATH_API_KV_PAIRS)
+                .putQueryParam(STRONG_CONSISTENCY, options != null && options.hasStrongConsistency())
+                .setBody(util().serialize(keys));
     }
 
     protected <T> ResponseDeserializer<MultiDocumentEntity<DocumentDeleteEntity<T>>> deleteKVPairsResponseDeserializer(
@@ -261,7 +248,6 @@ public abstract class InternalC8KeyValue<A extends InternalC8DB<E>, D extends In
     protected Request createRequest(final String name, final C8KVCreateOptions options) {
         VPackSlice body = util()
                 .serialize(options != null ? OptionsBuilder.build(options) : new C8KVCreateBodyOptions());
-
         final Request request = request(db.tenant(), db.name(), RequestType.POST, PATH_API_KV, name);
         request.putQueryParam(EXPIRATION, options != null && options.hasExpiration());
         request.putQueryParam(GROUP, options != null && options.hasGroup());
@@ -270,30 +256,25 @@ public abstract class InternalC8KeyValue<A extends InternalC8DB<E>, D extends In
     }
 
     protected Request truncateRequest(C8KVTruncateOptions options) {
-        final Request request = request(db.tenant(), db.name(), RequestType.PUT, PATH_API_KV, name, PATH_API_KV_TRUNCATE);
         final C8KVTruncateOptions params = (options != null ? options : new C8KVTruncateOptions());
-        if (StringUtils.isNotEmpty(params.getGroup())) {
-            request.putQueryParam(GROUP_ID, params.getGroup());
-        }
-        request.putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency());
-        request.putHeaderParam(TRANSACTION_ID, params.getStreamTransactionId());
-        return request;
+        return request(db.tenant(), db.name(), RequestType.PUT, PATH_API_KV, name, PATH_API_KV_TRUNCATE)
+                .putQueryParam(GROUP_ID, params.getGroup())
+                .putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency())
+                .putHeaderParam(TRANSACTION_ID, params.getStreamTransactionId());
     }
 
     protected Request dropRequest(C8KVDropOptions options) {
         final C8KVDropOptions params = (options != null ? options : new C8KVDropOptions());
-        final Request request = request(db.tenant(), db.name(), RequestType.DELETE, PATH_API_KV, name);
-        request.putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency());
-        return request;
+        return request(db.tenant(), db.name(), RequestType.DELETE, PATH_API_KV, name)
+                .putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency());
     }
 
     protected Request getAllGroupsRequest(C8KVReadGroupsOptions options) {
         final C8KVReadGroupsOptions params = (options != null ? options : new C8KVReadGroupsOptions());
-        final Request request = request(db.tenant(), db.name(), RequestType.GET, PATH_API_KV, name, PATH_API_KV_GROUPS)
+        return request(db.tenant(), db.name(), RequestType.GET, PATH_API_KV, name, PATH_API_KV_GROUPS)
                 .putQueryParam(OFFSET, params.getOffset())
-                .putQueryParam(LIMIT, params.getLimit());
-        request.putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency());
-        return request;
+                .putQueryParam(LIMIT, params.getLimit())
+                .putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency());
     }
 
     protected ResponseDeserializer<Collection<String>> getAllGroupsResponseDeserializer() {
@@ -314,11 +295,9 @@ public abstract class InternalC8KeyValue<A extends InternalC8DB<E>, D extends In
         payload.put("oldGroupID", oldGroupID);
         payload.put("newGroupID", newGroupID);
         VPackSlice body = util().serialize(payload);
-        final Request request = request(db.tenant(), db.name(), RequestType.PUT, PATH_API_KV, name,
-                PATH_API_KV_GROUP_ID);
-        request.putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency());
-        request.setBody(body);
-        return request;
+        return request(db.tenant(), db.name(), RequestType.PUT, PATH_API_KV, name, PATH_API_KV_GROUP_ID)
+                .putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency())
+                .setBody(body);
     }
 
 }
