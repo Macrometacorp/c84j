@@ -20,6 +20,7 @@
     </licenses>
 
     <properties>
+        <skipTests>true</skipTests>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <slf4j-api.version>1.7.36</slf4j-api.version>
         <arangodb.velocypack.version>1.4.3</arangodb.velocypack.version>
@@ -161,7 +162,7 @@
                         <include>**/*Test.java</include>
                         <include>**/*Example.java</include>
                     </includes>
-                    <skipTests>true</skipTests>
+                    <skipTests>${skipTests}</skipTests>
                 </configuration>
             </plugin>
             <plugin>
