@@ -5,7 +5,20 @@
 ## Compile Java SDK
 
 ```
-mvn clean install -DskipTests=true -Dmaven.javadoc.skip=true -B
+mvn clean install -Dmaven.javadoc.skip=true -B
+```
+
+# Run Integration Tests
+
+1. Configure `c8db.properties` file.
+2. Set desired fabric in `BaseTest` class in `TEST_DB` property.
+3. Run command for all tests
+```shell
+mvn test -DskipTests=false
+```
+or for selected:
+```shell
+mvn test -Dtest=C8CollectionStrongConsistencyTest,C8KVStrongConsistencyTest -DskipTests=false
 ```
 
 ## Reference

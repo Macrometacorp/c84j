@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.runners.Parameterized.Parameters;
 
 import com.c8db.entity.ServerRole;
@@ -15,19 +16,16 @@ import com.c8db.internal.C8Defaults;
 
 /**
  */
-public abstract class BaseTest {
 public abstract class BaseTest extends Assert {
 
     @Parameters
     public static Collection<C8DB.Builder> builders() {
-        return Arrays.asList(//
-                // new ArangoDB.Builder().useProtocol(Protocol.VST), //
-                new C8DB.Builder().useProtocol(Protocol.HTTP_JSON)// , //
-        // new ArangoDB.Builder().useProtocol(Protocol.HTTP_VPACK) //
+        return Arrays.asList(
+                new C8DB.Builder().useProtocol(Protocol.HTTP_JSON)
         );
     }
 
-    protected static final String TEST_DB = "javaDriverTestDb";
+    protected static final String TEST_DB = "_system";
     protected static final String TEST_DB_CUSTOM = "javaDriverTestDbCustom";
     protected static C8DB c8DB;
     protected static C8Database db;
