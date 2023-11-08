@@ -673,6 +673,7 @@ public abstract class InternalC8Collection<A extends InternalC8DB<E>, D extends 
     protected Request countRequest(final CollectionCountOptions options) {
         final CollectionCountOptions params = (options != null ? options : new CollectionCountOptions());
         return request(db.tenant(), db.name(), RequestType.GET, PATH_API_COLLECTION, name, "count")
+                .putQueryParam(STRONG_CONSISTENCY, params.hasStrongConsistency())
                 .putHeaderParam(TRANSACTION_ID, params.getStreamTransactionId());
     }
 

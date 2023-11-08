@@ -7,6 +7,7 @@ import com.c8db.C8DB.Builder;
 import com.c8db.entity.BaseKeyValue;
 import com.c8db.entity.C8KVCollectionEntity;
 import com.c8db.entity.C8KVEntity;
+import com.c8db.entity.DatabaseMetadataEntity;
 import com.c8db.entity.DocumentCreateEntity;
 import com.c8db.entity.MultiDocumentEntity;
 import com.c8db.model.C8KVCountPairsOptions;
@@ -35,15 +36,41 @@ public class C8KVGroupIDTest extends BaseTest {
     private static String GROUP_A = "groupA";
     private static String GROUP_B = "groupB";
     private static String GROUP_C = "groupC";
+    private static String SOURCE_REGION_HEADER = "X-Gdn-Source-Region";
+    private static String host;
+    private static String spotDc;
+    private static TestC8DBBuilder testC8DBBuilder;
 
+    @Parameterized.Parameters
+    public static Collection<C8DB.Builder> builders() {
+        testC8DBBuilder = new TestC8DBBuilder();
+        testC8DBBuilder.useProtocol(Protocol.HTTP_JSON);
+        return Arrays.asList(testC8DBBuilder);
+    }
 
     public C8KVGroupIDTest(final Builder builder) {
         super(builder);
+        host = builder.getHosts().iterator().next().getHost();
+    }
+
+    @Test
+    public void test0_check_if_non_spot_host() {
+        DatabaseMetadataEntity metadataEntity = db.getMetadata();
+        spotDc = metadataEntity.getOptions().getSpotDc();
+        assertFalse("The host `" + host+ "` is the same as spot host `" + spotDc
+                        + "`. This test suite requires connection to non-spot host for database " + TEST_DB,
+                host.contains(spotDc));
     }
 
     @Test
     public void test1_create_KV_collection_with_group() {
         C8KeyValue kvColl = db.kv(COLLECTION_NAME);
+
+        //validate response
+        testC8DBBuilder.listenResponse(response -> {
+            assertEquals(spotDc, response.getMeta().get(SOURCE_REGION_HEADER));
+        });
+
         C8KVCreateOptions options = new C8KVCreateOptions()
                 // enable group for KV collection
                 .group(true)
@@ -51,6 +78,10 @@ public class C8KVGroupIDTest extends BaseTest {
                 .waitForSync(true);
         C8KVEntity kvEntity = kvColl.create(options);
 
+        // wait some time for replication
+        try {
+            Thread.sleep(2000L);
+        } catch (InterruptedException e) {}
         // validate
         assertEquals(kvEntity.getName(), COLLECTION_NAME);
     }
@@ -72,11 +103,17 @@ public class C8KVGroupIDTest extends BaseTest {
 
     @Test
     public void test3_count_KV_pairs_by_group() {
+        // wait some time for replication
+        try {
+            Thread.sleep(2000L);
+        } catch (InterruptedException e) {}
+
         C8KeyValue kvColl = db.kv(COLLECTION_NAME);
         C8KVCountPairsOptions options = new C8KVCountPairsOptions()
                 // added parameter group, which return count of pairs in the groupB
                 .group(GROUP_B);
         long count = kvColl.countKVPairs(options);
+
 
         // validate
         assertEquals(count, 2);
@@ -132,6 +169,11 @@ public class C8KVGroupIDTest extends BaseTest {
     public void test7_get_groups_with_options() {
         C8KeyValue kvColl = db.kv(COLLECTION_NAME);
 
+        //validate response
+        testC8DBBuilder.listenResponse(response -> {
+            assertEquals(spotDc, response.getMeta().get(SOURCE_REGION_HEADER));
+        });
+
         C8KVReadGroupsOptions options = new C8KVReadGroupsOptions().strongConsistency(true);
         Collection<String> groups = kvColl.getGroups(options);
 
@@ -144,6 +186,11 @@ public class C8KVGroupIDTest extends BaseTest {
     @Test
     public void test7_update_group() {
         C8KeyValue kvColl = db.kv(COLLECTION_NAME);
+
+        //validate response
+        testC8DBBuilder.listenResponse(response -> {
+            assertEquals(spotDc, response.getMeta().get(SOURCE_REGION_HEADER));
+        });
 
         C8KVUpdateGroupOptions options = new C8KVUpdateGroupOptions().strongConsistency(true);
         kvColl.updateGroup(GROUP_A, GROUP_C, options);
@@ -164,10 +211,14 @@ public class C8KVGroupIDTest extends BaseTest {
         C8KVTruncateOptions options = new C8KVTruncateOptions().group(GROUP_B);
         kvColl.truncate(options);
 
+        // wait some time for replication
+        try {
+            Thread.sleep(2000L);
+        } catch (InterruptedException e) {}
         // validate that only groupB was deleted
         Collection<String> keys = kvColl.getKVKeys();
         // check if group enabled for collection
-        assertArrayEquals(keys.toArray(), new String[]{"key1"});
+        assertArrayEquals(new String[]{"key1"}, keys.toArray());
     }
     
     @Test

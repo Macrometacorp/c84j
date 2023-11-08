@@ -12,32 +12,36 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
-package com.c8db.model;
+package com.c8db.entity;
 
-/**
- */
-public class CollectionCountOptions extends MixinBase implements StrongConsistencyMixin<CollectionCountOptions> {
+public class DatabaseMetadataEntity implements Entity {
 
-    private String streamTransactionId;
+    private String name;
+    private Boolean isSystem;
+    private MetadataOptions options;
 
-    public CollectionCountOptions() {
-        super();
-    }
-
-    public String getStreamTransactionId() {
-        return streamTransactionId;
+    /**
+     * @return the name of the database
+     */
+    public String getName() {
+        return name;
     }
 
     /**
-     * @param streamTransactionId If set, the operation will be executed within the
-     *                            transaction.
+     * @return whether or not the database is the _system database
+     */
+    public Boolean isSystem() {
+        return isSystem;
+    }
+
+    /**
      * @return options
      */
-    public CollectionCountOptions streamTransactionId(final String streamTransactionId) {
-        this.streamTransactionId = streamTransactionId;
-        return this;
+    public MetadataOptions getOptions() {
+        return options;
     }
 
 }

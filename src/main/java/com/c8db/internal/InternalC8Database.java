@@ -26,6 +26,7 @@ import com.c8db.entity.C8KVCollectionEntity;
 import com.c8db.entity.C8StreamEntity;
 import com.c8db.entity.CollectionEntity;
 import com.c8db.entity.DatabaseEntity;
+import com.c8db.entity.DatabaseMetadataEntity;
 import com.c8db.entity.EdgeDefinition;
 import com.c8db.entity.ExecuteUserQueryOptions;
 import com.c8db.entity.GeoFabricPermissions;
@@ -484,11 +485,24 @@ public abstract class InternalC8Database<A extends InternalC8DB<E>, E extends C8
         return request(tenant, name, RequestType.GET, PATH_API_DATABASE, "current");
     }
 
+    protected Request getMetadataRequest() {
+        return request(tenant, name, RequestType.GET, PATH_API_DATABASE, "metadata");
+    }
+
     protected ResponseDeserializer<DatabaseEntity> getInfoResponseDeserializer() {
         return new ResponseDeserializer<DatabaseEntity>() {
             @Override
             public DatabaseEntity deserialize(final Response response) throws VPackException {
                 return util().deserialize(response.getBody().get(C8ResponseField.RESULT), DatabaseEntity.class);
+            }
+        };
+    }
+
+    protected ResponseDeserializer<DatabaseMetadataEntity> getMetadataResponseDeserializer() {
+        return new ResponseDeserializer<DatabaseMetadataEntity>() {
+            @Override
+            public DatabaseMetadataEntity deserialize(final Response response) throws VPackException {
+                return util().deserialize(response.getBody().get(C8ResponseField.RESULT), DatabaseMetadataEntity.class);
             }
         };
     }

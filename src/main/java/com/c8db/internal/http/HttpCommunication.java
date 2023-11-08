@@ -66,7 +66,7 @@ public class HttpCommunication implements Closeable {
 
     private final Map<Service, HostHandler> hostHandlerMatrix;
 
-    private HttpCommunication(final Map<Service, HostHandler> hostHandlerMatrix) {
+    protected HttpCommunication(final Map<Service, HostHandler> hostHandlerMatrix) {
         super();
         this.hostHandlerMatrix = hostHandlerMatrix;
     }
@@ -77,8 +77,6 @@ public class HttpCommunication implements Closeable {
             hostHandler.close();
         }
     }
-
-    private AtomicInteger c = new AtomicInteger(0);
 
     public Response execute(final Request request, final HostHandle hostHandle, Service service) throws C8DBException, IOException {
         final AccessType accessType = RequestUtils.determineAccessType(request);

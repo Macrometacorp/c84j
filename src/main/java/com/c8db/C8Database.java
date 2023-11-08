@@ -11,6 +11,7 @@ import com.c8db.entity.C8qlExecutionExplainEntity;
 import com.c8db.entity.C8qlParseEntity;
 import com.c8db.entity.CollectionEntity;
 import com.c8db.entity.DatabaseEntity;
+import com.c8db.entity.DatabaseMetadataEntity;
 import com.c8db.entity.EdgeDefinition;
 import com.c8db.entity.ExecuteUserQueryOptions;
 import com.c8db.entity.GeoFabricPermissions;
@@ -556,6 +557,14 @@ public interface C8Database extends C8SerializationAccessor {
      * @throws C8DBException
      */
     DatabaseEntity getInfo() throws C8DBException;
+
+    /**
+     * Retrieves metadata of the current database
+     *
+     * @return  metadata of the current database
+     * @throws C8DBException
+     */
+    DatabaseMetadataEntity getMetadata() throws C8DBException;
 
     /**
      * Execute a server-side traversal

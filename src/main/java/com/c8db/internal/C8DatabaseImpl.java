@@ -32,6 +32,7 @@ import com.c8db.entity.C8qlParseEntity;
 import com.c8db.entity.CollectionEntity;
 import com.c8db.entity.CursorEntity;
 import com.c8db.entity.DatabaseEntity;
+import com.c8db.entity.DatabaseMetadataEntity;
 import com.c8db.entity.EdgeDefinition;
 import com.c8db.entity.ExecuteUserQueryOptions;
 import com.c8db.entity.GeoFabricPermissions;
@@ -363,6 +364,11 @@ public class C8DatabaseImpl extends InternalC8Database<C8DBImpl, C8ExecutorSync>
     @Override
     public DatabaseEntity getInfo() throws C8DBException {
         return executor.execute(getInfoRequest(), getInfoResponseDeserializer());
+    }
+
+    @Override
+    public DatabaseMetadataEntity getMetadata() throws C8DBException {
+        return executor.execute(getMetadataRequest(), getMetadataResponseDeserializer());
     }
 
     @Override
