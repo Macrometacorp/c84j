@@ -125,6 +125,15 @@ public interface C8DB extends C8SerializationAccessor {
         }
 
         /**
+         * Get list of provided hosts.
+         *
+         * @return list of hosts
+         */
+        public Collection<HostDescription> getHosts() {
+            return hosts.get(Service.C8DB);
+        }
+
+        /**
          * Adds a service host to connect to. Multiple hosts can be added to provide fallbacks.
          * if service host is empty then it uses regular host from method `host(final String host, final int port)`
          *
@@ -693,12 +702,18 @@ public interface C8DB extends C8SerializationAccessor {
             final Map<Service, Collection<Host>> hostsMatrix = createHostMatrix(max, connectionFactory);
             final HostResolver hostResolver = createHostResolver(hostsMatrix, max, connectionFactory);
             final Map<Service, HostHandler> hostHandlerMatrix = createHostHandlerMatrix(hostResolver);
-            return new C8DBImpl(
+            return createC8DB(
                     new VstCommunicationSync.Builder(hostHandlerMatrix).timeout(timeout).user(user).password(password)
                             .useSsl(useSsl).sslContext(sslContext).chunksize(chunksize).maxConnections(maxConnections)
                             .connectionTtl(connectionTtl),
                     new HttpCommunication.Builder(hostHandlerMatrix), util, protocol, hostResolver,
                     new C8Context());
+        }
+
+        protected C8DB createC8DB(final VstCommunicationSync.Builder vstBuilder, final HttpCommunication.Builder httpBuilder,
+                                  final C8SerializationFactory util, final Protocol protocol, final HostResolver hostResolver,
+                                  final C8Context context) {
+            return new C8DBImpl(vstBuilder, httpBuilder, util, protocol, hostResolver, context);
         }
 
     }

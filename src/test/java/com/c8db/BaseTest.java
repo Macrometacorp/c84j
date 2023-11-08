@@ -6,7 +6,9 @@ package com.c8db;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
+import com.c8db.entity.DcInfoEntity;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.runners.Parameterized.Parameters;
@@ -25,6 +27,7 @@ public abstract class BaseTest extends Assert {
         );
     }
 
+    protected static final String TEST_TENANT = "demo";
     protected static final String TEST_DB = "_system";
     protected static final String TEST_DB_CUSTOM = "javaDriverTestDbCustom";
     protected static C8DB c8DB;
@@ -36,8 +39,7 @@ public abstract class BaseTest extends Assert {
             shutdown();
         }
         c8DB = builder.build();
-        db = c8DB.db(C8Defaults.DEFAULT_TENANT, TEST_DB);
-
+        db = c8DB.db(TEST_TENANT, TEST_DB);
         // only create the database if not existing
         try {
             db.getVersion().getVersion();

@@ -6,12 +6,15 @@ package com.c8db;
 import com.c8db.C8DB.Builder;
 import com.c8db.entity.BaseDocument;
 import com.c8db.entity.CollectionEntity;
+import com.c8db.entity.CollectionPropertiesEntity;
 import com.c8db.entity.CollectionType;
+import com.c8db.entity.DatabaseMetadataEntity;
 import com.c8db.entity.DocumentCreateEntity;
 import com.c8db.entity.DocumentDeleteEntity;
 import com.c8db.entity.DocumentUpdateEntity;
 import com.c8db.entity.IndexEntity;
 import com.c8db.entity.MultiDocumentEntity;
+import com.c8db.model.CollectionCountOptions;
 import com.c8db.model.CollectionCreateOptions;
 import com.c8db.model.CollectionDropOptions;
 import com.c8db.model.CollectionIndexDeleteOptions;
@@ -48,12 +51,39 @@ public class C8CollectionStrongConsistencyTest extends BaseTest {
 
     private static String COLLECTION_NAME = "doc_tests_1";
 
+    private static String SOURCE_REGION_HEADER = "X-Gdn-Source-Region";
+    private static String host;
+    private static String spotDc;
+    private static TestC8DBBuilder testC8DBBuilder;
+
+    @Parameterized.Parameters
+    public static Collection<C8DB.Builder> builders() {
+        testC8DBBuilder = new TestC8DBBuilder();
+        testC8DBBuilder.useProtocol(Protocol.HTTP_JSON);
+        return Arrays.asList(testC8DBBuilder);
+    }
+
     public C8CollectionStrongConsistencyTest(final Builder builder) {
         super(builder);
+        host = builder.getHosts().iterator().next().getHost();
+    }
+
+    @Test
+    public void test00_check_if_non_spot_host() {
+        DatabaseMetadataEntity metadataEntity = db.getMetadata();
+        spotDc = metadataEntity.getOptions().getSpotDc();
+        assertFalse("The host `" + host+ "` is the same as spot host `" + spotDc
+                        + "`. This test suite requires connection to non-spot host for database " + TEST_DB,
+                host.contains(spotDc));
     }
 
     @Test
     public void test01_create_collection_with_strong_consistency() {
+        //validate response
+        testC8DBBuilder.listenResponse(response -> {
+            assertEquals(spotDc, response.getMeta().get(SOURCE_REGION_HEADER));
+        });
+
         CollectionCreateOptions options = new CollectionCreateOptions()
                 .type(CollectionType.DOCUMENT)
                 .strongConsistency(true)
@@ -64,6 +94,10 @@ public class C8CollectionStrongConsistencyTest extends BaseTest {
         assertEquals(coll.getName(), COLLECTION_NAME);
         assertTrue(coll.getStrongConsistency());
 
+        // wait some time for replication
+        try {
+            Thread.sleep(2000L);
+        } catch (InterruptedException e) {}
         // validate that collection created with strong consistency by another call
         CollectionEntity coll2 = db.collection(COLLECTION_NAME).getInfo();
         assertEquals(coll2.getName(), COLLECTION_NAME);
@@ -72,6 +106,12 @@ public class C8CollectionStrongConsistencyTest extends BaseTest {
 
     @Test
     public void test02_create_all_indexes_with_strong_consistency() {
+
+        //validate response
+        testC8DBBuilder.listenResponse(response -> {
+            assertEquals(spotDc, response.getMeta().get(SOURCE_REGION_HEADER));
+        }, 6);
+
         // fulltext
         FulltextIndexOptions options = new FulltextIndexOptions()
                 .name("fulltextIndex1")
@@ -153,6 +193,11 @@ public class C8CollectionStrongConsistencyTest extends BaseTest {
 
     @Test
     public void test02_get_collections_with_strong_consistency() {
+        //validate response
+        testC8DBBuilder.listenResponse(response -> {
+            assertEquals(spotDc, response.getMeta().get(SOURCE_REGION_HEADER));
+        });
+
         CollectionsReadOptions options = new CollectionsReadOptions()
                 .strongConsistency(true);
         Collection<CollectionEntity> list = db.getCollections(options);
@@ -163,6 +208,11 @@ public class C8CollectionStrongConsistencyTest extends BaseTest {
 
     @Test
     public void test03_get_indexes_with_strong_consistency() {
+        //validate response
+        testC8DBBuilder.listenResponse(response -> {
+            assertEquals(spotDc, response.getMeta().get(SOURCE_REGION_HEADER));
+        });
+
         CollectionIndexesReadOptions options = new CollectionIndexesReadOptions()
                 .strongConsistency(true);
         Collection<IndexEntity> list = db.collection(COLLECTION_NAME).getIndexes(options);
@@ -176,6 +226,11 @@ public class C8CollectionStrongConsistencyTest extends BaseTest {
 
     @Test
     public void test03_create_document_with_strong_consistency() {
+        //validate response
+        testC8DBBuilder.listenResponse(response -> {
+            assertEquals(spotDc, response.getMeta().get(SOURCE_REGION_HEADER));
+        });
+
         DocumentCreateOptions options = new DocumentCreateOptions()
                 .strongConsistency(true);
         C8Collection coll = db.collection(COLLECTION_NAME);
@@ -188,6 +243,10 @@ public class C8CollectionStrongConsistencyTest extends BaseTest {
 
     @Test
     public void test04_get_and_delete_index_with_strong_consistency() {
+        //validate response
+        testC8DBBuilder.listenResponse(response -> {
+            assertEquals(spotDc, response.getMeta().get(SOURCE_REGION_HEADER));
+        },2);
 
         CollectionIndexReadOptions options0 = new CollectionIndexReadOptions()
                 .strongConsistency(true);
@@ -205,6 +264,11 @@ public class C8CollectionStrongConsistencyTest extends BaseTest {
 
     @Test
     public void test04_create_multiple_documents_with_strong_consistency() {
+        //validate response
+        testC8DBBuilder.listenResponse(response -> {
+            assertEquals(spotDc, response.getMeta().get(SOURCE_REGION_HEADER));
+        });
+
         DocumentCreateOptions options = new DocumentCreateOptions()
                 .strongConsistency(true);
         C8Collection coll = db.collection(COLLECTION_NAME);
@@ -217,7 +281,28 @@ public class C8CollectionStrongConsistencyTest extends BaseTest {
     }
 
     @Test
+    public void test05_count_documents_with_strong_consistency() {
+        //validate response
+        testC8DBBuilder.listenResponse(response -> {
+            assertEquals(spotDc, response.getMeta().get(SOURCE_REGION_HEADER));
+        });
+
+        CollectionCountOptions options = new CollectionCountOptions()
+                .strongConsistency(true);
+        CollectionPropertiesEntity collectionPropertiesEntity = db.collection(COLLECTION_NAME)
+                .count(options);
+
+        // validate
+        assertEquals((long) collectionPropertiesEntity.getCount(), 3L);
+    }
+
+    @Test
     public void test05_read_document_with_strong_consistency() {
+        //validate response
+        testC8DBBuilder.listenResponse(response -> {
+            assertEquals(spotDc, response.getMeta().get(SOURCE_REGION_HEADER));
+        });
+
         DocumentReadOptions options = new DocumentReadOptions()
                 .strongConsistency(true);
         C8Collection coll = db.collection(COLLECTION_NAME);
@@ -230,6 +315,11 @@ public class C8CollectionStrongConsistencyTest extends BaseTest {
 
     @Test
     public void test06_read_multiple_documents_with_strong_consistency() {
+        //validate response
+        testC8DBBuilder.listenResponse(response -> {
+            assertEquals(spotDc, response.getMeta().get(SOURCE_REGION_HEADER));
+        });
+
         DocumentReadOptions options = new DocumentReadOptions()
                 .strongConsistency(true);
         C8Collection coll = db.collection(COLLECTION_NAME);
@@ -244,6 +334,11 @@ public class C8CollectionStrongConsistencyTest extends BaseTest {
 
     @Test
     public void test07_replace_document_with_strong_consistency() {
+        //validate response
+        testC8DBBuilder.listenResponse(response -> {
+            assertEquals(spotDc, response.getMeta().get(SOURCE_REGION_HEADER));
+        });
+
         DocumentReplaceOptions options = new DocumentReplaceOptions()
                 .strongConsistency(true);
         C8Collection coll = db.collection(COLLECTION_NAME);
@@ -260,6 +355,11 @@ public class C8CollectionStrongConsistencyTest extends BaseTest {
 
     @Test
     public void test08_replace_multiple_documents_with_strong_consistency() {
+        //validate response
+        testC8DBBuilder.listenResponse(response -> {
+            assertEquals(spotDc, response.getMeta().get(SOURCE_REGION_HEADER));
+        });
+
         DocumentReplaceOptions options = new DocumentReplaceOptions()
                 .strongConsistency(true);
         C8Collection coll = db.collection(COLLECTION_NAME);
@@ -267,18 +367,27 @@ public class C8CollectionStrongConsistencyTest extends BaseTest {
         Doc doc3 = new Doc("key3", "replaced property 3");
         MultiDocumentEntity<DocumentUpdateEntity<Doc>> res = coll.replaceDocuments(Arrays.asList(doc2, doc3), options);
 
+        // wait some time for replication
+        try {
+            Thread.sleep(2000L);
+        } catch (InterruptedException e) {}
         // validate if updated with `get documents` call
         DocumentReadOptions options2 = new DocumentReadOptions()
                 .strongConsistency(true);
         MultiDocumentEntity<Doc> res2 = coll.getDocuments(Arrays.asList("key2", "key3"), Doc.class, options2);
         Doc doc_2 = res2.getDocuments().stream().filter(d -> d.getKey().equals("key2")).findFirst().get();
-        assertEquals(doc_2.getProperty1(), "replaced property 2");
+        assertEquals("replaced property 2", doc_2.getProperty1());
         Doc doc_3 = res2.getDocuments().stream().filter(d -> d.getKey().equals("key3")).findFirst().get();
-        assertEquals(doc_3.getProperty1(), "replaced property 3");
+        assertEquals("replaced property 3", doc_3.getProperty1());
     }
 
     @Test
     public void test09_update_document_with_strong_consistency() {
+        //validate response
+        testC8DBBuilder.listenResponse(response -> {
+            assertEquals(spotDc, response.getMeta().get(SOURCE_REGION_HEADER));
+        });
+
         DocumentUpdateOptions options = new DocumentUpdateOptions()
                 .strongConsistency(true);
         C8Collection coll = db.collection(COLLECTION_NAME);
@@ -295,6 +404,11 @@ public class C8CollectionStrongConsistencyTest extends BaseTest {
 
     @Test
     public void test10_update_multiple_documents_with_strong_consistency() {
+        //validate response
+        testC8DBBuilder.listenResponse(response -> {
+            assertEquals(spotDc, response.getMeta().get(SOURCE_REGION_HEADER));
+        });
+
         DocumentUpdateOptions options = new DocumentUpdateOptions()
                 .strongConsistency(true);
         C8Collection coll = db.collection(COLLECTION_NAME);
@@ -302,24 +416,33 @@ public class C8CollectionStrongConsistencyTest extends BaseTest {
         Doc doc3 = new Doc("key3", "updated property 3");
         MultiDocumentEntity<DocumentUpdateEntity<Doc>> res = coll.updateDocuments(Arrays.asList(doc2, doc3), options);
 
+        // wait some time for replication
+        try {
+            Thread.sleep(2000L);
+        } catch (InterruptedException e) {}
         // validate if updated with `get documents` call
         DocumentReadOptions options2 = new DocumentReadOptions()
                 .strongConsistency(true);
         MultiDocumentEntity<Doc> res2 = coll.getDocuments(Arrays.asList("key2", "key3"), Doc.class, options2);
         Doc doc_2 = res2.getDocuments().stream().filter(d -> d.getKey().equals("key2")).findFirst().get();
-        assertEquals(doc_2.getProperty1(), "updated property 2");
+        assertEquals("updated property 2", doc_2.getProperty1());
         Doc doc_3 = res2.getDocuments().stream().filter(d -> d.getKey().equals("key3")).findFirst().get();
-        assertEquals(doc_3.getProperty1(), "updated property 3");
+        assertEquals("updated property 3", doc_3.getProperty1());
     }
 
     @Test
     public void test11_delete_document_with_strong_consistency() {
+        //validate response
+        testC8DBBuilder.listenResponse(response -> {
+            assertEquals(spotDc, response.getMeta().get(SOURCE_REGION_HEADER));
+        }, 2);
+
         DocumentDeleteOptions options = new DocumentDeleteOptions()
                 .strongConsistency(true);
         C8Collection coll = db.collection(COLLECTION_NAME);
         DocumentDeleteEntity<BaseDocument> res = coll.deleteDocument("key1", BaseDocument.class, options);
 
-        // validate
+        // validate and test
         assertEquals(res.getKey(), "key1");
         DocumentExistsOptions options2 = new DocumentExistsOptions()
                 .strongConsistency(true);
@@ -329,21 +452,35 @@ public class C8CollectionStrongConsistencyTest extends BaseTest {
 
     @Test
     public void test12_delete_multiple_documents_with_strong_consistency() {
+        //validate response
+        testC8DBBuilder.listenResponse(response -> {
+            assertEquals(spotDc, response.getMeta().get(SOURCE_REGION_HEADER));
+        });
+
         DocumentDeleteOptions options = new DocumentDeleteOptions()
                 .strongConsistency(true);
         C8Collection coll = db.collection(COLLECTION_NAME);
         MultiDocumentEntity<DocumentDeleteEntity<Doc>> res =
                 coll.deleteDocuments(Arrays.asList("key2", "key3"), Doc.class, options);
 
+        // wait some time for replication
+        try {
+            Thread.sleep(2000L);
+        } catch (InterruptedException e) {}
         // validate if updated with `get documents` call
         DocumentReadOptions options2 = new DocumentReadOptions()
                 .strongConsistency(true);
         MultiDocumentEntity<Doc> res2 = coll.getDocuments(Arrays.asList("key2", "key3"), Doc.class, options2);
-        assertEquals(res2.getDocuments().size(), 0);
+        assertEquals(0, res2.getDocuments().size());
     }
 
     @Test
     public void test13_drop() {
+        //validate response
+        testC8DBBuilder.listenResponse(response -> {
+            assertEquals(spotDc, response.getMeta().get(SOURCE_REGION_HEADER));
+        });
+
         CollectionDropOptions options = new CollectionDropOptions()
                 .strongConsistency(true);
         db.collection(COLLECTION_NAME).drop(options);
