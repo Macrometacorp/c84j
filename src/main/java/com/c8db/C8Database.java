@@ -567,6 +567,20 @@ public interface C8Database extends C8SerializationAccessor {
     DatabaseMetadataEntity getMetadata() throws C8DBException;
 
     /**
+     * Set metadata of the current database
+     *
+     * @throws C8DBException
+     */
+    void setMetadata(Map<String, Object> metadata) throws C8DBException;
+
+    /**
+     * Partially update metadata of the current database
+     *
+     * @throws C8DBException
+     */
+    void updateMetadata(Map<String, Object> metadata) throws C8DBException;
+
+    /**
      * Execute a server-side traversal
      *
      * @param vertexClass The type of the vertex documents (POJO class, VPackSlice
