@@ -372,6 +372,16 @@ public class C8DatabaseImpl extends InternalC8Database<C8DBImpl, C8ExecutorSync>
     }
 
     @Override
+    public void setMetadata(Map<String, Object> metadata) throws C8DBException {
+        executor.execute(setMetadataRequest(metadata), Void.class);
+    }
+
+    @Override
+    public void updateMetadata(Map<String, Object> metadata) throws C8DBException {
+        executor.execute(updateMetadataRequest(metadata), Void.class);
+    }
+
+    @Override
     public <V, E> TraversalEntity<V, E> executeTraversal(final Class<V> vertexClass, final Class<E> edgeClass,
                                                          final TraversalOptions options) throws C8DBException {
         final Request request = executeTraversalRequest(options);

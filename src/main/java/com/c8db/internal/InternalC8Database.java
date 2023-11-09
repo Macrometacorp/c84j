@@ -103,6 +103,7 @@ public abstract class InternalC8Database<A extends InternalC8DB<E>, E extends C8
     protected static final String PATH_API_KV = "/_api/kv";
     private static final String EXCLUDE_SYSTEM = "excludeSystem";
     private static final String STRONG_CONSISTENCY = "strongConsistency";
+    private static final String PATH_API_METADATA = "metadata";
 
     private final String tenant;
     private final String name;
@@ -486,7 +487,21 @@ public abstract class InternalC8Database<A extends InternalC8DB<E>, E extends C8
     }
 
     protected Request getMetadataRequest() {
-        return request(tenant, name, RequestType.GET, PATH_API_DATABASE, "metadata");
+        return request(tenant, name, RequestType.GET, PATH_API_DATABASE, PATH_API_METADATA);
+    }
+
+    protected Request setMetadataRequest(Map<String, Object> metadata) {
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("metadata", metadata);
+        return request(tenant, name, RequestType.PUT, PATH_API_DATABASE, PATH_API_METADATA)
+                .setBody(util().serialize(payload));
+    }
+
+    protected Request updateMetadataRequest(Map<String, Object> metadata) {
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("metadata", metadata);
+        return request(tenant, name, RequestType.PATCH, PATH_API_DATABASE, PATH_API_METADATA)
+                .setBody(util().serialize(payload));
     }
 
     protected ResponseDeserializer<DatabaseEntity> getInfoResponseDeserializer() {

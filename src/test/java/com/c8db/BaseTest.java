@@ -41,13 +41,13 @@ public abstract class BaseTest extends Assert {
         c8DB = builder.build();
         db = c8DB.db(TEST_TENANT, TEST_DB);
         // only create the database if not existing
-        try {
+        /*try {
             db.getVersion().getVersion();
         } catch (final C8DBException e) {
             if (e.getErrorNum() == 1228) { // DATABASE NOT FOUND
                 c8DB.createGeoFabric(C8Defaults.DEFAULT_TENANT, TEST_DB, "", C8Defaults.DEFAULT_DC_LIST, TEST_DB);
             }
-        }
+        }*/
     }
 
     @AfterClass
