@@ -12,18 +12,27 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * Modifications copyright (c) 2023 Macrometa Corp All rights reserved.
  */
 
 package com.c8db.internal.util;
 
 import com.arangodb.velocypack.VPackSlice;
+import com.c8db.C8DBException;
 import com.c8db.Protocol;
 import com.c8db.internal.http.HttpDeleteWithBody;
 import com.c8db.internal.net.AccessType;
 import com.c8db.internal.net.HostDescription;
+import com.c8db.velocystream.BinaryRequestBody;
+import com.c8db.velocystream.JsonRequestBody;
 import com.c8db.velocystream.Request;
+import com.c8db.velocystream.RequestBody;
 import com.c8db.velocystream.RequestType;
+
 import java.util.Arrays;
+
+import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
@@ -34,6 +43,8 @@ import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.entity.mime.HttpMultipartMode;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
 
 /**
  *
@@ -87,15 +98,36 @@ public final class RequestUtils {
 
     private static HttpRequestBase requestWithBody(final HttpEntityEnclosingRequestBase httpRequest,
         final Request request, final Protocol contentType) {
-        final VPackSlice body = request.getBody();
+        final RequestBody body = request.getBody();
 
         if (body != null) {
             if (contentType == Protocol.HTTP_VPACK) {
-                httpRequest.setEntity(new ByteArrayEntity(
-                    Arrays.copyOfRange(body.getBuffer(), body.getStart(), body.getStart() + body.getByteSize()),
-                    CONTENT_TYPE_VPACK));
+                if (body instanceof JsonRequestBody) {
+                    VPackSlice vPackSlice = ((JsonRequestBody) body).getValue();
+                    httpRequest.setEntity(new ByteArrayEntity(
+                            Arrays.copyOfRange(vPackSlice.getBuffer(), vPackSlice.getStart(),
+                                    vPackSlice.getStart() + vPackSlice.getByteSize()),
+                            CONTENT_TYPE_VPACK));
+                } else {
+                    throw new C8DBException("This protocol doesn't support this type of body " + body.getClass());
+                }
             } else {
-                httpRequest.setEntity(new StringEntity(body.toString(), CONTENT_TYPE_APPLICATION_JSON_UTF8));
+                if (body instanceof JsonRequestBody) {
+                    VPackSlice vPackSlice = ((JsonRequestBody) body).getValue();
+                    httpRequest.setEntity(new StringEntity(vPackSlice.toString(), CONTENT_TYPE_APPLICATION_JSON_UTF8));
+                } else if (body instanceof BinaryRequestBody) {
+                    BinaryRequestBody binaryBody = (BinaryRequestBody) body;
+                    final MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+                    builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
+                    for (BinaryRequestBody.Item item : binaryBody.getItems()) {
+                        builder.addTextBody("meta", item.getMeta().toString(), ContentType.APPLICATION_JSON);
+                        builder.addBinaryBody("value", item.getValue(), ContentType.APPLICATION_OCTET_STREAM, "");
+                    }
+                    final HttpEntity entity = builder.build();
+                    httpRequest.setEntity(entity);
+                } else {
+                    throw new C8DBException("This protocol doesn't support this type of body " + body.getClass() );
+                }
             }
         }
         return httpRequest;

@@ -1,20 +1,23 @@
 /*
- * Copyright (c) 2022 - 2023 Macrometa Corp All rights reserved.
+ * Copyright (c) 2023 Macrometa Corp All rights reserved.
  */
 
 package com.c8db.entity;
 
+import com.arangodb.velocypack.annotations.Expose;
 import lombok.Data;
 
 import java.util.Map;
 
-import static com.c8db.entity.DocumentField.Type.*;
+import static com.c8db.entity.DocumentField.Type.EXPIRE_AT;
+import static com.c8db.entity.DocumentField.Type.GROUP_ID;
+import static com.c8db.entity.DocumentField.Type.VALUE;
 
 @Data
-public class BaseKeyValue extends BaseDocument {
+public class BlobKeyValue extends BaseDocument {
 
-    @DocumentField(VALUE)
-    protected Object value;
+    @Expose(serialize = false, deserialize = false)
+    protected byte[] value;
 
     @DocumentField(EXPIRE_AT)
     protected Long expireAt;
@@ -22,35 +25,35 @@ public class BaseKeyValue extends BaseDocument {
     @DocumentField(GROUP_ID)
     protected String groupID;
 
-    public BaseKeyValue() {
+    public BlobKeyValue() {
         super();
     }
 
-    public BaseKeyValue(final Object value, final Long expireAt) {
+    public BlobKeyValue(final byte[] value, final Long expireAt) {
         super();
         this.value = value;
         this.expireAt = expireAt;
     }
 
-    public BaseKeyValue(final String key, final Object value, final Long expireAt) {
+    public BlobKeyValue(final String key, final byte[] value, final Long expireAt) {
         super(key);
         this.value = value;
         this.expireAt = expireAt;
     }
 
-    public BaseKeyValue(final String key, final Object value, final Long expireAt, final String groupID) {
+    public BlobKeyValue(final String key, final byte[] value, final Long expireAt, final String groupID) {
         super(key);
         this.value = value;
         this.expireAt = expireAt;
         this.groupID = groupID;
     }
 
-    public BaseKeyValue(final Map<String, Object> properties) {
+    public BlobKeyValue(final Map<String, Object> properties) {
         super(properties);
 
         final Object tmpValue = properties.remove(VALUE.getSerializeName());
         if (tmpValue != null) {
-            this.value = tmpValue;
+            this.value = (byte[]) tmpValue;
         }
 
         final Object tmpExpireAt = properties.remove(EXPIRE_AT.getSerializeName());
@@ -63,4 +66,5 @@ public class BaseKeyValue extends BaseDocument {
             this.groupID = (String) groupID;
         }
     }
+
 }
