@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Macrometa Corp All rights reserved.
+ * Copyright (c) 2022 - 2023 Macrometa Corp All rights reserved.
  */
 package com.c8db;
 
@@ -97,6 +97,34 @@ public interface C8KeyValue {
             throws C8DBException;
 
     /**
+     * Set one or more key-value pairs in key-value collection.
+     * If the input is an array of objects then key-value pairs are created in batch.
+     * If the key does not exist the key-value pairs are created. Otherwise the entry for the key is updated.
+     * Specify expiration in UTC timestamp.
+     *
+     * @param values  A collection of KV pairs
+     * @return information about the document
+     * @throws C8DBException
+     */
+    MultiDocumentEntity<DocumentCreateEntity<BlobKeyValue>> insertBlobKVPairs(Collection<BlobKeyValue> values)
+            throws C8DBException;
+
+    /**
+     * Set one or more blob key-value pairs in key-value collection.
+     * If the input is an array of objects then key-value pairs are created in batch.
+     * If the key does not exist the key-value pairs are created. Otherwise the entry for the key is updated.
+     * Specify expiration in UTC timestamp.
+     *
+     * @param values  A collection of KV pairs
+     * @param options Additional options, can be null
+     * @return information about the document
+     * @throws C8DBException
+     */
+    MultiDocumentEntity<DocumentCreateEntity<BlobKeyValue>> insertBlobKVPairs(Collection<BlobKeyValue> values,
+                                                                          C8KVInsertValuesOptions options)
+            throws C8DBException;
+
+    /**
      * Deletes a pair with the given {@code key} from the KV.
      *
      * @param key The key of the pair
@@ -153,6 +181,23 @@ public interface C8KeyValue {
     BaseKeyValue getKVPair(String key, C8KVReadValueOptions options) throws C8DBException;
 
     /**
+     * Retrieves the KV pair with the given {@code key} from the KV.
+     *
+     * @param key The key of the pair
+     * @return the document identified by the key
+     */
+    BlobKeyValue getBlobKVPair(String key) throws C8DBException;
+
+    /**
+     * Retrieves the KV pair with the given {@code key} from the KV.
+     *
+     * @param key The key of the pair
+     * @param options Additional options, can be null
+     * @return the document identified by the key
+     */
+    BlobKeyValue getBlobKVPair(String key, C8KVReadValueOptions options) throws C8DBException;
+
+    /**
      * Retrieves multiple pairs.
      *
      * @return the documents and possible errors
@@ -167,7 +212,24 @@ public interface C8KeyValue {
      * @return the documents and possible errors
      * @throws C8DBException
      */
-   MultiDocumentEntity<BaseKeyValue> getKVPairs(C8KVReadValuesOptions options) throws C8DBException;
+    MultiDocumentEntity<BaseKeyValue> getKVPairs(C8KVReadValuesOptions options) throws C8DBException;
+
+    /**
+     * Retrieves multiple blob pairs.
+     *
+     * @return the documents and possible errors
+     * @throws C8DBException
+     */
+    MultiDocumentEntity<BlobKeyValue> getBlobKVPairs() throws C8DBException;
+
+    /**
+     * Retrieves multiple pairs with the given {@code _key} from the KV.
+     *
+     * @param options Additional options, can be null
+     * @return the documents and possible errors
+     * @throws C8DBException
+     */
+    MultiDocumentEntity<BlobKeyValue> getBlobKVPairs(C8KVReadValuesOptions options) throws C8DBException;
 
     /**
      * Retrieves keys from KV collection.

@@ -12,6 +12,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * Modifications copyright (c) 2023 Macrometa Corp All rights reserved.
  */
 
 package com.c8db.internal.velocystream;
@@ -26,6 +28,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import javax.net.ssl.SSLContext;
 
 import com.c8db.Service;
+import com.c8db.velocystream.JsonRequestBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -160,7 +163,7 @@ public abstract class VstCommunication<R, C extends VstConnection> implements Cl
 
     protected Message createMessage(final Request request) throws VPackParserException {
         final long id = mId.incrementAndGet();
-        return new Message(id, util.serialize(request), request.getBody());
+        return new Message(id, util.serialize(request), ((JsonRequestBody)request.getBody()).getValue());
     }
 
     protected Collection<Chunk> buildChunks(final Message message) {

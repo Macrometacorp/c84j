@@ -12,12 +12,15 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * Modifications copyright (c) 2023 Macrometa Corp All rights reserved.
  */
 
 package com.c8db.internal.util;
 
 import java.util.Map.Entry;
 
+import com.c8db.velocystream.JsonRequestBody;
 import org.apache.http.auth.Credentials;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,7 +66,7 @@ public final class CURLLogger {
         buffer.append(" '").append(url).append("'");
         if (includeBody) {
             buffer.append("\n");
-            buffer.append((String) util.deserialize(request.getBody(), String.class));
+            buffer.append((String) util.deserialize(((JsonRequestBody)request.getBody()).getValue(), String.class));
             buffer.append("\n");
             buffer.append("___EOB___");
         }

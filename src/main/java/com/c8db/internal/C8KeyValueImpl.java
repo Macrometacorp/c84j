@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Macrometa Corp All rights reserved.
+ * Copyright (c) 2022 - 2023 Macrometa Corp All rights reserved.
  */
 package com.c8db.internal;
 
@@ -66,6 +66,18 @@ public class C8KeyValueImpl extends InternalC8KeyValue<C8DBImpl, C8DatabaseImpl,
     }
 
     @Override
+    public  MultiDocumentEntity<DocumentCreateEntity<BlobKeyValue>> insertBlobKVPairs(
+            final Collection<BlobKeyValue> values) throws C8DBException {
+        return insertBlobKVPairs(values, null);
+    }
+
+    @Override
+    public  MultiDocumentEntity<DocumentCreateEntity<BlobKeyValue>> insertBlobKVPairs(
+            final Collection<BlobKeyValue>  values,final C8KVInsertValuesOptions options) throws C8DBException {
+        return executor.execute(insertBlobKVPairsRequest(values, options), insertBlobKVPairsResponseDeserializer());
+    }
+
+    @Override
     public DocumentDeleteEntity<Void> deleteKVPair(final String key) throws C8DBException {
         return deleteKVPair(key, null);
     }
@@ -118,6 +130,34 @@ public class C8KeyValueImpl extends InternalC8KeyValue<C8DBImpl, C8DatabaseImpl,
     }
 
     @Override
+    public BlobKeyValue getBlobKVPair(final String key) throws C8DBException {
+        return getBlobKVPair(key, null);
+    }
+
+    @Override
+    public BlobKeyValue getBlobKVPair(final String key, final C8KVReadValueOptions options) throws C8DBException {
+        DocumentUtil.validateDocumentKey(key);
+        try {
+            return executor.execute(getBlobKVPairRequest(key, options), getBlobKVPairResponseDeserializer());
+        } catch (final C8DBException e) {
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug(e.getMessage(), e);
+            }
+
+            // handle Response: 404, Error: 1655 - transaction not found
+            if (e.getErrorNum() != null && e.getErrorNum() == 1655) {
+                throw e;
+            }
+
+            if ((e.getResponseCode() != null
+                    && (e.getResponseCode() == 404 || e.getResponseCode() == 304 || e.getResponseCode() == 412))) {
+                return null;
+            }
+            throw e;
+        }
+    }
+
+    @Override
     public MultiDocumentEntity<BaseKeyValue> getKVPairs()
             throws C8DBException {
         return getKVPairs(null);
@@ -127,6 +167,18 @@ public class C8KeyValueImpl extends InternalC8KeyValue<C8DBImpl, C8DatabaseImpl,
     public MultiDocumentEntity<BaseKeyValue> getKVPairs(final C8KVReadValuesOptions options)
             throws C8DBException {
         return executor.execute(getKVPairsRequest(options), getKVPairsResponseDeserializer());
+    }
+
+    @Override
+    public MultiDocumentEntity<BlobKeyValue> getBlobKVPairs()
+            throws C8DBException {
+        return getBlobKVPairs(null);
+    }
+
+    @Override
+    public MultiDocumentEntity<BlobKeyValue> getBlobKVPairs(final C8KVReadValuesOptions options)
+            throws C8DBException {
+        return executor.execute(getBlobKVPairsRequest(options), getBlobKVPairsResponseDeserializer());
     }
 
     @Override

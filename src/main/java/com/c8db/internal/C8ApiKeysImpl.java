@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Macrometa Corp All rights reserved
+ * Copyright (c) 2021 - 2023 Macrometa Corp All rights reserved
  */
 
 package com.c8db.internal;
