@@ -12,6 +12,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * Modifications copyright (c) 2023 Macrometa Corp All rights reserved.
  */
 
 package com.c8db.velocystream;
@@ -32,7 +34,7 @@ public class Response {
     private int responseCode;
     private Map<String, String> meta;
     @Expose(deserialize = false)
-    private VPackSlice body = null;
+    private ResponseBody body = null;
 
     public Response() {
         super();
@@ -72,10 +74,24 @@ public class Response {
     }
 
     public VPackSlice getBody() {
-        return body;
+        if (body instanceof JsonResponseBody){
+            return ((JsonResponseBody) body).getValue();
+        }
+        return null;
+    }
+
+    public MultipartResponseBody getMultipartBody() {
+        if (body instanceof MultipartResponseBody) {
+            return (MultipartResponseBody) body;
+        }
+        return null;
     }
 
     public void setBody(final VPackSlice body) {
+        this.body = new JsonResponseBody(body);
+    }
+
+    public void setBody(final ResponseBody body) {
         this.body = body;
     }
 
