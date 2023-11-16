@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
+ * Modifications copyright (c) 2021 - 2023 Macrometa Corp All rights reserved.
  */
 
 package com.c8db.entity;
@@ -22,6 +23,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.arangodb.velocypack.annotations.Expose;
 import com.c8db.entity.DocumentField.Type;
 
 /**
@@ -37,6 +39,7 @@ public class BaseDocument implements Serializable {
     protected String key;
     @DocumentField(Type.REV)
     protected String revision;
+    @Expose(serialize = false)
     protected Map<String, Object> properties;
 
     public BaseDocument() {

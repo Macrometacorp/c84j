@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Macrometa Corp All rights reserved
+ * Copyright (c) 2021 - 2023 Macrometa Corp All rights reserved
  */
 
 package com.c8db.internal.http;
@@ -18,7 +18,11 @@ import com.c8db.util.BackoffRetryCounter;
 import com.c8db.util.RequestBackoffRetryCounter;
 import com.c8db.util.C8Serialization;
 import com.c8db.util.C8Serializer.Options;
+import com.c8db.velocystream.BinaryRequestBody;
+import com.c8db.velocystream.JsonRequestBody;
+import com.c8db.velocystream.MultipartResponseBody;
 import com.c8db.velocystream.Request;
+import com.c8db.velocystream.RequestBody;
 import com.c8db.velocystream.RequestType;
 import com.c8db.velocystream.Response;
 import org.apache.commons.lang3.StringUtils;
@@ -53,6 +57,8 @@ import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.entity.mime.HttpMultipartMode;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -77,6 +83,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
+import javax.mail.BodyPart;
+import javax.mail.internet.MimeMultipart;
+import javax.mail.util.ByteArrayDataSource;
 import javax.net.ssl.SSLContext;
 
 import static org.apache.http.HttpStatus.SC_SERVICE_UNAVAILABLE;
@@ -433,14 +442,37 @@ public class HttpConnection implements Connection {
     }
 
     private HttpRequestBase requestWithBody(final HttpEntityEnclosingRequestBase httpRequest, final Request request) {
-        final VPackSlice body = request.getBody();
+        final RequestBody body = request.getBody();
         if (body != null) {
             if (contentType == Protocol.HTTP_VPACK) {
-                httpRequest.setEntity(new ByteArrayEntity(
-                        Arrays.copyOfRange(body.getBuffer(), body.getStart(), body.getStart() + body.getByteSize()),
-                        CONTENT_TYPE_VPACK));
+                if (body instanceof JsonRequestBody) {
+                    VPackSlice vPackSlice = ((JsonRequestBody) body).getValue();
+                    httpRequest.setEntity(new ByteArrayEntity(
+                            Arrays.copyOfRange(vPackSlice.getBuffer(), vPackSlice.getStart(),
+                                    vPackSlice.getStart() + vPackSlice.getByteSize()),
+                            CONTENT_TYPE_VPACK));
+                } else {
+                    throw new C8DBException("This protocol doesn't support this type of body " + body.getClass());
+                }
+
             } else {
-                httpRequest.setEntity(new StringEntity(body.toString(), CONTENT_TYPE_APPLICATION_JSON_UTF8));
+                if (body instanceof JsonRequestBody) {
+                    VPackSlice vPackSlice = ((JsonRequestBody) body).getValue();
+                    httpRequest.setEntity(new StringEntity(vPackSlice.toString(), CONTENT_TYPE_APPLICATION_JSON_UTF8));
+                } else if (body instanceof BinaryRequestBody) {
+                    BinaryRequestBody binaryBody = (BinaryRequestBody) body;
+                    final MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+                    builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
+                    for (BinaryRequestBody.Item item : binaryBody.getItems()) {
+                        builder.addTextBody("meta", item.getMeta().toString(), ContentType.APPLICATION_JSON);
+                        builder.addBinaryBody("value", item.getValue(), ContentType.APPLICATION_OCTET_STREAM, "");
+                    }
+                    final HttpEntity entity = builder.build();
+                    httpRequest.setEntity(entity);
+                } else {
+                    throw new C8DBException("This protocol doesn't support this type of body " + body.getClass() );
+                }
+
             }
         }
         return httpRequest;
@@ -476,15 +508,53 @@ public class HttpConnection implements Connection {
                     response.setBody(new VPackSlice(content));
                 }
             } else {
-                final String content = IOUtils.toString(entity.getContent());
-                if (!content.isEmpty()) {
+                Header[] httpContentTypes = httpResponse.getHeaders("Content-Type");
+                String httpContentType = httpContentTypes.length > 0 ?
+                        httpContentTypes[0].getValue() : "application/json; charset=utf-8";
+                if (httpContentType.startsWith("multipart/form-data")) {
                     try {
-                        response.setBody(
-                                util.serialize(content, new Options().stringAsJson(true).serializeNullValues(true)));
-                    } catch (C8DBException e) {
-                        final byte[] contentAsByteArray = content.getBytes();
-                        if (contentAsByteArray.length > 0) {
-                            response.setBody(new VPackSlice(contentAsByteArray));
+                        ByteArrayDataSource datasource = new ByteArrayDataSource(entity.getContent(), httpContentType);
+                        System.setProperty("mail.mime.multipart.allowempty", "true");
+                        MimeMultipart multipart = new MimeMultipart(datasource);
+                        List<MultipartResponseBody.Item> items = new ArrayList<>();
+                        int count = multipart.getCount();
+                        for (int i = 0; i < count; i++) {
+                            Object value = null;
+                            BodyPart bodyPart = multipart.getBodyPart(i);
+                            if (bodyPart.isMimeType(ContentType.APPLICATION_OCTET_STREAM.getMimeType())) {
+                                value = IOUtils.toByteArray(bodyPart.getInputStream());
+                            } else if (bodyPart.isMimeType(ContentType.APPLICATION_JSON.getMimeType())) {
+                                final String content = IOUtils.toString(bodyPart.getInputStream());
+                                if (!content.isEmpty()) {
+                                    try {
+                                        value = util.serialize(content,
+                                                new Options().stringAsJson(true).serializeNullValues(true));
+                                    } catch (C8DBException e) {
+                                        final byte[] contentAsByteArray = content.getBytes();
+                                        if (contentAsByteArray.length > 0) {
+                                            response.setBody(new VPackSlice(contentAsByteArray));
+                                        }
+                                    }
+                                }
+                            }
+                            items.add(new MultipartResponseBody.Item(value, bodyPart.getContentType(),
+                                    bodyPart.getFileName()));
+                        }
+                        response.setBody(new MultipartResponseBody(items));
+                    } catch (Exception e) {
+                        throw new IOException(e);
+                    }
+                } else {
+                    final String content = IOUtils.toString(entity.getContent());
+                    if (!content.isEmpty()) {
+                        try {
+                            response.setBody(
+                                    util.serialize(content, new Options().stringAsJson(true).serializeNullValues(true)));
+                        } catch (C8DBException e) {
+                            final byte[] contentAsByteArray = content.getBytes();
+                            if (contentAsByteArray.length > 0) {
+                                response.setBody(new VPackSlice(contentAsByteArray));
+                            }
                         }
                     }
                 }

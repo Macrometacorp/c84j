@@ -12,6 +12,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * Modifications copyright (c) 2023 Macrometa Corp All rights reserved.
  */
 
 package com.c8db.velocystream;
@@ -37,7 +39,7 @@ public class Request {
     private final Map<String, String> queryParam;
     private final Map<String, String> headerParam;
     @Expose(serialize = false)
-    private VPackSlice body;
+    private RequestBody body;
 
     public Request(final String tenant, final String database, final RequestType requestType, final String path) {
         this(tenant, database, requestType, true, path);
@@ -116,11 +118,16 @@ public class Request {
         return this;
     }
 
-    public VPackSlice getBody() {
+    public RequestBody getBody() {
         return body;
     }
 
     public Request setBody(final VPackSlice body) {
+        this.body = new JsonRequestBody(body);
+        return this;
+    }
+
+    public Request setBody(final RequestBody body) {
         this.body = body;
         return this;
     }
