@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Macrometa Corp All rights reserved
+ * Copyright (c) 2021 - 2024 Macrometa Corp All rights reserved
  */
 
 package com.c8db.internal.http;
@@ -176,9 +176,9 @@ public class HttpConnection implements Connection {
 
     private static String buildUrl(final String baseUrl, final Request request, final Service service) throws UnsupportedEncodingException {
         final StringBuilder sb = new StringBuilder().append(baseUrl);
-        final String database = request.getDatabase();
-        final String tenant = request.getTenant();
-        if (tenant != null && !tenant.isEmpty() && service != Service.C8FUNCTION) {
+        final String database = request.getPathDatabase();
+        final String tenant = request.getPathTenant();
+        if (StringUtils.isNotEmpty(tenant)) {
             sb.append("/_tenant/").append(tenant);
         }
 
@@ -247,8 +247,7 @@ public class HttpConnection implements Connection {
             httpRequest.setHeader(HttpHeaders.ACCEPT, "application/x-velocypack");
         }
         addHeader(request, httpRequest);
-        httpRequest.setHeader("x-gdn-tenantid", request.getTenant());
-        TenantUser tenantUser = new TenantUser(request.getTenant(), user);
+        TenantUser tenantUser = new TenantUser(request.getDbTenant(), user);
         if (jwtAuthEnabled) {
             String jwt = defaultJWT != null ? defaultJWT : cachedJwt.get(tenantUser);
             if (StringUtils.isNotEmpty(apiKey) && jwt == null) {  //Use API key only if API Key is provided
@@ -319,7 +318,7 @@ public class HttpConnection implements Connection {
             } catch (Exception e) {
                 if (e instanceof C8DBException && ((C8DBException) e).getResponseCode().equals(401)) {
                     // jwt might have expired refresh it
-                    String jwt = addJWT(new TenantUser(request.getTenant(), user));
+                    String jwt = addJWT(new TenantUser(request.getDbTenant(), user));
                     httpRequest.removeHeaders(HttpHeaders.AUTHORIZATION);
                     httpRequest.addHeader(HttpHeaders.AUTHORIZATION, "bearer " + jwt);
                 }

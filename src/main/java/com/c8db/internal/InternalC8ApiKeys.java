@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Macrometa Corp All rights reserved.
+ * Copyright (c) 2021 - 2024 Macrometa Corp All rights reserved.
  */
 
 package com.c8db.internal;
@@ -41,7 +41,7 @@ public abstract class InternalC8ApiKeys<A extends InternalC8DB<E>, D extends Int
     private final D db;
 
     public InternalC8ApiKeys(D db) {
-        super(db.executor, db.util, db.context);
+        super(db.executor, db.util, db.context, db.tenant());
         this.db = db;
     }
 

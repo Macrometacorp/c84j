@@ -1,7 +1,5 @@
 /*
- *
- * Copyright (c) 2022 Macrometa Corp All rights reserved
- *
+ * Copyright (c) 2022 - 2024 Macrometa Corp All rights reserved
  */
 package com.c8db.internal;
 
@@ -95,7 +93,7 @@ public abstract class InternalC8Dynamo<A extends InternalC8DB<E>, D extends Inte
     }
 
     protected InternalC8Dynamo(final D db, final String tableName) {
-        super(db.executor, db.util, db.context);
+        super(db.executor, db.util, db.context, db.tenant());
         this.db = db;
         this.tableName = tableName;
         this.protocolFactory = new SdkJsonProtocolFactory((new JsonClientMetadata()));

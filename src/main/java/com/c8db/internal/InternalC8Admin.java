@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Macrometa Corp All rights reserved.
+ * Copyright (c) 2021 - 2024 Macrometa Corp All rights reserved.
  */
 
 package com.c8db.internal;
@@ -45,7 +45,7 @@ public abstract class InternalC8Admin<A extends InternalC8DB<E>, D extends Inter
     private final D db;
 
     protected InternalC8Admin(final D db) {
-        super(db.executor, db.util, db.context);
+        super(db.executor, db.util, db.context, db.tenant());
         this.db = db;
     }
 

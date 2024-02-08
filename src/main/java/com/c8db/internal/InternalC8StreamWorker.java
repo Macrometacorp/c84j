@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Macrometa Corp All rights reserved
+ * Copyright (c) 2023 - 2024 Macrometa Corp All rights reserved
  */
 
 package com.c8db.internal;
@@ -26,7 +26,7 @@ public abstract class InternalC8StreamWorker<A extends InternalC8DB<E>, D extend
     private final D db;
 
     public InternalC8StreamWorker(D db) {
-        super(db.executor, db.util, db.context);
+        super(db.executor, db.util, db.context, db.tenant());
         this.db = db;
     }
 

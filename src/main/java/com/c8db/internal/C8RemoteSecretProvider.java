@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Macrometa Corp All rights reserved
+ * Copyright (c) 2022 - 2024 Macrometa Corp All rights reserved
  */
 
 package com.c8db.internal;
@@ -62,7 +62,7 @@ public class C8RemoteSecretProvider implements SecretProvider {
         credentials.put("password", new String(password));
         credentials.put("email", email);
         final HttpRequestBase authHttpRequest = RequestUtils.buildHttpRequestBase(
-            new Request(null, null, RequestType.POST, authUrl)
+            new Request(null, null, null, RequestType.POST, authUrl)
                 .setBody(serialization.serialize(credentials)), authUrl, contentType);
         authHttpRequest.setHeader(HttpHeaders.USER_AGENT,
             "Mozilla/5.0 (compatible; C8DB-JavaDriver/1.1; +http://mt.orz.at/)");

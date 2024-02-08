@@ -12,6 +12,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * Modifications copyright (c) 2024 Macrometa Corp All rights reserved.
  */
 
 package com.c8db.internal;
@@ -37,12 +39,15 @@ public abstract class C8Executeable<E extends C8Executor> {
     protected final E executor;
     protected final C8SerializationFactory util;
     protected final C8Context context;
+    protected final String dbTenant;
 
-    protected C8Executeable(final E executor, final C8SerializationFactory util, final C8Context context) {
+    protected C8Executeable(final E executor, final C8SerializationFactory util, final C8Context context,
+                            final String dbTenant) {
         super();
         this.executor = executor;
         this.util = util;
         this.context = context;
+        this.dbTenant = dbTenant;
     }
 
     protected E executor() {
@@ -57,14 +62,14 @@ public abstract class C8Executeable<E extends C8Executor> {
         return util.get(serializer);
     }
 
-    protected Request request(final String tenant, final String database, final RequestType requestType,
+    protected Request request(final String pathTenant, final String pathDatabase, final RequestType requestType,
                               final String... path) {
-        return request(tenant, database, requestType, true, path);
+        return request(pathTenant, pathDatabase, requestType, true, path);
     }
 
-    protected Request request(final String tenant, final String database, final RequestType requestType,
+    protected Request request(final String pathTenant, final String pathDatabase, final RequestType requestType,
             final boolean retryEnabled, final String... path) {
-        final Request request = new Request(tenant, database, requestType, retryEnabled, createPath(path));
+        final Request request = new Request(dbTenant, pathTenant, pathDatabase, requestType, retryEnabled, createPath(path));
         for (final Entry<String, String> header : context.getHeaderParam().entrySet()) {
             request.putHeaderParam(header.getKey(), header.getValue());
         }
