@@ -12,6 +12,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * Modifications copyright (c) 2024 Macrometa Corp All rights reserved.
  */
 
 package com.c8db.internal.net;
@@ -141,7 +143,8 @@ public class ExtendedHostResolver implements HostResolver {
 
         try {
 
-            response = executor.execute(new Request(C8RequestParam.DEMO_TENANT, C8RequestParam.SYSTEM, RequestType.GET,
+            response = executor.execute(new Request(C8RequestParam.DEMO_TENANT, C8RequestParam.DEMO_TENANT,
+                    C8RequestParam.SYSTEM, RequestType.GET,
                     "/_api/cluster/endpoints"), new ResponseDeserializer<Collection<String>>() {
                         @Override
                         public Collection<String> deserialize(final Response response) throws VPackException {

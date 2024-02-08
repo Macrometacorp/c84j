@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Macrometa Corp All rights reserved.
+ * Copyright (c) 2021 - 2024 Macrometa Corp All rights reserved.
  */
 
 package com.c8db.internal;
@@ -15,9 +15,7 @@ import com.c8db.velocystream.Request;
 import com.c8db.velocystream.RequestType;
 import com.c8db.velocystream.Response;
 
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Map;
 
 /**
@@ -25,20 +23,18 @@ import java.util.Map;
  */
 public abstract class InternalC8Compute<A extends InternalC8DB<E>, D extends InternalC8Database<A, E>, E extends C8Executor>
     extends C8Executeable<E> {
-
-    protected static final String PATH_API_COMPUTE = "/_api/compute";
-    protected static final String PATH_API_FX = PATH_API_COMPUTE + "/fx";
+    protected static final String PATH_API_FUNCTION = "/_api/function";
     protected static final String METADATA = "metadata";
 
     private final D db;
 
     public InternalC8Compute(D db) {
-        super(db.executor, db.util, db.context);
+        super(db.executor, db.util, db.context, db.tenant());
         this.db = db;
     }
 
     protected Request getFunctionsRequest(final FxReadOptions options) {
-        final Request request = request(db.tenant(), db.name(), RequestType.GET, PATH_API_FX);
+        final Request request = request(null, db.name(), RequestType.GET, PATH_API_FUNCTION);
         final FxReadOptions params = (options != null ? options : new FxReadOptions());
         request.putQueryParam("type", params.getType().toString().toLowerCase());
         return request;
@@ -56,7 +52,7 @@ public abstract class InternalC8Compute<A extends InternalC8DB<E>, D extends Int
     }
 
     protected Request getInfoRequest(final String name) {
-        final Request request = request(db.tenant(), db.name(), RequestType.GET, PATH_API_FX, name);
+        final Request request = request(null, db.name(), RequestType.GET, PATH_API_FUNCTION, name);
         return request;
     }
 
@@ -73,8 +69,7 @@ public abstract class InternalC8Compute<A extends InternalC8DB<E>, D extends Int
     }
 
     protected Request getMetadataRequest() {
-        final Request request = request(db.tenant(), db.name(), RequestType.GET, PATH_API_FX, METADATA);
-        return request;
+        return request(null, db.name(), RequestType.GET, PATH_API_FUNCTION, METADATA);
     }
 
     protected ResponseDeserializer<FxMetadataEntity> getMetadataResponseDeserializer() {
@@ -90,7 +85,7 @@ public abstract class InternalC8Compute<A extends InternalC8DB<E>, D extends Int
 
     protected Request executeFunctionRequest(String name, Map<String, Object> arguments) {
         final VPackSlice body = util().serialize(arguments);
-        final Request request = request(db.tenant(), db.name(), RequestType.POST, false, PATH_API_FX, "invoke", name);
+        final Request request = request(null, db.name(), RequestType.POST, false, PATH_API_FUNCTION, "invoke", name);
         request.putQueryParam("params", body.toString());
         return request;
     }

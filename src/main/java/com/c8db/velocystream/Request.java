@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Modifications copyright (c) 2023 Macrometa Corp All rights reserved.
+ * Modifications copyright (c) 2023 - 2024 Macrometa Corp All rights reserved.
  */
 
 package com.c8db.velocystream;
@@ -31,7 +31,8 @@ public class Request {
 
     private int version = 1;
     private int type = 1;
-    private final String tenant;
+    private final String dbTenant;
+    private final String pathTenant;
     private final String database;
     private final RequestType requestType;
     private final boolean retryEnabled;
@@ -41,14 +42,27 @@ public class Request {
     @Expose(serialize = false)
     private RequestBody body;
 
-    public Request(final String tenant, final String database, final RequestType requestType, final String path) {
-        this(tenant, database, requestType, true, path);
+    public Request(final String dbTenant, final String pathTenant, final String pathDatabase,
+                   final RequestType requestType,
+                   final String path) {
+        this(dbTenant, pathTenant, pathDatabase, requestType, true, path);
     }
 
-    public Request(final String tenant, final String database, final RequestType requestType, final boolean retryEnabled,
+    /**
+     *
+     * @param dbTenant - this attribute always not empty. It comes from c8db.db(<dbTenant>, ..)
+     * @param pathTenant  - this attribute empty if request doesn't have `/_tenant/<pathTenant>` an a request.
+     * @param database - - this attribute empty if request doesn't have `/_fabric/<fabric>` an a request.
+     * @param requestType - HTTP type of request
+     * @param retryEnabled - use retry strategy
+     * @param path - path suffix for a request
+     */
+    public Request(final String dbTenant, final String pathTenant, final String database, final RequestType requestType,
+                   final boolean retryEnabled,
                    final String path) {
         super();
-        this.tenant = tenant;
+        this.dbTenant = dbTenant;
+        this.pathTenant = pathTenant;
         this.database = database;
         this.request = path;
         this.requestType = requestType;
@@ -76,11 +90,15 @@ public class Request {
         return this;
     }
 
-    public String getTenant() {
-        return tenant;
+    public String getPathTenant() {
+        return pathTenant;
     }
 
-    public String getDatabase() {
+    public String getDbTenant() {
+        return dbTenant;
+    }
+
+    public String getPathDatabase() {
         return database;
     }
 

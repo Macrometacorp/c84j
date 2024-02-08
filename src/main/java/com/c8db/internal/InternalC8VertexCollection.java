@@ -12,6 +12,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * Modifications copyright (c) 2024 Macrometa Corp All rights reserved.
  */
 
 package com.c8db.internal;
@@ -47,7 +49,7 @@ public abstract class InternalC8VertexCollection<A extends InternalC8DB<E>, D ex
     private final String name;
 
     protected InternalC8VertexCollection(final G graph, final String name) {
-        super(graph.executor, graph.util, graph.context);
+        super(graph.executor, graph.util, graph.context, graph.db().tenant());
         this.graph = graph;
         this.name = name;
     }

@@ -12,6 +12,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * Modifications copyright (c) 2024 Macrometa Corp All rights reserved.
  */
 
 package com.c8db.internal.velocystream.internal;
@@ -28,7 +30,7 @@ public class AuthenticationRequest extends Request {
     private final String encryption;// "plain"
 
     public AuthenticationRequest(final String user, final String password, final String encryption) {
-        super(null, null, null, null);
+        super(null, null, null, null, null);
         this.user = user;
         this.password = password;
         this.encryption = encryption;

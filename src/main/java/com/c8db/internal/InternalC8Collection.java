@@ -13,8 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Modifications copyright (c) 2021 Macrometa Corp All rights reserved.
- *
+ * Modifications copyright (c) 2021 - 2024 Macrometa Corp All rights reserved.
  */
 
 package com.c8db.internal;
@@ -96,7 +95,7 @@ public abstract class InternalC8Collection<A extends InternalC8DB<E>, D extends 
     protected volatile String name;
 
     protected InternalC8Collection(final D db, final String name) {
-        super(db.executor, db.util, db.context);
+        super(db.executor, db.util, db.context, db.tenant());
         this.db = db;
         this.name = name;
     }

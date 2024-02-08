@@ -1,7 +1,5 @@
 /*
- *
- *  * Copyright (c) 2022 Macrometa Corp All rights reserved
- *
+ * Copyright (c) 2022 - 2024 Macrometa Corp All rights reserved
  */
 
 package com.c8db.internal;
@@ -28,7 +26,7 @@ public abstract class InternalC8Alerts<A extends InternalC8DB<E>, D extends Inte
     private final D db;
 
     protected InternalC8Alerts(final D db) {
-        super(db.executor, db.util, db.context);
+        super(db.executor, db.util, db.context, db.tenant());
         this.db = db;
     }
 

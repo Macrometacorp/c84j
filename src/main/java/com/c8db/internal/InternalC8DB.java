@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Macrometa Corp All rights reserved
+ * Copyright (c) 2021 - 2024 Macrometa Corp All rights reserved
  */
 
 package com.c8db.internal;
@@ -16,7 +16,6 @@ import com.arangodb.velocypack.exception.VPackException;
 import com.c8db.entity.DataCenterEntity;
 import com.c8db.entity.DcInfoEntity;
 import com.c8db.entity.GeoFabricEntity;
-import com.c8db.entity.GeoFabricPermissions;
 import com.c8db.entity.LogLevelEntity;
 import com.c8db.entity.Permissions;
 import com.c8db.entity.ServerRole;
@@ -34,8 +33,8 @@ import com.c8db.velocystream.Request;
 import com.c8db.velocystream.RequestType;
 import com.c8db.velocystream.Response;
 
+import static com.c8db.internal.InternalC8ApiKeys.SYSTEM_TENANT;
 import static com.c8db.internal.InternalC8Database.QUERY_PARAM_FULL;
-
 
 public abstract class InternalC8DB<E extends C8Executor> extends C8Executeable<E> {
 
@@ -45,7 +44,7 @@ public abstract class InternalC8DB<E extends C8Executor> extends C8Executeable<E
     private static final String PATH_API_ROLE = "/_admin/server/role";
 
     protected InternalC8DB(final E executor, final C8SerializationFactory util, final C8Context context) {
-        super(executor, util, context);
+        super(executor, util, context, SYSTEM_TENANT);
     }
 
     protected Request getRoleRequest() {
