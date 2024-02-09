@@ -25,6 +25,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+
+import static com.c8db.internal.InternalC8ApiKeys.SYSTEM_TENANT;
 
 /**
  * Internal request/response related functions.
@@ -129,7 +132,12 @@ public abstract class InternalC8Admin<A extends InternalC8DB<E>, D extends Inter
     }
     
     protected Request getTenantFeaturesRequest(final String tenant) {
-        return request(db.tenant(), db.name(), RequestType.GET, PATH_API_FEATURES, PATH_TENANT, tenant);
+        final Request request = new Request(SYSTEM_TENANT, null, null, RequestType.GET, true,
+                createPath(PATH_API_FEATURES, PATH_TENANT, tenant));
+        for (final Map.Entry<String, String> header : context.getHeaderParam().entrySet()) {
+            request.putHeaderParam(header.getKey(), header.getValue());
+        }
+        return request;
     }
 
     protected Request getTenantMetricsRequest(TenantMetricsOption options){
