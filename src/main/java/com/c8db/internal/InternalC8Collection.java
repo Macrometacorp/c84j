@@ -95,7 +95,7 @@ public abstract class InternalC8Collection<A extends InternalC8DB<E>, D extends 
     protected volatile String name;
 
     protected InternalC8Collection(final D db, final String name) {
-        super(db.executor, db.util, db.context, db.tenant());
+        super(db.executor, db.util, db.context, db.tenant(), db.credentials());
         this.db = db;
         this.name = name;
     }

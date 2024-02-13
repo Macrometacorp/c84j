@@ -49,7 +49,7 @@ public abstract class InternalC8VertexCollection<A extends InternalC8DB<E>, D ex
     private final String name;
 
     protected InternalC8VertexCollection(final G graph, final String name) {
-        super(graph.executor, graph.util, graph.context, graph.db().tenant());
+        super(graph.executor, graph.util, graph.context, graph.db().tenant(), graph.db().credentials());
         this.graph = graph;
         this.name = name;
     }

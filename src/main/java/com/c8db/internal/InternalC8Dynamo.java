@@ -93,7 +93,7 @@ public abstract class InternalC8Dynamo<A extends InternalC8DB<E>, D extends Inte
     }
 
     protected InternalC8Dynamo(final D db, final String tableName) {
-        super(db.executor, db.util, db.context, db.tenant());
+        super(db.executor, db.util, db.context, db.tenant(), db.credentials());
         this.db = db;
         this.tableName = tableName;
         this.protocolFactory = new SdkJsonProtocolFactory((new JsonClientMetadata()));

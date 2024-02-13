@@ -7,6 +7,8 @@ package com.c8db.internal;
 import com.c8db.C8DBException;
 import com.c8db.Protocol;
 import com.c8db.SecretProvider;
+import com.c8db.credentials.C8Credentials;
+import com.c8db.credentials.DefaultCredentials;
 import com.c8db.internal.net.HostDescription;
 import com.c8db.internal.util.RequestUtils;
 import com.c8db.internal.util.ResponseUtils;
@@ -29,21 +31,17 @@ import org.apache.http.impl.client.CloseableHttpClient;
 public class C8RemoteSecretProvider implements SecretProvider {
     private Protocol contentType;
     private boolean useSsl;
-    private String username;
-    private String email;
-    private char[] password;
+    private C8Credentials credentials;
     private HostDescription authHost;
     private C8Serialization serialization;
     private CloseableHttpClient client;
 
     public void init(SecretProviderContext context) {
-        this.username = context.getUsername();
-        this.email = context.getEmail();
-        this.password = context.getPassword() != null ? context.getPassword() : "".toCharArray();
+        this.credentials = context.getCredentials();
         this.serialization = context.getSerialization();
         this.client = context.getClient();
         this.authHost = context.getHost();
-        this.useSsl = context.getUseSsl();
+        this.useSsl = context.isUseSsl();
         this.contentType = context.getContentType();
     }
 
@@ -56,28 +54,33 @@ public class C8RemoteSecretProvider implements SecretProvider {
     @Override
     public String fetchSecret(String tenant, String user) {
         String authUrl = RequestUtils.buildBaseUrl(authHost, useSsl) + "/_open/auth";
-        Map<String, String> credentials = new HashMap<>();
+        Map<String, String> credentialsMap = new HashMap<>();
 
-        credentials.put("username", StringUtils.isNotEmpty(user) ? user : username);
-        credentials.put("password", new String(password));
-        credentials.put("email", email);
-        final HttpRequestBase authHttpRequest = RequestUtils.buildHttpRequestBase(
-            new Request(null, null, null, RequestType.POST, authUrl)
-                .setBody(serialization.serialize(credentials)), authUrl, contentType);
-        authHttpRequest.setHeader(HttpHeaders.USER_AGENT,
-            "Mozilla/5.0 (compatible; C8DB-JavaDriver/1.1; +http://mt.orz.at/)");
+        if (credentials instanceof DefaultCredentials) {
+            DefaultCredentials defaultCredentials = (DefaultCredentials) credentials;
+            credentialsMap.put("username", defaultCredentials.getUser());
+            credentialsMap.put("password", defaultCredentials.getPassword());
+            credentialsMap.put("email", defaultCredentials.getEmail());
+            final HttpRequestBase authHttpRequest = RequestUtils.buildHttpRequestBase(
+                            new Request(tenant, null, null, RequestType.POST, authUrl)
+                            .setBody(serialization.serialize(credentialsMap)), authUrl, contentType);
+            authHttpRequest.setHeader(HttpHeaders.USER_AGENT,
+                            "Mozilla/5.0 (compatible; C8DB-JavaDriver/1.1; +http://mt.orz.at/)");
 
-        if (contentType == Protocol.HTTP_VPACK) {
-            authHttpRequest.setHeader(HttpHeaders.ACCEPT, "application/x-velocypack");
-        }
+            if (contentType == Protocol.HTTP_VPACK) {
+                authHttpRequest.setHeader(HttpHeaders.ACCEPT, "application/x-velocypack");
+            }
 
-        try {
-            Response authResponse = ResponseUtils.buildResponse(serialization,
-                    client.execute(authHttpRequest), contentType);
-            ResponseUtils.checkError(serialization, authResponse);
-            return authResponse.getBody().get("jwt").getAsString();
-        } catch (IOException e) {
-            throw new C8DBException(e);
+            try {
+                Response authResponse = ResponseUtils.buildResponse(serialization,
+                                client.execute(authHttpRequest), contentType);
+                ResponseUtils.checkError(serialization, authResponse);
+                return authResponse.getBody().get("jwt").getAsString();
+            } catch (IOException e) {
+                throw new C8DBException(e);
+            }
+        } else {
+            throw new C8DBException("Support only DefaultCredentials");
         }
     }
 }

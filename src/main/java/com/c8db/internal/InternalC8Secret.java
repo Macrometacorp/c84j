@@ -23,7 +23,7 @@ public abstract class InternalC8Secret<A extends InternalC8DB<E>, D extends Inte
     private final D db;
 
     public InternalC8Secret(D db) {
-        super(db.executor, db.util, db.context, db.tenant());
+        super(db.executor, db.util, db.context, db.tenant(), db.credentials());
         this.db = db;
     }
 

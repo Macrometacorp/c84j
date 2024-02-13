@@ -44,7 +44,7 @@ public abstract class InternalC8DB<E extends C8Executor> extends C8Executeable<E
     private static final String PATH_API_ROLE = "/_admin/server/role";
 
     protected InternalC8DB(final E executor, final C8SerializationFactory util, final C8Context context) {
-        super(executor, util, context, SYSTEM_TENANT);
+        super(executor, util, context, SYSTEM_TENANT, null);
     }
 
     protected Request getRoleRequest() {

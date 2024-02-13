@@ -23,6 +23,7 @@ import java.util.Map;
 
 import com.arangodb.velocypack.VPackSlice;
 import com.arangodb.velocypack.annotations.Expose;
+import com.c8db.credentials.C8Credentials;
 
 /**
  *
@@ -35,6 +36,7 @@ public class Request {
     private final String pathTenant;
     private final String database;
     private final RequestType requestType;
+    private final C8Credentials credentials;
     private final boolean retryEnabled;
     private final String request;
     private final Map<String, String> queryParam;
@@ -45,7 +47,13 @@ public class Request {
     public Request(final String dbTenant, final String pathTenant, final String pathDatabase,
                    final RequestType requestType,
                    final String path) {
-        this(dbTenant, pathTenant, pathDatabase, requestType, true, path);
+        this(dbTenant, pathTenant, pathDatabase, requestType, null, true, path);
+    }
+
+    public Request(final String dbTenant, final String pathTenant, final String pathDatabase,
+                   final RequestType requestType,
+                   final String path, C8Credentials credentials) {
+        this(dbTenant, pathTenant, pathDatabase, requestType, credentials, true, path);
     }
 
     /**
@@ -58,8 +66,7 @@ public class Request {
      * @param path - path suffix for a request
      */
     public Request(final String dbTenant, final String pathTenant, final String database, final RequestType requestType,
-                   final boolean retryEnabled,
-                   final String path) {
+                   final C8Credentials credentials, final boolean retryEnabled, final String path) {
         super();
         this.dbTenant = dbTenant;
         this.pathTenant = pathTenant;
@@ -69,6 +76,7 @@ public class Request {
         body = null;
         queryParam = new HashMap<String, String>();
         headerParam = new HashMap<String, String>();
+        this.credentials = credentials;
         this.retryEnabled = retryEnabled;
     }
 
@@ -127,6 +135,10 @@ public class Request {
 
     public boolean isRetryEnabled() {
         return retryEnabled;
+    }
+
+    public C8Credentials getCredentials() {
+        return credentials;
     }
 
     public Request putHeaderParam(final String key, final String value) {

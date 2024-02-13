@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import com.c8db.credentials.C8Credentials;
 import com.c8db.entity.GeoFabricPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -114,14 +115,25 @@ public class C8DBImpl extends InternalC8DB<C8ExecutorSync> implements C8DB {
     }
 
     @Override
+    public C8Database db(final String tenant, final String name, final String spotDc, final String dcList,
+                         C8Credentials credentials) {
+        return new C8DatabaseImpl(this, tenant, name, spotDc, dcList, credentials).setCursorInitializer(cursorInitializer);
+    }
+
+    @Override
     public C8Database db(final String tenant, final String name, final String spotDc, final String dcList) {
-        return new C8DatabaseImpl(this, tenant, name, spotDc, dcList).setCursorInitializer(cursorInitializer);
+        return db(tenant, name, spotDc, dcList, null);
     }
 
     @Override
     public C8Database db(String tenant, String name, Map<String, String> headerParams) {
         this.context.getHeaderParam().putAll(headerParams);
         return db(tenant, name, "", "");
+    }
+
+    @Override
+    public C8Database db(String tenant, String name, Map<String, String> headerParams, C8Credentials credentials) {
+        return db(tenant, name, "", "", credentials);
     }
     
     @Override

@@ -20,6 +20,7 @@ import com.c8db.C8KeyValue;
 import com.c8db.C8Redis;
 import com.c8db.C8CEP;
 import com.c8db.C8Secret;
+import com.c8db.credentials.C8Credentials;
 import com.c8db.entity.C8DBVersion;
 import com.c8db.C8Stream;
 import com.c8db.Restql;
@@ -75,8 +76,8 @@ public class C8DatabaseImpl extends InternalC8Database<C8DBImpl, C8ExecutorSync>
     private C8CursorInitializer cursorInitializer;
 
     protected C8DatabaseImpl(final C8DBImpl c8DB, final String tenant, final String name,
-                             final String spotDc, final String dcList) {
-        super(c8DB, tenant, name, spotDc, dcList);
+                             final String spotDc, final String dcList, C8Credentials credentials) {
+        super(c8DB, tenant, name, spotDc, dcList, credentials);
     }
 
     @Override

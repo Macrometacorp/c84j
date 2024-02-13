@@ -15,6 +15,7 @@ import com.arangodb.velocypack.VPackParser;
 import com.arangodb.velocypack.VPackParserModule;
 import com.arangodb.velocypack.VPackSerializer;
 import com.arangodb.velocypack.ValueType;
+import com.c8db.credentials.C8Credentials;
 import com.c8db.entity.C8DBVersion;
 import com.c8db.entity.DataCenterEntity;
 import com.c8db.entity.DcInfoEntity;
@@ -338,6 +339,17 @@ public interface C8DB extends C8SerializationAccessor {
          */
         public Builder secretProvider(final SecretProvider provider) {
             setSecretProvider(provider);
+            return this;
+        }
+
+        /**
+         * Sets credentials.
+         *
+         * @param credentials the child of C8Credentials interface to be used.
+         * @return {@link C8DB.Builder}
+         */
+        public Builder credentials(final C8Credentials credentials) {
+            setCredentials(credentials);
             return this;
         }
 
@@ -696,8 +708,9 @@ public interface C8DB extends C8SerializationAccessor {
             if (protocol == null || Protocol.VST == protocol) {
                 connectionFactory = new VstConnectionFactorySync(timeout, connectionTtl, useSsl, sslContext);
             } else {
-                connectionFactory = new HttpConnectionFactory(timeout, responseSizeLimit, user, password, secretProvider, email, jwtAuth, jwtToken, useSsl,
-                    sslContext, custom, protocol, connectionTtl, httpCookieSpec, apiKey, auxHost, retryTimeout);
+                connectionFactory = new HttpConnectionFactory(credentials, timeout, responseSizeLimit, secretProvider,
+                        useSsl,
+                    sslContext, custom, protocol, connectionTtl, httpCookieSpec, auxHost, retryTimeout);
             }
             final Map<Service, Collection<Host>> hostsMatrix = createHostMatrix(max, connectionFactory);
             final HostResolver hostResolver = createHostResolver(hostsMatrix, max, connectionFactory);
@@ -743,6 +756,22 @@ public interface C8DB extends C8SerializationAccessor {
      * @param dcList The list of Edge Locations (Datacenters) as a comma-separated
      *               string. The individual elements for this parameter are your
      *               Edge Location URL prefixes up to the first . character.
+     * @param credentials custom credentials for database
+     * @return database handler
+     */
+    C8Database db(String tenant, String name, String spotDc, String dcList, C8Credentials credentials);
+
+    /**
+     * Returns a {@code ArangoDatabase} instance for the given database name.
+     *
+     * @param tenant Name of the tenant
+     * @param name   Name of the database
+     * @param spotDc The Edge Location (Datacenter) where on-spot operations for the
+     *               given geofabric will be performed. By default a random
+     *               datacenter is chosen from those which are capable.
+     * @param dcList The list of Edge Locations (Datacenters) as a comma-separated
+     *               string. The individual elements for this parameter are your
+     *               Edge Location URL prefixes up to the first . character.
      * @return database handler
      */
     C8Database db(String tenant, String name, String spotDc, String dcList);
@@ -767,6 +796,18 @@ public interface C8DB extends C8SerializationAccessor {
      * @return database handler
      */
     C8Database db(String tenant, String name, Map<String, String> headerParams);
+
+    /**
+     * Returns a {@code ArangoDatabase} instance for the given database name and
+     * tenant.
+     *
+     * @param tenant Name of the tenant
+     * @param name   Name of the database
+     * @param headerParams HTTP header parameters
+     * @param credentials custom credentials for database
+     * @return database handler
+     */
+    C8Database db(String tenant, String name, Map<String, String> headerParams, C8Credentials credentials);
     
     /**
      * Creates a new database with the given name.

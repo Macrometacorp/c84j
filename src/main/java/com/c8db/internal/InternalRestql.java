@@ -44,7 +44,7 @@ public abstract class InternalRestql<A extends InternalC8DB<E>, D extends Intern
     private final D db;
 
     protected InternalRestql(final D db) {
-        super(db.executor, db.util, db.context, db.tenant());
+        super(db.executor, db.util, db.context, db.tenant(), db.credentials());
         this.db = db;
     }
 

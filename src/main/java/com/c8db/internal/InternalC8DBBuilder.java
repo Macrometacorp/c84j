@@ -24,6 +24,10 @@ import com.c8db.C8DB;
 import com.c8db.C8DBException;
 import com.c8db.SecretProvider;
 import com.c8db.Service;
+import com.c8db.credentials.ApiKeyCredentials;
+import com.c8db.credentials.C8Credentials;
+import com.c8db.credentials.DefaultCredentials;
+import com.c8db.credentials.JwtCredentials;
 import com.c8db.entity.LoadBalancingStrategy;
 import com.c8db.internal.net.ConnectionFactory;
 import com.c8db.internal.net.DirtyReadHostHandler;
@@ -41,6 +45,7 @@ import com.c8db.internal.velocypack.VPackDriverModule;
 import com.c8db.util.C8Deserializer;
 import com.c8db.util.C8Serialization;
 import com.c8db.util.C8Serializer;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -112,6 +117,8 @@ public abstract class InternalC8DBBuilder {
     protected String apiKey;
     protected SecretProvider secretProvider;
 
+    protected C8Credentials credentials;
+
     public InternalC8DBBuilder() {
         super();
         vpackBuilder = new VPack.Builder();
@@ -181,14 +188,21 @@ public abstract class InternalC8DBBuilder {
 
     protected void setEmail(String email) {
         this.email = email;
+        tryCreateDefaultCredentials();
     }
 
     protected void setJwtToken(String jwtToken) {
         this.jwtToken = jwtToken;
+        if (StringUtils.isNotEmpty(jwtToken)) {
+            this.credentials = new JwtCredentials(jwtToken);
+        }
     }
 
     protected void setApiKey(String apiKey) {
         this.apiKey = apiKey;
+        if (StringUtils.isNotEmpty(apiKey)) {
+            this.credentials = new ApiKeyCredentials(apiKey);
+        }
     }
 
     protected void setTimeout(final Integer timeout) {
@@ -201,10 +215,12 @@ public abstract class InternalC8DBBuilder {
 
     protected void setUser(final String user) {
         this.user = user;
+        tryCreateDefaultCredentials();
     }
 
     protected void setPassword(final String password) {
         this.password = password;
+        tryCreateDefaultCredentials();
     }
 
     protected void setUseSsl(final Boolean useSsl) {
@@ -241,6 +257,10 @@ public abstract class InternalC8DBBuilder {
 
     protected void setSecretProvider(final SecretProvider secretProvider) {
         this.secretProvider = secretProvider;
+    }
+
+    protected void setCredentials(final C8Credentials credentials) {
+        this.credentials = credentials;
     }
 
     protected void serializer(final C8Serializer serializer) {
@@ -453,4 +473,13 @@ public abstract class InternalC8DBBuilder {
         return matrix;
     }
 
+    private void tryCreateDefaultCredentials() {
+        if (StringUtils.isNotEmpty(email) && StringUtils.isNotEmpty(password)) {
+            if (StringUtils.isEmpty(user)) {
+                this.credentials = new DefaultCredentials(email, password);
+            } else {
+                this.credentials = new DefaultCredentials(email, password, user);
+            }
+        }
+    }
 }

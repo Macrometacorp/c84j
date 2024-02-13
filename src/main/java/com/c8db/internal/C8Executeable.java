@@ -22,6 +22,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.Map.Entry;
 
 import com.c8db.C8DBException;
+import com.c8db.credentials.C8Credentials;
 import com.c8db.internal.util.C8SerializationFactory;
 import com.c8db.internal.util.EncodeUtils;
 import com.c8db.internal.util.C8SerializationFactory.Serializer;
@@ -40,14 +41,16 @@ public abstract class C8Executeable<E extends C8Executor> {
     protected final C8SerializationFactory util;
     protected final C8Context context;
     protected final String dbTenant;
+    private final C8Credentials credentials;
 
     protected C8Executeable(final E executor, final C8SerializationFactory util, final C8Context context,
-                            final String dbTenant) {
+                            final String dbTenant, final C8Credentials credentials) {
         super();
         this.executor = executor;
         this.util = util;
         this.context = context;
         this.dbTenant = dbTenant;
+        this.credentials = credentials;
     }
 
     protected E executor() {
@@ -62,6 +65,10 @@ public abstract class C8Executeable<E extends C8Executor> {
         return util.get(serializer);
     }
 
+    public C8Credentials credentials() {
+        return credentials;
+    }
+
     protected Request request(final String pathTenant, final String pathDatabase, final RequestType requestType,
                               final String... path) {
         return request(pathTenant, pathDatabase, requestType, true, path);
@@ -69,7 +76,8 @@ public abstract class C8Executeable<E extends C8Executor> {
 
     protected Request request(final String pathTenant, final String pathDatabase, final RequestType requestType,
             final boolean retryEnabled, final String... path) {
-        final Request request = new Request(dbTenant, pathTenant, pathDatabase, requestType, retryEnabled, createPath(path));
+        final Request request = new Request(dbTenant, pathTenant, pathDatabase, requestType, credentials, retryEnabled,
+                createPath(path));
         for (final Entry<String, String> header : context.getHeaderParam().entrySet()) {
             request.putHeaderParam(header.getKey(), header.getValue());
         }

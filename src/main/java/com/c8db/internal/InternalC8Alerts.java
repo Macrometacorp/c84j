@@ -26,7 +26,7 @@ public abstract class InternalC8Alerts<A extends InternalC8DB<E>, D extends Inte
     private final D db;
 
     protected InternalC8Alerts(final D db) {
-        super(db.executor, db.util, db.context, db.tenant());
+        super(db.executor, db.util, db.context, db.tenant(), db.credentials());
         this.db = db;
     }
 

@@ -27,7 +27,7 @@ public abstract class InternalC8Redis<A extends InternalC8DB<E>, D extends Inter
     }
 
     protected InternalC8Redis(final D db, final String tableName) {
-        super(db.executor, db.util, db.context, db.tenant());
+        super(db.executor, db.util, db.context, db.tenant(), db.credentials());
         this.db = db;
         this.tableName = tableName;
         this.protocolFactory = new SdkJsonProtocolFactory((new JsonClientMetadata()));

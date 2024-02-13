@@ -26,7 +26,7 @@ public abstract class InternalC8StreamWorker<A extends InternalC8DB<E>, D extend
     private final D db;
 
     public InternalC8StreamWorker(D db) {
-        super(db.executor, db.util, db.context, db.tenant());
+        super(db.executor, db.util, db.context, db.tenant(), db.credentials());
         this.db = db;
     }
 

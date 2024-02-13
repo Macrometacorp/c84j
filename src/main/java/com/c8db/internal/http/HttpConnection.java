@@ -8,6 +8,11 @@ import com.c8db.C8DBException;
 import com.c8db.Protocol;
 import com.c8db.SecretProvider;
 import com.c8db.Service;
+import com.c8db.credentials.ApiKeyCredentials;
+import com.c8db.credentials.BasicCredentials;
+import com.c8db.credentials.C8Credentials;
+import com.c8db.credentials.DefaultCredentials;
+import com.c8db.credentials.JwtCredentials;
 import com.c8db.internal.C8RemoteSecretProvider;
 import com.c8db.internal.SecretProviderContext;
 import com.c8db.internal.net.Connection;
@@ -43,7 +48,6 @@ import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.message.BasicHeaderElementIterator;
@@ -76,41 +80,30 @@ public class HttpConnection implements Connection {
 
     private final PoolingHttpClientConnectionManager cm;
     private final CloseableHttpClient client;
-    private final String user;
-    private final String password;
-    private final String email;
-    private final Boolean jwtAuthEnabled;
+    private final C8Credentials credentials;
     private final C8Serialization util;
     private final Boolean useSsl;
     private final Protocol contentType;
     private final HostDescription host;
     private Map<TenantUser, String> cachedJwt = new ConcurrentHashMap<>();
-    private final String defaultJWT;
-    private final String apiKey;
     private final HostDescription auxHost;
     private final SecretProvider secretProvider;
     private final Service service;
     private final Integer retryTimeout;
 
-    private HttpConnection(final HostDescription host, final Integer timeout, final Integer responseSizeLimit, final String user, final String password,
-        final String email, final Boolean jwtAuthEnabled, final Boolean useSsl,
-        final SSLContext sslContext, final C8Serialization util,
-        final Protocol contentType, final Long ttl, final String httpCookieSpec,
-        final String jwt, final String apiKey, final HostDescription auxHost,
-        final SecretProvider secretProvider, final Service service, Integer retryTimeout) {
+    private HttpConnection(final C8Credentials credentials, final HostDescription host, final Integer timeout,
+                           final Integer responseSizeLimit, final Boolean useSsl, final SSLContext sslContext,
+                           final C8Serialization util, final Protocol contentType, final Long ttl,
+                           final String httpCookieSpec, final HostDescription auxHost,
+                           final SecretProvider secretProvider, final Service service, Integer retryTimeout) {
 
         super();
+        this.credentials = credentials;
         this.host = host;
-        this.user = user;
-        this.password = password != null ? password : "";
-        this.email = email;
-        this.jwtAuthEnabled = jwtAuthEnabled;
         this.useSsl = useSsl;
         this.util = util;
         this.contentType = contentType;
-        this.apiKey = apiKey;
         this.auxHost = auxHost;
-        this.defaultJWT = jwt;
         this.service = service;
         this.retryTimeout = retryTimeout;
 
@@ -165,10 +158,9 @@ public class HttpConnection implements Connection {
         }
         client = builder.build();
 
-        String pwd = password != null ? password : "";
-        SecretProviderContext secCtx = new SecretProviderContext.Builder().email(email).username(user).useSsl(useSsl)
-                .password(pwd.toCharArray()).client(client).host(auxHost).serialization(util)
-                .contentType(contentType).build();
+        SecretProviderContext secCtx =
+                SecretProviderContext.builder().credentials(credentials).useSsl(useSsl).client(client).host(auxHost).
+                        serialization(util).contentType(contentType).build();
         this.secretProvider =
                 secretProvider == null ? new C8RemoteSecretProvider() : secretProvider;
         this.secretProvider.init(secCtx);
@@ -247,43 +239,54 @@ public class HttpConnection implements Connection {
             httpRequest.setHeader(HttpHeaders.ACCEPT, "application/x-velocypack");
         }
         addHeader(request, httpRequest);
-        TenantUser tenantUser = new TenantUser(request.getDbTenant(), user);
-        if (jwtAuthEnabled) {
-            String jwt = defaultJWT != null ? defaultJWT : cachedJwt.get(tenantUser);
-            if (StringUtils.isNotEmpty(apiKey) && jwt == null) {  //Use API key only if API Key is provided
-                LOGGER.debug("Using API Key for authentication.");
-                httpRequest.addHeader(HttpHeaders.AUTHORIZATION, "apikey " + apiKey);
-            } else if (jwt == null) { //Generate JWT using user credentials if jwt and apikey are absent
-                jwt = addJWT(tenantUser);
-                LOGGER.debug("Using JWT for authentication.");
-                httpRequest.addHeader(HttpHeaders.AUTHORIZATION, "bearer " + jwt);
-            } else { //Add Header when JWT is provided
-                LOGGER.debug("Using JWT for authentication.");
-                httpRequest.addHeader(HttpHeaders.AUTHORIZATION, "bearer " + jwt);
-            }
-        } else {
-            // basic auth instead
+
+        C8Credentials credentials = request.getCredentials() == null ? this.credentials : request.getCredentials();
+        if (credentials instanceof BasicCredentials) {
+            BasicCredentials basicCredentials = (BasicCredentials) credentials;
             LOGGER.debug("Using Credentials for authentication.");
-            final Credentials credentials = addCredentials(httpRequest);
+            final Credentials httpCredentials = addCredentials(httpRequest, basicCredentials);
             if (LOGGER.isDebugEnabled()) {
-                CURLLogger.log(url, request, credentials, util);
+                CURLLogger.log(url, request, httpCredentials, util);
             }
+        } else if (credentials instanceof JwtCredentials) {
+            String jwt = ((JwtCredentials) credentials).getJwt();
+            LOGGER.debug("Using JWT for authentication.");
+            httpRequest.addHeader(HttpHeaders.AUTHORIZATION, "bearer " + jwt);
+        } else if (credentials instanceof ApiKeyCredentials) {
+            String apiKey = ((ApiKeyCredentials) credentials).getApiKey();
+            LOGGER.debug("Using API Key for authentication.");
+            httpRequest.addHeader(HttpHeaders.AUTHORIZATION, "apikey " + apiKey);
+        } else if (credentials instanceof DefaultCredentials) {
+            DefaultCredentials defaultCredentials = (DefaultCredentials) credentials;
+            TenantUser tenantUser = new TenantUser(request.getDbTenant(), defaultCredentials.getUser());
+            String jwt = cachedJwt.get(tenantUser);
+            if (StringUtils.isEmpty(jwt)) {
+                    jwt = addJWT(tenantUser, request.getCredentials());
+                    LOGGER.debug("Using JWT for authentication.");
+                }
+            httpRequest.addHeader(HttpHeaders.AUTHORIZATION, "bearer " + jwt);
         }
         Response response = null;
         try {
             response = ResponseUtils.buildResponse(util, client.execute(httpRequest), contentType);
             ResponseUtils.checkError(util, response);
         } catch (C8DBException ex) {
-            if (ex.getResponseCode().equals(401) && defaultJWT == null) {
-                // jwt might have expired refresh it
-                String jwt = addJWT(tenantUser);
-                httpRequest.removeHeaders(HttpHeaders.AUTHORIZATION);
-                httpRequest.addHeader(HttpHeaders.AUTHORIZATION, "bearer " + jwt);
-                response = ResponseUtils.buildResponse(util, client.execute(httpRequest), contentType);
-                ResponseUtils.checkError(util, response);
+            if (ex.getResponseCode().equals(401)) {
+                if (credentials instanceof DefaultCredentials) {
+                    // jwt might have expired refresh it
+                    DefaultCredentials defaultCredentials = (DefaultCredentials) credentials;
+                    TenantUser tenantUser = new TenantUser(request.getDbTenant(), defaultCredentials.getUser());
+                    String jwt = addJWT(tenantUser, request.getCredentials());
+                    httpRequest.removeHeaders(HttpHeaders.AUTHORIZATION);
+                    httpRequest.addHeader(HttpHeaders.AUTHORIZATION, "bearer " + jwt);
+                    response = ResponseUtils.buildResponse(util, client.execute(httpRequest), contentType);
+                    ResponseUtils.checkError(util, response);
+                } else {
+                    ResponseUtils.checkError(util, response);
+                }
             } else if (ex.getResponseCode() >= 500) {
                 if (request.isRetryEnabled()) {
-                    response = retryRequest(request, httpRequest);
+                    response = retryRequest(request, httpRequest, credentials);
                 }
                 ResponseUtils.checkError(util, response);
             } else if (ex.getResponseCode() >= 400) {
@@ -293,7 +296,7 @@ public class HttpConnection implements Connection {
                 ResponseUtils.checkError(util, response);
             }
         } catch (UnknownHostException | NoHttpResponseException | ConnectException ex) {
-            response = retryRequest(request, httpRequest);
+            response = retryRequest(request, httpRequest, credentials);
             if(response == null){
                 throw new C8DBException("c84j exhausted all retries.", SC_SERVICE_UNAVAILABLE, ex);
             }
@@ -301,7 +304,7 @@ public class HttpConnection implements Connection {
         return response;
     }
 
-    private Response retryRequest(final Request request, HttpRequestBase httpRequest) throws IOException {
+    private Response retryRequest(final Request request, HttpRequestBase httpRequest, C8Credentials credentials) throws IOException {
         Response response = null;
 
         BackoffRetryCounter retryCounter = new RequestBackoffRetryCounter(request, retryTimeout);
@@ -317,10 +320,14 @@ public class HttpConnection implements Connection {
             } catch (InterruptedException e) {
             } catch (Exception e) {
                 if (e instanceof C8DBException && ((C8DBException) e).getResponseCode().equals(401)) {
-                    // jwt might have expired refresh it
-                    String jwt = addJWT(new TenantUser(request.getDbTenant(), user));
-                    httpRequest.removeHeaders(HttpHeaders.AUTHORIZATION);
-                    httpRequest.addHeader(HttpHeaders.AUTHORIZATION, "bearer " + jwt);
+                    if (credentials instanceof DefaultCredentials) {
+                        DefaultCredentials defaultCredentials = (DefaultCredentials) credentials;
+                        // jwt might have expired refresh it
+                        String jwt = addJWT(new TenantUser(request.getDbTenant(), defaultCredentials.getUser()),
+                                request.getCredentials());
+                        httpRequest.removeHeaders(HttpHeaders.AUTHORIZATION);
+                        httpRequest.addHeader(HttpHeaders.AUTHORIZATION, "bearer " + jwt);
+                    }
                 }
             }
             retryCounter.increment();
@@ -332,16 +339,41 @@ public class HttpConnection implements Connection {
         return response;
     }
 
-    private synchronized String addJWT(TenantUser tenantUser) {
-        String secret = secretProvider.fetchSecret(tenantUser.tenant, tenantUser.user);
+    private synchronized String addJWT(TenantUser tenantUser, C8Credentials requestCredentials) {
+        String secret = null;
+        if (requestCredentials != null) {
+            // use temporary provider
+            SecretProviderContext context = SecretProviderContext.builder()
+                    .client(client)
+                    .useSsl(useSsl)
+                    .host(host)
+                    .serialization(util)
+                    .contentType(contentType)
+                    .credentials(requestCredentials)
+                    .build();
+            secretProvider.init(context);
+            secret = secretProvider.fetchSecret(tenantUser.tenant, tenantUser.user);
+            context = SecretProviderContext.builder()
+                    .client(client)
+                    .useSsl(useSsl)
+                    .host(host)
+                    .serialization(util)
+                    .contentType(contentType)
+                    .credentials(credentials)
+                    .build();
+            secretProvider.init(context);
+        } else {
+            secret = secretProvider.fetchSecret(tenantUser.tenant, tenantUser.user);
+        }
         cachedJwt.put(tenantUser, secret);
         return secret;
     }
 
-    public Credentials addCredentials(final HttpRequestBase httpRequest) {
+    public Credentials addCredentials(final HttpRequestBase httpRequest, BasicCredentials basicCredentials) {
         Credentials credentials = null;
-        if (user != null) {
-            credentials = new UsernamePasswordCredentials(user, password != null ? password : "");
+        if (basicCredentials.getUser() != null) {
+            credentials = new UsernamePasswordCredentials(basicCredentials.getUser(),
+                    new String(basicCredentials.getPassword()));
             try {
                 httpRequest.addHeader(new BasicScheme().authenticate(credentials, httpRequest, null));
             } catch (final AuthenticationException e) {
@@ -353,10 +385,7 @@ public class HttpConnection implements Connection {
 
     public static class Builder {
 
-        private String user;
-        private String password;
-        private String email;
-        private Boolean jwtAuthEnabled;
+        private C8Credentials credentials;
         private C8Serialization util;
         private Boolean useSsl;
         private String httpCookieSpec;
@@ -366,25 +395,13 @@ public class HttpConnection implements Connection {
         private SSLContext sslContext;
         private Integer timeout;
         private Integer responseSizeLimit;
-        private String jwt;
-        private String apiKey;
         private HostDescription auxHost;
         private SecretProvider secretProvider;
         private Service service;
         private Integer retryTimeout;
 
-        public Builder user(final String user) {
-            this.user = user;
-            return this;
-        }
-
-        public Builder password(final String password) {
-            this.password = password;
-            return this;
-        }
-
-        public Builder jwt(final String jwt) {
-            this.jwt = jwt;
+        public Builder credentials(final C8Credentials credentials) {
+            this.credentials = credentials;
             return this;
         }
 
@@ -393,23 +410,8 @@ public class HttpConnection implements Connection {
             return this;
         }
 
-        public Builder apiKey(final String apiKey) {
-            this.apiKey = apiKey;
-            return this;
-        }
-
-        public Builder email(final String email) {
-            this.email = email;
-            return this;
-        }
-
         public Builder serializationUtil(final C8Serialization util) {
             this.util = util;
-            return this;
-        }
-
-        public Builder jwtAuthEnabled(final Boolean jwtAuth) {
-            this.jwtAuthEnabled = jwtAuth;
             return this;
         }
 
@@ -469,8 +471,8 @@ public class HttpConnection implements Connection {
 
 
         public HttpConnection build() {
-            return new HttpConnection(host, timeout, responseSizeLimit, user, password, email, jwtAuthEnabled, useSsl, sslContext, util,
-                    contentType, ttl, httpCookieSpec, jwt, apiKey, auxHost, secretProvider, service, retryTimeout);
+            return new HttpConnection(credentials, host, timeout, responseSizeLimit, useSsl, sslContext, util,
+                    contentType, ttl, httpCookieSpec, auxHost, secretProvider, service, retryTimeout);
         }
     }
 

@@ -22,6 +22,7 @@ package com.c8db.internal;
 import com.arangodb.velocypack.Type;
 import com.arangodb.velocypack.VPackSlice;
 import com.arangodb.velocypack.exception.VPackException;
+import com.c8db.credentials.C8Credentials;
 import com.c8db.entity.C8KVCollectionEntity;
 import com.c8db.entity.C8StreamEntity;
 import com.c8db.entity.CollectionEntity;
@@ -112,8 +113,8 @@ public abstract class InternalC8Database<A extends InternalC8DB<E>, E extends C8
     private final A c8db;
 
     protected InternalC8Database(final A c8db, final String tenant, final String name, final String spotDc,
-                                 final String dcList) {
-        super(c8db.executor, c8db.util, c8db.context, c8db.dbTenant);
+                                 final String dcList, final C8Credentials credentials) {
+        super(c8db.executor, c8db.util, c8db.context, tenant, credentials);
         this.c8db = c8db;
         this.tenant = tenant;
         this.name = name;

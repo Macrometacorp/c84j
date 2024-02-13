@@ -48,7 +48,7 @@ public abstract class InternalC8Admin<A extends InternalC8DB<E>, D extends Inter
     private final D db;
 
     protected InternalC8Admin(final D db) {
-        super(db.executor, db.util, db.context, db.tenant());
+        super(db.executor, db.util, db.context, db.tenant(), db.credentials());
         this.db = db;
     }
 
@@ -132,7 +132,7 @@ public abstract class InternalC8Admin<A extends InternalC8DB<E>, D extends Inter
     }
     
     protected Request getTenantFeaturesRequest(final String tenant) {
-        final Request request = new Request(SYSTEM_TENANT, null, null, RequestType.GET, true,
+        final Request request = new Request(SYSTEM_TENANT, null, null, RequestType.GET, db().credentials(), true,
                 createPath(PATH_API_FEATURES, PATH_TENANT, tenant));
         for (final Map.Entry<String, String> header : context.getHeaderParam().entrySet()) {
             request.putHeaderParam(header.getKey(), header.getValue());

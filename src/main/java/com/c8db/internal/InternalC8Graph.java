@@ -46,7 +46,7 @@ public abstract class InternalC8Graph<A extends InternalC8DB<E>, D extends Inter
     private final String name;
 
     protected InternalC8Graph(final D db, final String name) {
-        super(db.executor, db.util, db.context, db.tenant());
+        super(db.executor, db.util, db.context, db.tenant(), db.credentials());
         this.db = db;
         this.name = name;
     }

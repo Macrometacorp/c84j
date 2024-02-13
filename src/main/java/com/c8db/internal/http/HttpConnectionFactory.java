@@ -24,6 +24,7 @@ import javax.net.ssl.SSLContext;
 
 import com.c8db.Protocol;
 import com.c8db.Service;
+import com.c8db.credentials.C8Credentials;
 import com.c8db.internal.net.Connection;
 import com.c8db.internal.net.ConnectionFactory;
 import com.c8db.internal.net.HostDescription;
@@ -33,28 +34,26 @@ public class HttpConnectionFactory implements ConnectionFactory {
 
     private final HttpConnection.Builder builder;
 
-    public HttpConnectionFactory(final Integer timeout, final Integer responseSizeLimit, final String user,
-                                 final String password, final String email, final Boolean jwtAuth, final Boolean useSsl,
-                                 final SSLContext sslContext, final C8Serialization util, final Protocol protocol,
-                                 final Long connectionTtl, String httpCookieSpec, final String jwtToken, final String apiKey,
+    public HttpConnectionFactory(final C8Credentials credentials, final Integer timeout, final Integer responseSizeLimit,
+                                 final Boolean useSsl, final SSLContext sslContext, final C8Serialization util,
+                                 final Protocol protocol, final Long connectionTtl, String httpCookieSpec,
                                  final HostDescription auxiliaryHost, Integer retryTimeout) {
         super();
-        builder = new HttpConnection.Builder().timeout(timeout).responseSizeLimit(responseSizeLimit).user(user)
-                .password(password).email(email)
-                .jwtAuthEnabled(jwtAuth).useSsl(useSsl).sslContext(sslContext).serializationUtil(util)
-                .contentType(protocol).ttl(connectionTtl).httpCookieSpec(httpCookieSpec).jwt(jwtToken)
-                .apiKey(apiKey).auxHost(auxiliaryHost).retryTimeout(retryTimeout);
+        builder = new HttpConnection.Builder().timeout(timeout).responseSizeLimit(responseSizeLimit)
+                .credentials(credentials).useSsl(useSsl).sslContext(sslContext).serializationUtil(util)
+                .contentType(protocol).ttl(connectionTtl).httpCookieSpec(httpCookieSpec).auxHost(auxiliaryHost)
+                .retryTimeout(retryTimeout);
     }
 
-    public HttpConnectionFactory(final Integer timeout, final Integer responseSizeLimit, final String user, final String password,
-        SecretProvider secretProvider, final String email, final Boolean jwtAuth, final String jwtToken, final Boolean useSsl,
-        final SSLContext sslContext, final C8Serialization util, final Protocol protocol, final Long connectionTtl,
-        String httpCookieSpec, final String apiKey, final HostDescription auxiliaryHost, Integer retryTimeout) {
+    public HttpConnectionFactory(final C8Credentials credentials, final Integer timeout, final Integer responseSizeLimit,
+                                 final SecretProvider secretProvider, final Boolean useSsl, final SSLContext sslContext,
+                                 final C8Serialization util, final Protocol protocol, final Long connectionTtl,
+                                 final String httpCookieSpec, final HostDescription auxiliaryHost, Integer retryTimeout) {
         super();
-        builder = new HttpConnection.Builder().timeout(timeout).responseSizeLimit(responseSizeLimit).secretProvider(secretProvider).email(email)
-            .jwtAuthEnabled(jwtAuth).jwt(jwtToken).useSsl(useSsl).sslContext(sslContext).serializationUtil(util)
-            .contentType(protocol).ttl(connectionTtl).httpCookieSpec(httpCookieSpec)
-            .apiKey(apiKey).auxHost(auxiliaryHost).user(user).password(password).retryTimeout(retryTimeout);
+        builder = new HttpConnection.Builder().timeout(timeout).responseSizeLimit(responseSizeLimit)
+                .secretProvider(secretProvider).credentials(credentials).useSsl(useSsl).sslContext(sslContext)
+                .serializationUtil(util).contentType(protocol).ttl(connectionTtl).httpCookieSpec(httpCookieSpec)
+                .auxHost(auxiliaryHost).retryTimeout(retryTimeout);
     }
 
     @Override

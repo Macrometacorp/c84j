@@ -47,7 +47,7 @@ public abstract class InternalC8Stream<A extends InternalC8DB<E>, D extends Inte
     private final String name;
 
     protected InternalC8Stream(final D db, final String name) {
-        super(db.executor, db.util, db.context, db.tenant());
+        super(db.executor, db.util, db.context, db.tenant(), db.credentials());
         this.db = db;
         this.name = name;
     }
