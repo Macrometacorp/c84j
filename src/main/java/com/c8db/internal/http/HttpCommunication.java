@@ -12,6 +12,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ *  Modifications copyright (c) 2024 Macrometa Corp All rights reserved.
  */
 
 package com.c8db.internal.http;
@@ -20,19 +22,20 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.net.SocketException;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 
-import com.c8db.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.c8db.C8DBException;
+import com.c8db.Service;
 import com.c8db.internal.net.AccessType;
 import com.c8db.internal.net.C8DBRedirectException;
+import com.c8db.internal.net.Connection;
 import com.c8db.internal.net.Host;
 import com.c8db.internal.net.HostDescription;
 import com.c8db.internal.net.HostHandle;
 import com.c8db.internal.net.HostHandler;
+import com.c8db.internal.net.ManagedConnection;
 import com.c8db.internal.util.HostUtils;
 import com.c8db.internal.util.RequestUtils;
 import com.c8db.util.C8Serialization;
@@ -84,8 +87,8 @@ public class HttpCommunication implements Closeable {
         Host host = hostHandler.get(hostHandle, accessType);
         try {
             while (true) {
-                try {
-                    final HttpConnection connection = (HttpConnection) host.connection();
+                try (final ManagedConnection<Connection> managedConnection = host.connection()) {
+                    final HttpConnection connection = (HttpConnection) managedConnection.connection();
                     final Response response = connection.execute(request);
                     hostHandler.success();
                     hostHandler.confirm();

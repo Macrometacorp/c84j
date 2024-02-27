@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Modifications copyright (c) 2023 Macrometa Corp All rights reserved.
+ * Modifications copyright (c) 2023 - 2024 Macrometa Corp All rights reserved.
  */
 
 package com.c8db.internal.velocystream;
@@ -42,6 +42,7 @@ import com.c8db.internal.net.Host;
 import com.c8db.internal.net.HostDescription;
 import com.c8db.internal.net.HostHandle;
 import com.c8db.internal.net.HostHandler;
+import com.c8db.internal.net.ManagedConnection;
 import com.c8db.internal.util.HostUtils;
 import com.c8db.internal.util.RequestUtils;
 import com.c8db.internal.util.ResponseUtils;
@@ -80,7 +81,7 @@ public abstract class VstCommunication<R, C extends VstConnection> implements Cl
     }
 
     @SuppressWarnings("unchecked")
-    protected synchronized C connect(final HostHandle hostHandle, final AccessType accessType, Service service) {
+    protected synchronized ManagedConnection<C> connect(final HostHandle hostHandle, final AccessType accessType, Service service) {
         HostHandler hostHandler = hostHandlerMatrix.get(service);
         Host host = hostHandler.get(hostHandle, accessType);
         while (true) {
@@ -88,9 +89,10 @@ public abstract class VstCommunication<R, C extends VstConnection> implements Cl
                 hostHandler.reset();
                 throw new C8DBException("Was not able to connect to any host");
             }
-            final C connection = (C) host.connection();
+            final ManagedConnection<C> managedConnection = host.connection().castConnection();
+            final C connection = managedConnection.connection();
             if (connection.isOpen()) {
-                return connection;
+                return managedConnection;
             } else {
                 try {
                     connection.open();
@@ -99,8 +101,13 @@ public abstract class VstCommunication<R, C extends VstConnection> implements Cl
                         authenticate(connection);
                     }
                     hostHandler.confirm();
-                    return connection;
+                    return managedConnection;
                 } catch (final IOException e) {
+                	try {
+                		managedConnection.close();
+                	} catch (final IOException e2) {
+                		LOGGER.warn("Failed to dispose managed connection");
+                	}
                     hostHandler.fail();
                     if (hostHandle != null && hostHandle.getHost() != null) {
                         hostHandle.setHost(null);
@@ -131,8 +138,11 @@ public abstract class VstCommunication<R, C extends VstConnection> implements Cl
 
     public R execute(final Request request, final HostHandle hostHandle, Service service) throws C8DBException {
         try {
-            final C connection = connect(hostHandle, RequestUtils.determineAccessType(request), service);
-            return execute(request, connection);
+            try (final ManagedConnection<C> managedConnection = connect(hostHandle, RequestUtils.determineAccessType(request), service)) {
+            	return execute(request, managedConnection.connection());
+            } catch (final Exception e) {
+            	throw new C8DBException(e);
+            }
         } catch (final C8DBException e) {
             if (e instanceof C8DBRedirectException) {
                 final String location = C8DBRedirectException.class.cast(e).getLocation();

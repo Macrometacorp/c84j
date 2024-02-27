@@ -12,18 +12,26 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ *  Modifications copyright (c) 2024 Macrometa Corp All rights reserved.
  */
 
 package com.c8db.internal.net;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.Set;
+import java.util.Stack;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
-import com.c8db.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.c8db.C8DBException;
+import com.c8db.Service;
 import com.c8db.internal.velocystream.internal.VstConnection;
 import com.c8db.internal.velocystream.internal.VstConnectionSync;
 
@@ -36,8 +44,9 @@ public class ConnectionPoolImpl implements ConnectionPool {
 
     private final HostDescription host;
     private final int maxConnections;
-    private final List<Connection> connections;
-    private int current;
+    private final Stack<Connection> connections;
+    private final Set<Connection> usedConnections;
+    private final Queue<CompletableFuture<Connection>> waitingQueue;
     private final ConnectionFactory factory;
     private final Service service;
 
@@ -48,38 +57,29 @@ public class ConnectionPoolImpl implements ConnectionPool {
         this.maxConnections = maxConnections;
         this.factory = factory;
         this.service = service;
-        connections = new ArrayList<Connection>();
-        current = 0;
+        this.connections = new Stack<>();
+        this.usedConnections = new HashSet<>();
+        this.waitingQueue = new LinkedList<>();
     }
 
     @Override
-    public Connection createConnection(final HostDescription host) {
-        return factory.create(host, service);
-    }
-
-    @Override
-    public synchronized Connection connection() {
-
-        final Connection connection;
-
-        if (connections.size() < maxConnections) {
-            connection = createConnection(host);
-            connections.add(connection);
-            current++;
-        } else {
-            final int index = (current++) % connections.size();
-            connection = connections.get(index);
-        }
+    public ManagedConnection<Connection> connection() {
+        final Connection connection = getConnection();
 
         if (connection instanceof VstConnectionSync) {
             LOGGER.debug("Return Connection " + ((VstConnection) connection).getConnectionName());
         }
 
-        return connection;
+        return new ManagedConnection<>(connection, this);
     }
 
     @Override
     public void close() throws IOException {
+        synchronized (this) {
+            if (!usedConnections.isEmpty()) {
+                throw new C8DBException("Attempting to close connection pool with active connections remaining.");
+            }
+        }
         for (final Connection connection : connections) {
             connection.close();
         }
@@ -87,9 +87,54 @@ public class ConnectionPoolImpl implements ConnectionPool {
     }
 
     @Override
+    public void dispose(Connection connection) {
+        synchronized (this) {
+            if (!usedConnections.remove(connection)) {
+                throw new C8DBException("Connection disposed to incorrect connection pool.");
+            }
+            // Check if there are any threads waiting to get connections
+            CompletableFuture<Connection> future;
+            while ((future = waitingQueue.poll()) != null && future.isCancelled()) {};
+            if (future != null) {
+                future.complete(connection);
+            } else {
+                // No threads waiting for connections
+                connections.push(connection);
+            }
+        }
+    }
+
+    @Override
     public String toString() {
         return "ConnectionPoolImpl [host=" + host + ", maxConnections=" + maxConnections + ", connections="
-                + connections.size() + ", current=" + current + ", factory=" + factory.getClass().getSimpleName() + "]";
+                + connections.size() + ", usedconnections=" + usedConnections.size() + ", factory=" + factory.getClass().getSimpleName() + "]";
+    }
+    
+    private Connection createConnection(final HostDescription host) {
+        return factory.create(host, service);
+    }
+    
+    private Connection getConnection() {
+        CompletableFuture<Connection> future;
+        synchronized (this) {
+            if (!connections.empty()) {
+                Connection connection = connections.pop();
+                usedConnections.add(connection);
+                return connection;
+            } else if (usedConnections.size() < maxConnections) {
+                Connection connection = createConnection(host);
+                usedConnections.add(connection);
+                return connection;
+            } else {
+                future = new CompletableFuture<>();
+                waitingQueue.add(future);
+            }
+        }
+        try {
+            return future.get();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new C8DBException(e);
+        }
     }
 
 }
