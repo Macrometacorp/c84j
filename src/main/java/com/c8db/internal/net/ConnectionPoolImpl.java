@@ -96,6 +96,7 @@ public class ConnectionPoolImpl implements ConnectionPool {
             CompletableFuture<Connection> future;
             while ((future = waitingQueue.poll()) != null && future.isCancelled()) {};
             if (future != null) {
+            	usedConnections.add(connection);
                 future.complete(connection);
             } else {
                 // No threads waiting for connections

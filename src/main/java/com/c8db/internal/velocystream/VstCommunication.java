@@ -103,10 +103,10 @@ public abstract class VstCommunication<R, C extends VstConnection> implements Cl
                     hostHandler.confirm();
                     return managedConnection;
                 } catch (final IOException e) {
-                	try {
-                		managedConnection.close();
-                	} catch (final IOException e2) {
-                		LOGGER.warn("Failed to dispose managed connection");
+                    try {
+                        managedConnection.close();
+                    } catch (final IOException e2) {
+                        LOGGER.warn("Failed to dispose managed connection");
                 	}
                     hostHandler.fail();
                     if (hostHandle != null && hostHandle.getHost() != null) {
