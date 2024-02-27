@@ -83,6 +83,7 @@ public class HttpConnection implements Connection {
     private final C8Serialization util;
     private final Boolean useSsl;
     private final Protocol contentType;
+    private final Long ttl;
     private final HostDescription host;
     private Map<TenantUser, String> cachedJwt = new ConcurrentHashMap<>();
     private final String defaultJWT;
@@ -108,6 +109,7 @@ public class HttpConnection implements Connection {
         this.useSsl = useSsl;
         this.util = util;
         this.contentType = contentType;
+        this.ttl = ttl;
         this.apiKey = apiKey;
         this.auxHost = auxHost;
         this.defaultJWT = jwt;
@@ -160,9 +162,6 @@ public class HttpConnection implements Connection {
         final HttpClientBuilder builder = HttpClientBuilder.create().setDefaultRequestConfig(requestConfig.build())
                 .setConnectionManager(cm).setKeepAliveStrategy(keepAliveStrategy)
                 .setRetryHandler(new HttpRequestRetryHandler());
-        if (ttl != null) {
-            builder.setConnectionTimeToLive(ttl, TimeUnit.MILLISECONDS);
-        }
         client = builder.build();
 
         String pwd = password != null ? password : "";
@@ -223,10 +222,14 @@ public class HttpConnection implements Connection {
             final String value = he.getValue();
             if (value != null && "timeout".equalsIgnoreCase(param)) {
                 try {
-                    return Long.parseLong(value) * 1000L;
+                    long timeout = Long.parseLong(value) * 1000L;
+                    return ttl != null ? Math.min(timeout, ttl) : timeout;
                 } catch (final NumberFormatException ignore) {
                 }
             }
+        }
+        if (ttl != null) {
+            return ttl;
         }
         return 30L * 1000L;
     }
