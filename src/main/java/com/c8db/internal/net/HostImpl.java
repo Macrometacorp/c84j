@@ -12,6 +12,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ *  Modifications copyright (c) 2024 Macrometa Corp All rights reserved.
  */
 
 package com.c8db.internal.net;
@@ -46,7 +48,7 @@ public class HostImpl implements Host {
     }
 
     @Override
-    public Connection connection() {
+    public ManagedConnection<Connection> connection() {
         return connectionPool.connection();
     }
 
